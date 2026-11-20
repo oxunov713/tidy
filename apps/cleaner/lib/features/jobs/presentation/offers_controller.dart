@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tidy_cleaner/core/alerts/offer_alerts.dart';
-import 'package:tidy_cleaner/core/clock.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/jobs/data/cleaner_repositories.dart';
 import 'package:tidy_cleaner/features/jobs/domain/incoming_offer.dart';

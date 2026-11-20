@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tidy_cleaner/app.dart';
 import 'package:tidy_cleaner/core/location/geolocator_location_service.dart';
 import 'package:tidy_cleaner/core/location/location_service.dart';
-import 'package:tidy_cleaner/core/storage/preferences.dart';
+import 'package:tidy_core/tidy_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

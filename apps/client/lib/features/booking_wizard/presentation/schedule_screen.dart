@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/format/formatters.dart';
-import 'package:tidy_client/core/providers/clock.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/error_state.dart';
 import 'package:tidy_client/core/widgets/shimmer.dart';
@@ -16,6 +15,7 @@ import 'package:tidy_client/features/booking_wizard/presentation/widgets/day_str
 import 'package:tidy_client/features/booking_wizard/presentation/widgets/slot_grid.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/widgets/wizard_bottom_bar.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// Step 2: day, start time and (optionally) a cleaner. Times come from

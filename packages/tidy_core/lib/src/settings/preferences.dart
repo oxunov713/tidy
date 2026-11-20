@@ -1,9 +1,21 @@
 import 'dart:ui';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_client/core/providers/preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-part 'locale_controller.g.dart';
+part 'preferences.g.dart';
+
+/// Loaded once in `main()` and passed in as an override, so the rest of the
+/// app reads it synchronously.
+@Riverpod(keepAlive: true)
+SharedPreferences sharedPreferences(Ref ref) => throw UnimplementedError(
+  'Override sharedPreferencesProvider in main()',
+);
+
+/// "Now", as a provider so expiry, countdown and "today" logic can be tested
+/// with a fixed time.
+@Riverpod(keepAlive: true)
+DateTime Function() clock(Ref ref) => DateTime.now;
 
 const supportedLanguageCodes = ['en', 'ru', 'uz'];
 
@@ -20,11 +32,11 @@ class LocaleController extends _$LocaleController {
 
   Future<void> select(Locale? locale) async {
     final prefs = ref.read(sharedPreferencesProvider);
+    state = locale;
     if (locale == null) {
       await prefs.remove(_key);
     } else {
       await prefs.setString(_key, locale.languageCode);
     }
-    state = locale;
   }
 }

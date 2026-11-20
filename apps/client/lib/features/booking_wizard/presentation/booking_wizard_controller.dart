@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_client/core/providers/clock.dart';
 import 'package:tidy_client/features/addresses/presentation/address_providers.dart';
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_state.dart';

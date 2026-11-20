@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tidy_cleaner/core/storage/preferences.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 part 'job_local_store.g.dart';

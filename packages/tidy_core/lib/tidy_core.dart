@@ -22,5 +22,6 @@ export 'src/push/push_service.dart';
 export 'src/realtime/realtime_client.dart';
 export 'src/realtime/realtime_event.dart';
 export 'src/session/session_repository.dart';
+export 'src/settings/preferences.dart';
 export 'src/time/business_time.dart';
 export 'src/time/date_format.dart';

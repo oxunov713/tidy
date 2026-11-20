@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/clock.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/theme/pro_colors.dart';
 import 'package:tidy_cleaner/core/widgets/async_states.dart';

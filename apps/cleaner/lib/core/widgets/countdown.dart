@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/clock.dart';
+import 'package:tidy_core/tidy_core.dart';
 
 /// Rebuilds [builder] every second with the time left until [until].
 class Countdown extends ConsumerStatefulWidget {

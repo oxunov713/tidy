@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/clock.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/maps/maps_launcher.dart';
