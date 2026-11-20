@@ -116,6 +116,9 @@ func (s *Cleaners) UpdateJobStatus(ctx context.Context, p Principal, bookingID u
 	if b.CleanerID == nil || *b.CleanerID != p.UserID {
 		return domain.Booking{}, domain.Forbidden("This isn't your job.")
 	}
+	if err := requireApproved(ctx, s.store, p.UserID); err != nil {
+		return domain.Booking{}, err
+	}
 	if !b.Status.CanTransitionTo(status) {
 		return domain.Booking{}, domain.InvalidTransition("A job that is " + string(b.Status) + " can't become " + string(status) + ".")
 	}

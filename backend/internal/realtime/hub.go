@@ -402,4 +402,27 @@ func (h *Hub) BookingAccessRevoked(bookingID, userID uuid.UUID) {
 	}
 }
 
+func (h *Hub) UserAccessRevoked(userID uuid.UUID) {
+	type membership struct {
+		c    *client
+		room string
+	}
+	var found []membership
+	h.mu.RLock()
+	for c := range h.clients {
+		if c.UserID != userID {
+			continue
+		}
+		for room := range c.rooms {
+			if strings.HasPrefix(room, bookingRoomPrefix) {
+				found = append(found, membership{c, room})
+			}
+		}
+	}
+	h.mu.RUnlock()
+	for _, m := range found {
+		h.evict(m.c, m.room)
+	}
+}
+
 var _ service.Events = (*Hub)(nil)

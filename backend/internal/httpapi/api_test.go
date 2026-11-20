@@ -178,7 +178,7 @@ func newEnv(t *testing.T) *testEnv {
 		Bookings:  bookings,
 		Dispatch:  e.dispatch,
 		Cleaners:  service.NewCleaners(store, payments, hub, pusher, london, clock, log),
-		Admin:     service.NewAdmin(store, bookings, hub, pusher, london, clock),
+		Admin:     service.NewAdmin(store, bookings, e.dispatch, hub, pusher, london, clock, log),
 		Payments:  payments,
 		WebSocket: hub.Handler(bookings),
 		Health:    store.Ping,

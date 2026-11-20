@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -20,14 +21,16 @@ type AdminDeps interface {
 type Admin struct {
 	store    AdminDeps
 	bookings *Bookings
+	dispatch *Dispatcher
 	events   Events
 	push     *Pusher
 	loc      *time.Location
 	clock    Clock
+	log      *slog.Logger
 }
 
-func NewAdmin(store AdminDeps, bookings *Bookings, events Events, push *Pusher, loc *time.Location, clock Clock) *Admin {
-	return &Admin{store: store, bookings: bookings, events: events, push: push, loc: loc, clock: clock}
+func NewAdmin(store AdminDeps, bookings *Bookings, dispatch *Dispatcher, events Events, push *Pusher, loc *time.Location, clock Clock, log *slog.Logger) *Admin {
+	return &Admin{store: store, bookings: bookings, dispatch: dispatch, events: events, push: push, loc: loc, clock: clock, log: log}
 }
 
 type Stats struct {
@@ -155,8 +158,12 @@ func (a *Admin) Cleaners(ctx context.Context, status *domain.CleanerStatus) ([]d
 	return a.store.ListCleanerProfiles(ctx, status)
 }
 
-func (a *Admin) SetCleanerStatus(ctx context.Context, id uuid.UUID, status domain.CleanerStatus) error {
-	if err := a.store.SetCleanerStatus(ctx, id, status); err != nil {
+func (a *Admin) SetCleanerStatus(ctx context.Context, p Principal, id uuid.UUID, status domain.CleanerStatus) error {
+	if status == domain.CleanerSuspended {
+		if err := a.suspend(ctx, p, id); err != nil {
+			return err
+		}
+	} else if err := a.store.SetCleanerStatus(ctx, id, status); err != nil {
 		return err
 	}
 	msg := map[domain.CleanerStatus]string{
@@ -167,4 +174,35 @@ func (a *Admin) SetCleanerStatus(ctx context.Context, id uuid.UUID, status domai
 		a.push.Notify(id, domain.Notification{Title: "Tidy", Body: msg, Data: map[string]string{"type": "cleaner.status"}})
 	}
 	return nil
+}
+
+// suspend gives the cleaner's upcoming jobs to someone else straight away.
+func (a *Admin) suspend(ctx context.Context, p Principal, id uuid.UUID) error {
+	jobs, err := a.store.SuspendCleaner(ctx, id, &p.UserID)
+	if err != nil {
+		return err
+	}
+	a.events.UserAccessRevoked(id)
+	now := a.clock.now()
+	for _, b := range jobs.Released {
+		a.events.BookingStatus(b, now)
+		a.push.Notify(b.ClientID, domain.Notification{
+			Title: "New cleaner needed",
+			Body:  "Your cleaner can't make it. We're finding you someone else for " + b.Start.In(a.loc).Format("Mon 2 Jan 15:04") + ".",
+			Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String()},
+		})
+		a.redispatch(ctx, b.ID)
+	}
+	for _, bookingID := range jobs.WithdrawnOffers {
+		a.events.OfferGone(id, bookingID)
+		a.redispatch(ctx, bookingID)
+	}
+	return nil
+}
+
+func (a *Admin) redispatch(ctx context.Context, bookingID uuid.UUID) {
+	// The dispatch sweep retries, so the suspension itself still counts.
+	if err := a.dispatch.Dispatch(ctx, bookingID); err != nil {
+		a.log.Error("dispatch released booking", "booking_id", bookingID, "err", err)
+	}
 }

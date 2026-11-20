@@ -198,3 +198,54 @@ func (s *Store) SetCleanerStatus(ctx context.Context, id uuid.UUID, status domai
 	}
 	return err
 }
+
+func (s *Store) SuspendCleaner(ctx context.Context, id uuid.UUID, actor *uuid.UUID) (service.ReleasedJobs, error) {
+	var out service.ReleasedJobs
+	err := s.inTx(ctx, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(ctx, `UPDATE cleaners SET status = 'suspended', is_online = false WHERE user_id = $1`, id)
+		if err != nil {
+			return err
+		}
+		if tag.RowsAffected() == 0 {
+			return domain.NotFound("Cleaner")
+		}
+
+		// Jobs the cleaner hasn't started go back to the pool. A clean that
+		// is already in progress is left for support to sort out.
+		rows, err := tx.Query(ctx, `
+			UPDATE bookings SET cleaner_id = NULL, status = 'confirmed', updated_at = now()
+			WHERE cleaner_id = $1 AND status IN ('assigned', 'on_the_way')
+			RETURNING id`, id)
+		if err != nil {
+			return err
+		}
+		ids, err := pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+		if err != nil {
+			return err
+		}
+		for _, bookingID := range ids {
+			if err := addEvent(ctx, tx, bookingID, domain.StatusConfirmed, actor); err != nil {
+				return err
+			}
+			b, err := getBooking(ctx, tx, bookingID)
+			if err != nil {
+				return err
+			}
+			out.Released = append(out.Released, b)
+		}
+		// The client's map must not keep showing the old cleaner.
+		if _, err := tx.Exec(ctx, `DELETE FROM booking_locations WHERE booking_id = ANY($1::uuid[])`, uuidStrings(ids)); err != nil {
+			return err
+		}
+
+		rows, err = tx.Query(ctx, `
+			UPDATE booking_offers SET status = 'withdrawn'
+			WHERE cleaner_id = $1 AND status = 'open' RETURNING booking_id`, id)
+		if err != nil {
+			return err
+		}
+		out.WithdrawnOffers, err = pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+		return err
+	})
+	return out, err
+}

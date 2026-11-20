@@ -76,7 +76,7 @@ func run() error {
 	payments := service.NewPayments(store, provider, dispatch, hub, nil, log)
 	bookings := service.NewBookings(store, store, payments, hub, pusher, loc, radius, nil, log)
 	cleaners := service.NewCleaners(store, payments, hub, pusher, loc, nil, log)
-	admin := service.NewAdmin(store, bookings, hub, pusher, loc, nil)
+	admin := service.NewAdmin(store, bookings, dispatch, hub, pusher, loc, nil, log)
 
 	api := httpapi.New(httpapi.Deps{
 		Auth:        auth,

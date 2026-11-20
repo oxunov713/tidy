@@ -408,10 +408,23 @@ func (s *Bookings) Review(ctx context.Context, p Principal, id uuid.UUID, in Rev
 }
 
 func (s *Bookings) Messages(ctx context.Context, p Principal, id uuid.UUID) ([]domain.Message, error) {
-	if _, err := s.accessible(ctx, p, id); err != nil {
+	b, err := s.accessible(ctx, p, id)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.requireApprovedCleaner(ctx, b, p.UserID); err != nil {
 		return nil, err
 	}
 	return s.store.ListMessages(ctx, id)
+}
+
+// requireApprovedCleaner checks the cleaner's profile when the caller is
+// the booking's cleaner.
+func (s *Bookings) requireApprovedCleaner(ctx context.Context, b domain.Booking, userID uuid.UUID) error {
+	if b.CleanerID == nil || *b.CleanerID != userID {
+		return nil
+	}
+	return requireApproved(ctx, s.store, userID)
 }
 
 func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, body string) (domain.Message, error) {
@@ -421,6 +434,9 @@ func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, b
 	}
 	if !b.IsParticipant(p.UserID) {
 		return domain.Message{}, domain.Forbidden("Only the client and the cleaner can write here.")
+	}
+	if err := s.requireApprovedCleaner(ctx, b, p.UserID); err != nil {
+		return domain.Message{}, err
 	}
 	body, err = domain.ValidateMessageBody(body)
 	if err != nil {
@@ -447,7 +463,7 @@ func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, b
 }
 
 // CanWatch tells the WebSocket hub who may be in booking:<id>: the client,
-// and the assigned cleaner until the booking is cancelled.
+// and the assigned cleaner while approved and until the booking is cancelled.
 func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (bool, error) {
 	b, err := s.store.GetBooking(ctx, bookingID)
 	if errors.Is(err, domain.ErrNotFound) {
@@ -459,7 +475,14 @@ func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (b
 	if b.ClientID == userID {
 		return true, nil
 	}
-	return b.IsParticipant(userID) && b.Status != domain.StatusCancelled, nil
+	if !b.IsParticipant(userID) || b.Status == domain.StatusCancelled {
+		return false, nil
+	}
+	err = requireApproved(ctx, s.store, userID)
+	if errors.Is(err, domain.ErrForbidden) {
+		return false, nil
+	}
+	return err == nil, err
 }
 
 // RecordLocation stores the cleaner's latest position on the way to a job
@@ -474,6 +497,9 @@ func (s *Bookings) RecordLocation(ctx context.Context, cleanerID, bookingID uuid
 	}
 	if b.CleanerID == nil || *b.CleanerID != cleanerID {
 		return 0, domain.Forbidden("This isn't your job.")
+	}
+	if err := requireApproved(ctx, s.store, cleanerID); err != nil {
+		return 0, err
 	}
 	if b.Status != domain.StatusAssigned && b.Status != domain.StatusOnTheWay {
 		return 0, domain.InvalidTransition("Location is only shared on the way to a job.")

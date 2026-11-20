@@ -157,6 +157,16 @@ type PaymentStore interface {
 type AdminStore interface {
 	ListCleanerProfiles(ctx context.Context, status *domain.CleanerStatus) ([]domain.CleanerProfile, error)
 	SetCleanerStatus(ctx context.Context, id uuid.UUID, status domain.CleanerStatus) error
+	// SuspendCleaner takes the cleaner offline, moves their jobs that haven't
+	// started back to confirmed and withdraws their open offers.
+	SuspendCleaner(ctx context.Context, id uuid.UUID, actor *uuid.UUID) (ReleasedJobs, error)
+}
+
+type ReleasedJobs struct {
+	// Released are the bookings that lost their cleaner.
+	Released []domain.Booking
+	// WithdrawnOffers are bookings whose open offer to the cleaner was withdrawn.
+	WithdrawnOffers []uuid.UUID
 }
 
 // PaymentProvider holds money for a booking and charges it once the clean is done.
@@ -188,6 +198,8 @@ type Events interface {
 	// BookingAccessRevoked removes the user from the booking's room, e.g.
 	// the old cleaner after a reassign.
 	BookingAccessRevoked(bookingID, userID uuid.UUID)
+	// UserAccessRevoked removes the user from every booking room.
+	UserAccessRevoked(userID uuid.UUID)
 }
 
 // NopEvents is used where nobody listens, e.g. in a one-off command.
@@ -198,3 +210,4 @@ func (NopEvents) OfferNew(uuid.UUID, domain.Booking, time.Time) {}
 func (NopEvents) OfferGone(uuid.UUID, uuid.UUID)                {}
 func (NopEvents) MessageNew(uuid.UUID, domain.Message)          {}
 func (NopEvents) BookingAccessRevoked(uuid.UUID, uuid.UUID)     {}
+func (NopEvents) UserAccessRevoked(uuid.UUID)                   {}

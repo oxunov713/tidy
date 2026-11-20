@@ -77,7 +77,7 @@ func (s *Server) setCleanerStatus(status domain.CleanerStatus) handlerFunc {
 		if err != nil {
 			return err
 		}
-		if err := s.admin.SetCleanerStatus(r.Context(), id, status); err != nil {
+		if err := s.admin.SetCleanerStatus(r.Context(), principal(r), id, status); err != nil {
 			return err
 		}
 		return noContent(w)
