@@ -191,7 +191,7 @@ func (s *Store) ListCleanerProfiles(ctx context.Context, status *domain.CleanerS
 func (s *Store) SetCleanerStatus(ctx context.Context, id uuid.UUID, status domain.CleanerStatus) error {
 	// A suspended cleaner goes offline so the dispatcher stops picking them.
 	tag, err := s.pool.Exec(ctx, `
-		UPDATE cleaners SET status = $2, is_online = is_online AND $2 = 'approved'
+		UPDATE cleaners SET status = $2::cleaner_status, is_online = is_online AND $2::cleaner_status = 'approved'
 		WHERE user_id = $1`, id, status)
 	if err == nil && tag.RowsAffected() == 0 {
 		return domain.NotFound("Cleaner")

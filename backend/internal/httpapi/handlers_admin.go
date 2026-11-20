@@ -110,7 +110,12 @@ func (s *Server) updateService(w http.ResponseWriter, r *http.Request) error {
 	if err := decode(w, r, &in); err != nil {
 		return err
 	}
-	active := in.IsActive == nil || *in.IsActive
+	// PUT replaces the whole service, so a missing flag must not quietly
+	// switch a disabled service back on.
+	if in.IsActive == nil {
+		return domain.Invalid("is_active", "is required")
+	}
+	active := *in.IsActive
 	svc, err := s.catalogue.UpdateService(r.Context(), id, service.ServiceUpdate{
 		Title: in.Title, BasePrice: in.BasePrice, PerBedroom: in.PerBedroom, PerBathroom: in.PerBathroom,
 		BaseMinutes: in.BaseMinutes, MinutesPerRoom: in.MinutesPerRoom, IsActive: active,

@@ -41,6 +41,10 @@ Paginated lists take `cursor` and `limit` (default 20, max 50) and return
 
 OTP: 6 digits, valid 5 minutes, 5 attempts, max 3 requests per phone per 10 minutes.
 
+`role` only matters the first time a phone number signs up. Leave it out for
+existing accounts and for admins (admins are promoted in the database, the API
+never creates one).
+
 ## Me
 
 | Method | Path | Notes |
@@ -111,7 +115,7 @@ Optional `cleaner_id` limits the check to one cleaner ("book Sarah again").
 | POST | `/cleaner/jobs/{id}/status` | `{ status: "on_the_way" \| "in_progress" \| "completed" }`; `on_the_way` from 3 h before the start |
 | GET | `/cleaner/availability` | weekly hours |
 | PUT | `/cleaner/availability` | `[{ weekday, start_time, end_time }]` |
-| GET | `/cleaner/earnings?period=week` | `week` or `month`: `{ total, tips, jobs, minutes, days: [{ date, amount }], recent: [...] }` |
+| GET | `/cleaner/earnings?period=week` | `week` or `month`: `{ total, tips, jobs, minutes, days: [{ date, amount }], recent: [...] }`. `total` is without tips; `days[].amount` includes them |
 
 ## Admin
 
@@ -155,5 +159,7 @@ Server → client:
 { "type": "error", "code": "forbidden", "message": "…" }
 ```
 
-Only the client and the assigned cleaner can join `booking:<id>`. Only cleaners
-receive `offer.*`. The server pings every 30 s and drops silent connections after 60 s.
+Only the client and the assigned cleaner can join `booking:<id>`. Cleaners get
+`offer.*` after subscribing to the `cleaner:offers` room. `location` is accepted
+only while the booking is `assigned` or `on_the_way`; otherwise the server
+answers with an `error` message (`invalid_transition`). The server pings every 30 s and drops silent connections after 60 s.
