@@ -31,7 +31,7 @@ class AuthInterceptor extends Interceptor {
   /// it cannot recurse.
   final Dio refreshDio;
 
-  /// Called after a failed refresh, once the stored tokens are cleared.
+  /// Called after the server rejected the refresh token (401), once the stored tokens are cleared.
   final void Function()? onSessionExpired;
 
   Future<bool>? _inFlight;
@@ -104,9 +104,9 @@ class AuthInterceptor extends Interceptor {
       _generation++;
       return true;
     } on DioException catch (e) {
-      // The server answered and said no: the session is over. Without a
-      // response (offline) keep the tokens and let the caller retry later.
-      if (e.response == null) rethrow;
+      // Only a 401 means the refresh token is dead. Offline, 429 and 5xx are
+      // temporary: keep the session and let the caller see the error.
+      if (e.response?.statusCode != 401) rethrow;
       await storage.clear();
       onSessionExpired?.call();
       return false;
