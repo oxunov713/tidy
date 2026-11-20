@@ -634,4 +634,108 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get callUnavailable =>
       'Qo‘ng‘iroq hozircha mavjud emas. Xabar yozing.';
+
+  @override
+  String get howWasYourClean => 'Tozalash qanday o‘tdi?';
+
+  @override
+  String starsLabel(int count) {
+    return '$count yulduz';
+  }
+
+  @override
+  String get ratingNotGreat => 'Yaxshi emas';
+
+  @override
+  String get ratingCouldBeBetter => 'Yaxshiroq bo‘lishi mumkin';
+
+  @override
+  String get ratingOkay => 'Yomon emas';
+
+  @override
+  String get ratingGood => 'Yaxshi';
+
+  @override
+  String get ratingExcellent => 'A’lo';
+
+  @override
+  String get tagSpotless => 'Top-toza';
+
+  @override
+  String get tagPunctual => 'O‘z vaqtida';
+
+  @override
+  String get tagFriendly => 'Xushmuomala';
+
+  @override
+  String get tagDetail => 'Tafsilotlarga e’tibor';
+
+  @override
+  String get tagEco => 'Mening vositalarim';
+
+  @override
+  String get anythingElse => 'Yana nimadir? (ixtiyoriy)';
+
+  @override
+  String commentHint(String name) {
+    return 'Nima yaxshi chiqqanini yozing';
+  }
+
+  @override
+  String get addTip => 'Choychaqa qo‘shish';
+
+  @override
+  String get submitReview => 'Sharhni yuborish';
+
+  @override
+  String get reviewThanks => 'Sharhingiz uchun rahmat!';
+
+  @override
+  String get alreadyReviewed => 'Bu tozalash uchun sharh qoldirgansiz.';
+
+  @override
+  String get noMessagesTitle => 'Hozircha xabar yo‘q';
+
+  @override
+  String get noMessagesBody => 'Tozalovchingiz bilan salomlashing.';
+
+  @override
+  String get messageHint => 'Xabar';
+
+  @override
+  String get send => 'Yuborish';
+
+  @override
+  String get noChatsTitle => 'Hozircha suhbat yo‘q';
+
+  @override
+  String get noChatsBody =>
+      'Tozalovchi buyurtmani qabul qilgach, shu yerda yozishingiz mumkin.';
+
+  @override
+  String get addYourName => 'Ismingizni kiriting';
+
+  @override
+  String get editProfile => 'Profilni tahrirlash';
+
+  @override
+  String get fullName => 'Ism va familiya';
+
+  @override
+  String get email => 'Email (ixtiyoriy)';
+
+  @override
+  String get emailInvalid => 'To‘g‘ri email kiriting';
+
+  @override
+  String get language => 'Til';
+
+  @override
+  String get systemDefault => 'Tizim tili';
+
+  @override
+  String get logout => 'Chiqish';
+
+  @override
+  String get logoutTitle => 'Tidy dan chiqasizmi?';
 }

@@ -388,5 +388,52 @@
       }
     }
   },
-  "callUnavailable": "Calling is not available yet. Send a message instead."
+  "callUnavailable": "Calling is not available yet. Send a message instead.",
+  "howWasYourClean": "How was your clean?",
+  "starsLabel": "{count} star",
+  "@starsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingNotGreat": "Not great",
+  "ratingCouldBeBetter": "Could be better",
+  "ratingOkay": "Okay",
+  "ratingGood": "Good",
+  "ratingExcellent": "Excellent",
+  "tagSpotless": "Spotless",
+  "tagPunctual": "On time",
+  "tagFriendly": "Friendly",
+  "tagDetail": "Great attention to detail",
+  "tagEco": "Used my products",
+  "anythingElse": "Anything else? (optional)",
+  "commentHint": "Tell {name} what they did well",
+  "@commentHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addTip": "Add a tip",
+  "submitReview": "Submit review",
+  "reviewThanks": "Thanks for your review!",
+  "alreadyReviewed": "You have already reviewed this clean.",
+  "noMessagesTitle": "No messages yet",
+  "noMessagesBody": "Say hello to your cleaner.",
+  "messageHint": "Message",
+  "send": "Send",
+  "noChatsTitle": "No conversations yet",
+  "noChatsBody": "Once a cleaner accepts your booking you can chat here.",
+  "addYourName": "Add your name",
+  "editProfile": "Edit profile",
+  "fullName": "Full name",
+  "email": "Email (optional)",
+  "emailInvalid": "Enter a valid email",
+  "language": "Language",
+  "systemDefault": "System default",
+  "logout": "Log out",
+  "logoutTitle": "Log out of Tidy?"
 }

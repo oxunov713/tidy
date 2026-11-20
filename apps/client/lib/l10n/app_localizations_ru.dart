@@ -629,4 +629,108 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get callUnavailable => 'Звонки пока недоступны. Напишите сообщение.';
+
+  @override
+  String get howWasYourClean => 'Как прошла уборка?';
+
+  @override
+  String starsLabel(int count) {
+    return 'Звёзд: $count';
+  }
+
+  @override
+  String get ratingNotGreat => 'Плохо';
+
+  @override
+  String get ratingCouldBeBetter => 'Могло быть лучше';
+
+  @override
+  String get ratingOkay => 'Нормально';
+
+  @override
+  String get ratingGood => 'Хорошо';
+
+  @override
+  String get ratingExcellent => 'Отлично';
+
+  @override
+  String get tagSpotless => 'Безупречно';
+
+  @override
+  String get tagPunctual => 'Пунктуальность';
+
+  @override
+  String get tagFriendly => 'Приветливость';
+
+  @override
+  String get tagDetail => 'Внимание к деталям';
+
+  @override
+  String get tagEco => 'Мои средства';
+
+  @override
+  String get anythingElse => 'Что-то ещё? (необязательно)';
+
+  @override
+  String commentHint(String name) {
+    return 'Расскажите, что получилось хорошо';
+  }
+
+  @override
+  String get addTip => 'Добавить чаевые';
+
+  @override
+  String get submitReview => 'Отправить отзыв';
+
+  @override
+  String get reviewThanks => 'Спасибо за отзыв!';
+
+  @override
+  String get alreadyReviewed => 'Вы уже оставили отзыв об этой уборке.';
+
+  @override
+  String get noMessagesTitle => 'Сообщений пока нет';
+
+  @override
+  String get noMessagesBody => 'Поздоровайтесь с вашим клинером.';
+
+  @override
+  String get messageHint => 'Сообщение';
+
+  @override
+  String get send => 'Отправить';
+
+  @override
+  String get noChatsTitle => 'Диалогов пока нет';
+
+  @override
+  String get noChatsBody =>
+      'Когда клинер примет заказ, здесь можно будет написать ему.';
+
+  @override
+  String get addYourName => 'Добавьте имя';
+
+  @override
+  String get editProfile => 'Изменить профиль';
+
+  @override
+  String get fullName => 'Имя и фамилия';
+
+  @override
+  String get email => 'Эл. почта (необязательно)';
+
+  @override
+  String get emailInvalid => 'Введите корректный email';
+
+  @override
+  String get language => 'Язык';
+
+  @override
+  String get systemDefault => 'Как в системе';
+
+  @override
+  String get logout => 'Выйти';
+
+  @override
+  String get logoutTitle => 'Выйти из Tidy?';
 }

@@ -1209,6 +1209,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Calling is not available yet. Send a message instead.'**
   String get callUnavailable;
+
+  /// No description provided for @howWasYourClean.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your clean?'**
+  String get howWasYourClean;
+
+  /// No description provided for @starsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} star'**
+  String starsLabel(int count);
+
+  /// No description provided for @ratingNotGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Not great'**
+  String get ratingNotGreat;
+
+  /// No description provided for @ratingCouldBeBetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Could be better'**
+  String get ratingCouldBeBetter;
+
+  /// No description provided for @ratingOkay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get ratingOkay;
+
+  /// No description provided for @ratingGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get ratingGood;
+
+  /// No description provided for @ratingExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get ratingExcellent;
+
+  /// No description provided for @tagSpotless.
+  ///
+  /// In en, this message translates to:
+  /// **'Spotless'**
+  String get tagSpotless;
+
+  /// No description provided for @tagPunctual.
+  ///
+  /// In en, this message translates to:
+  /// **'On time'**
+  String get tagPunctual;
+
+  /// No description provided for @tagFriendly.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly'**
+  String get tagFriendly;
+
+  /// No description provided for @tagDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Great attention to detail'**
+  String get tagDetail;
+
+  /// No description provided for @tagEco.
+  ///
+  /// In en, this message translates to:
+  /// **'Used my products'**
+  String get tagEco;
+
+  /// No description provided for @anythingElse.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything else? (optional)'**
+  String get anythingElse;
+
+  /// No description provided for @commentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell {name} what they did well'**
+  String commentHint(String name);
+
+  /// No description provided for @addTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a tip'**
+  String get addTip;
+
+  /// No description provided for @submitReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get submitReview;
+
+  /// No description provided for @reviewThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your review!'**
+  String get reviewThanks;
+
+  /// No description provided for @alreadyReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already reviewed this clean.'**
+  String get alreadyReviewed;
+
+  /// No description provided for @noMessagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get noMessagesTitle;
+
+  /// No description provided for @noMessagesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Say hello to your cleaner.'**
+  String get noMessagesBody;
+
+  /// No description provided for @messageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get messageHint;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @noChatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet'**
+  String get noChatsTitle;
+
+  /// No description provided for @noChatsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a cleaner accepts your booking you can chat here.'**
+  String get noChatsBody;
+
+  /// No description provided for @addYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your name'**
+  String get addYourName;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get fullName;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get email;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get emailInvalid;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get systemDefault;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logout;
+
+  /// No description provided for @logoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out of Tidy?'**
+  String get logoutTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -630,4 +630,108 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get callUnavailable =>
       'Calling is not available yet. Send a message instead.';
+
+  @override
+  String get howWasYourClean => 'How was your clean?';
+
+  @override
+  String starsLabel(int count) {
+    return '$count star';
+  }
+
+  @override
+  String get ratingNotGreat => 'Not great';
+
+  @override
+  String get ratingCouldBeBetter => 'Could be better';
+
+  @override
+  String get ratingOkay => 'Okay';
+
+  @override
+  String get ratingGood => 'Good';
+
+  @override
+  String get ratingExcellent => 'Excellent';
+
+  @override
+  String get tagSpotless => 'Spotless';
+
+  @override
+  String get tagPunctual => 'On time';
+
+  @override
+  String get tagFriendly => 'Friendly';
+
+  @override
+  String get tagDetail => 'Great attention to detail';
+
+  @override
+  String get tagEco => 'Used my products';
+
+  @override
+  String get anythingElse => 'Anything else? (optional)';
+
+  @override
+  String commentHint(String name) {
+    return 'Tell $name what they did well';
+  }
+
+  @override
+  String get addTip => 'Add a tip';
+
+  @override
+  String get submitReview => 'Submit review';
+
+  @override
+  String get reviewThanks => 'Thanks for your review!';
+
+  @override
+  String get alreadyReviewed => 'You have already reviewed this clean.';
+
+  @override
+  String get noMessagesTitle => 'No messages yet';
+
+  @override
+  String get noMessagesBody => 'Say hello to your cleaner.';
+
+  @override
+  String get messageHint => 'Message';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get noChatsTitle => 'No conversations yet';
+
+  @override
+  String get noChatsBody =>
+      'Once a cleaner accepts your booking you can chat here.';
+
+  @override
+  String get addYourName => 'Add your name';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get fullName => 'Full name';
+
+  @override
+  String get email => 'Email (optional)';
+
+  @override
+  String get emailInvalid => 'Enter a valid email';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get systemDefault => 'System default';
+
+  @override
+  String get logout => 'Log out';
+
+  @override
+  String get logoutTitle => 'Log out of Tidy?';
 }

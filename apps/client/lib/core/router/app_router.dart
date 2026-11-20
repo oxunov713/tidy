@@ -14,7 +14,11 @@ import 'package:tidy_client/features/booking_wizard/presentation/configure_scree
 import 'package:tidy_client/features/booking_wizard/presentation/schedule_screen.dart';
 import 'package:tidy_client/features/bookings/presentation/booking_details_screen.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_screen.dart';
+import 'package:tidy_client/features/chat/presentation/chat_list_screen.dart';
+import 'package:tidy_client/features/chat/presentation/chat_screen.dart';
 import 'package:tidy_client/features/home/presentation/home_screen.dart';
+import 'package:tidy_client/features/profile/presentation/profile_screen.dart';
+import 'package:tidy_client/features/review/presentation/review_screen.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_screen.dart';
 
 part 'app_router.g.dart';
@@ -97,6 +101,16 @@ GoRouter appRouter(Ref ref) {
             BookingDetailsScreen(bookingId: state.pathParameters['id']!),
         routes: [
           GoRoute(
+            path: 'review',
+            builder: (context, state) =>
+                ReviewScreen(bookingId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'chat',
+            builder: (context, state) =>
+                ChatScreen(bookingId: state.pathParameters['id']!),
+          ),
+          GoRoute(
             path: 'track',
             builder: (context, state) =>
                 TrackingScreen(bookingId: state.pathParameters['id']!),
@@ -126,7 +140,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.chat,
-                builder: (context, state) => const SizedBox.shrink(),
+                builder: (context, state) => const ChatListScreen(),
               ),
             ],
           ),
@@ -134,7 +148,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.profile,
-                builder: (context, state) => const SizedBox.shrink(),
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),
