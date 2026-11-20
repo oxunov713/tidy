@@ -33,10 +33,19 @@ type AuthStore interface {
 	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 
 	SaveRefreshToken(ctx context.Context, userID uuid.UUID, tokenHash string, expiresAt time.Time) error
-	// RotateRefreshToken revokes oldHash and stores newHash. Presenting a
-	// token that was already rotated revokes every token of that user.
-	RotateRefreshToken(ctx context.Context, oldHash, newHash string, expiresAt time.Time) (uuid.UUID, error)
+	// RotateRefreshToken revokes oldHash and stores newHash, and returns when
+	// the rotation happened. Presenting oldHash again within grace of its
+	// rotation, with the same newHash, returns that first rotation. Any other
+	// reuse revokes every token of the user.
+	RotateRefreshToken(ctx context.Context, r RefreshRotation) (uuid.UUID, time.Time, error)
 	RevokeRefreshToken(ctx context.Context, tokenHash string) error
+}
+
+type RefreshRotation struct {
+	OldHash, NewHash string
+	ExpiresAt        time.Time
+	Now              time.Time
+	Grace            time.Duration
 }
 
 type UserStore interface {

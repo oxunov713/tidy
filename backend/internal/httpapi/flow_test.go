@@ -46,13 +46,14 @@ func TestOTPLogin(t *testing.T) {
 	e.expect(e.do("GET", "/me", "not-a-token", nil), http.StatusUnauthorized)
 	e.expect(e.do("GET", "/bookings", s.AccessToken, nil), http.StatusForbidden)
 
-	// Refresh rotates; the old refresh token then stops working, and using
-	// it again signs the user out everywhere.
+	// Refresh rotates; after the grace window the old refresh token stops
+	// working, and using it again signs the user out everywhere.
 	var next session
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": s.RefreshToken}), http.StatusOK).decode(t, &next)
 	if next.RefreshToken == s.RefreshToken {
 		t.Fatal("refresh token was not rotated")
 	}
+	e.travelTo(time.Now().Add(11 * time.Second))
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": s.RefreshToken}), http.StatusUnauthorized)
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": next.RefreshToken}), http.StatusUnauthorized)
 

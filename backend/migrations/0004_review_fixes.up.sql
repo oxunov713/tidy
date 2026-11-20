@@ -1,5 +1,6 @@
--- Fixes from the first review: plans that can end, and payments for visits
--- booked further ahead than a card hold lasts.
+-- Fixes from the first review: plans that can end, payments for visits
+-- booked further ahead than a card hold lasts, and a grace window for
+-- refresh tokens.
 
 ALTER TABLE booking_plans ADD COLUMN ended_at timestamptz;
 
@@ -24,3 +25,7 @@ CREATE TABLE payment_customers (
     created_at   timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, provider)
 );
+
+-- Hash of the token that replaced this one, so a retried refresh within the
+-- grace window can be told apart from a stolen token.
+ALTER TABLE refresh_tokens ADD COLUMN replaced_by text;

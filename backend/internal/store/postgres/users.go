@@ -128,15 +128,17 @@ func (s *Store) SaveRefreshToken(ctx context.Context, userID uuid.UUID, tokenHas
 	return err
 }
 
-func (s *Store) RotateRefreshToken(ctx context.Context, oldHash, newHash string, expiresAt time.Time) (uuid.UUID, error) {
+func (s *Store) RotateRefreshToken(ctx context.Context, r service.RefreshRotation) (uuid.UUID, time.Time, error) {
 	var userID uuid.UUID
+	rotatedAt := r.Now
 	reused := false
 	err := s.inTx(ctx, func(tx pgx.Tx) error {
 		var revokedAt *time.Time
+		var replacedBy *string
 		var expires time.Time
 		err := tx.QueryRow(ctx, `
-			SELECT user_id, revoked_at, expires_at FROM refresh_tokens
-			WHERE token_hash = $1 FOR UPDATE`, oldHash).Scan(&userID, &revokedAt, &expires)
+			SELECT user_id, revoked_at, replaced_by, expires_at FROM refresh_tokens
+			WHERE token_hash = $1 FOR UPDATE`, r.OldHash).Scan(&userID, &revokedAt, &replacedBy, &expires)
 		if isNoRows(err) {
 			return domain.ErrUnauthorized
 		}
@@ -144,26 +146,49 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldHash, newHash string,
 			return err
 		}
 		if revokedAt != nil {
+			ok, err := retriedWithinGrace(ctx, tx, r, *revokedAt, replacedBy)
+			if err != nil || ok {
+				rotatedAt = *revokedAt
+				return err
+			}
 			// A rotated token came back: it was stolen or the app is
 			// confused. Either way, sign the user out everywhere.
 			reused = true
-			_, err := tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`, userID)
+			_, err = tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = $2 WHERE user_id = $1 AND revoked_at IS NULL`, userID, r.Now)
 			return err
 		}
-		if time.Now().After(expires) {
+		if r.Now.After(expires) {
 			return domain.ErrUnauthorized
 		}
-		if _, err := tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE token_hash = $1`, oldHash); err != nil {
+		if _, err := tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = $2, replaced_by = $3 WHERE token_hash = $1`,
+			r.OldHash, r.Now, r.NewHash); err != nil {
 			return err
 		}
 		_, err = tx.Exec(ctx, `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
-			userID, newHash, expiresAt)
+			userID, r.NewHash, r.ExpiresAt)
 		return err
 	})
 	if err == nil && reused {
 		err = domain.ErrUnauthorized
 	}
-	return userID, err
+	return userID, rotatedAt, err
+}
+
+// retriedWithinGrace: two requests raced with the same token, or the answer
+// to the first one was lost. The successor must still be usable: rotated
+// on is fine, signed out is not.
+func retriedWithinGrace(ctx context.Context, tx pgx.Tx, r service.RefreshRotation, revokedAt time.Time, replacedBy *string) (bool, error) {
+	if replacedBy == nil || *replacedBy != r.NewHash || r.Now.Sub(revokedAt) > r.Grace {
+		return false, nil
+	}
+	var successorRevoked, successorRotated bool
+	err := tx.QueryRow(ctx, `
+		SELECT revoked_at IS NOT NULL, replaced_by IS NOT NULL FROM refresh_tokens WHERE token_hash = $1`,
+		r.NewHash).Scan(&successorRevoked, &successorRotated)
+	if isNoRows(err) {
+		return false, nil
+	}
+	return err == nil && (!successorRevoked || successorRotated), err
 }
 
 func (s *Store) RevokeRefreshToken(ctx context.Context, tokenHash string) error {

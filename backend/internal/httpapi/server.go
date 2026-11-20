@@ -29,7 +29,10 @@ type Server struct {
 	log       *slog.Logger
 
 	corsOrigins []string
-	authLimit   *rateLimiter
+	// Sign-in and token refresh have separate limits: apps refresh in the
+	// background and must not lock their users out of signing in.
+	authLimit    *rateLimiter
+	refreshLimit *rateLimiter
 }
 
 type Deps struct {
@@ -52,8 +55,9 @@ func New(d Deps) *Server {
 		auth: d.Auth, users: d.Users, catalogue: d.Catalogue, bookings: d.Bookings,
 		dispatch: d.Dispatch, cleaners: d.Cleaners, admin: d.Admin, payments: d.Payments,
 		ws: d.WebSocket, health: d.Health, log: d.Log,
-		corsOrigins: d.CORSOrigins,
-		authLimit:   newRateLimiter(30, time.Minute),
+		corsOrigins:  d.CORSOrigins,
+		authLimit:    newRateLimiter(30, time.Minute),
+		refreshLimit: newRateLimiter(60, time.Minute),
 	}
 }
 
@@ -80,11 +84,13 @@ func (s *Server) Routes() http.Handler {
 			r.Use(middleware.Timeout(15 * time.Second))
 
 			r.Route("/auth", func(r chi.Router) {
-				r.Use(s.limitByIP(s.authLimit))
-				r.Post("/otp", s.handle(s.requestOTP))
-				r.Post("/verify", s.handle(s.verifyOTP))
-				r.Post("/refresh", s.handle(s.refresh))
-				r.Post("/logout", s.handle(s.logout))
+				r.With(s.limitByIP(s.refreshLimit)).Post("/refresh", s.handle(s.refresh))
+				r.Group(func(r chi.Router) {
+					r.Use(s.limitByIP(s.authLimit))
+					r.Post("/otp", s.handle(s.requestOTP))
+					r.Post("/verify", s.handle(s.verifyOTP))
+					r.Post("/logout", s.handle(s.logout))
+				})
 			})
 
 			r.Get("/services", s.handle(s.listServices))
