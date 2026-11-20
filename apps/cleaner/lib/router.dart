@@ -1,9 +1,17 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tidy_cleaner/features/active_job/presentation/active_job_page.dart';
 import 'package:tidy_cleaner/features/auth/presentation/account_status_pages.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/auth/presentation/sign_in_page.dart';
+import 'package:tidy_cleaner/features/chat/presentation/chat_page.dart';
+import 'package:tidy_cleaner/features/earnings/presentation/earnings_page.dart';
+import 'package:tidy_cleaner/features/jobs/presentation/jobs_page.dart';
+import 'package:tidy_cleaner/features/permissions/presentation/location_permission_page.dart';
+import 'package:tidy_cleaner/features/profile/presentation/profile_page.dart';
+import 'package:tidy_cleaner/features/schedule/presentation/schedule_page.dart';
+import 'package:tidy_cleaner/features/shell/presentation/shell_page.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 part 'router.g.dart';
@@ -14,6 +22,13 @@ abstract final class Routes {
   static const pending = '/pending';
   static const suspended = '/suspended';
   static const jobs = '/jobs';
+  static const schedule = '/schedule';
+  static const earnings = '/earnings';
+  static const profile = '/profile';
+  static const locationPermission = '/location-permission';
+
+  static String job(String id) => '/job/$id';
+  static String chat(String id) => '/job/$id/chat';
 }
 
 /// Where a user with this session belongs. Pure so it can be tested.
@@ -75,9 +90,58 @@ GoRouter router(Ref ref) {
         path: Routes.suspended,
         builder: (context, state) => const SuspendedPage(),
       ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => ShellPage(navigationShell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.jobs,
+                builder: (context, state) => const JobsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.schedule,
+                builder: (context, state) => const SchedulePage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.earnings,
+                builder: (context, state) => const EarningsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profile,
+                builder: (context, state) => const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
+      ),
       GoRoute(
-        path: Routes.jobs,
-        builder: (context, state) => const Scaffold(),
+        path: '/job/:id',
+        builder: (context, state) =>
+            ActiveJobPage(bookingId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'chat',
+            builder: (context, state) =>
+                ChatPage(bookingId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.locationPermission,
+        builder: (context, state) => const LocationPermissionPage(),
       ),
     ],
   );

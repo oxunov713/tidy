@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tidy_cleaner/features/auth/data/api_auth_repository.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -42,3 +43,9 @@ class SessionController extends _$SessionController {
     }
   }
 }
+
+/// Id of the signed-in cleaner. Controllers that hold per-user data watch it,
+/// so they start fresh after a sign-out and sign-in as someone else.
+@Riverpod(keepAlive: true)
+String? currentUserId(Ref ref) =>
+    ref.watch(sessionControllerProvider.select((s) => s.value?.id));

@@ -11,6 +11,9 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(
+      // Failed requests show an error with a retry button; do not retry them
+      // silently in the background.
+      retry: (_, _) => null,
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         locationServiceProvider.overrideWithValue(

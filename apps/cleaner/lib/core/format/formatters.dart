@@ -10,6 +10,14 @@ abstract final class Fmt {
   static String timeRange(DateTime start, DateTime end, [String? locale]) =>
       '${time(start, locale)} – ${time(end, locale)}';
 
+  /// "T" (narrow weekday, for chart labels).
+  static String weekdayNarrow(DateTime local, [String? locale]) =>
+      DateFormat('EEEEE', locale).format(local);
+
+  /// "Thu"
+  static String weekdayShort(DateTime local, [String? locale]) =>
+      DateFormat('EEE', locale).format(local);
+
   /// "Thu 4 Dec"
   static String shortDate(DateTime utc, [String? locale]) =>
       DateFormat('EEE d MMM', locale).format(utc.toLocal());
@@ -40,6 +48,10 @@ abstract final class Fmt {
   /// Whole pounds for tight spots, "£96". Pence are dropped by rounding down.
   static String poundsShort(int pence) =>
       PriceText.format(pence).replaceFirst(RegExp(r'\.\d\d$'), '');
+
+  /// "£84" for whole pounds, "£84.50" otherwise.
+  static String payout(int pence) =>
+      pence % 100 == 0 ? poundsShort(pence) : pounds(pence);
 
   /// "£22.60".
   static String pounds(int pence) => PriceText.format(pence);

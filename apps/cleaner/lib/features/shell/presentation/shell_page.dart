@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:tidy_cleaner/features/active_job/presentation/location_reporter.dart';
 import 'package:tidy_cleaner/features/shell/presentation/offer_alert_host.dart';
 import 'package:tidy_cleaner/features/shell/presentation/realtime_connection.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
@@ -15,7 +16,9 @@ class ShellPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(realtimeConnectionProvider);
+    ref
+      ..watch(realtimeConnectionProvider)
+      ..watch(locationReportingProvider);
     final l10n = AppLocalizations.of(context);
     return OfferAlertHost(
       child: Scaffold(
