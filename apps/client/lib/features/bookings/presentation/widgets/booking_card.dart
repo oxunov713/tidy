@@ -119,22 +119,36 @@ class BookingCard extends ConsumerWidget {
                 booking.total,
                 style: text.titleLarge?.copyWith(fontSize: 18),
               ),
-              const Spacer(),
-              if (showCancel)
-                TextButton(
-                  onPressed: onCancel,
-                  style: TextButton.styleFrom(
-                    foregroundColor: TidyColors.danger,
-                  ),
-                  child: Text(l10n.cancel),
+              const SizedBox(width: 8),
+              // Wraps instead of overflowing when labels are long (Russian,
+              // large text sizes).
+              Expanded(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    if (showCancel)
+                      TextButton(
+                        onPressed: onCancel,
+                        style: TextButton.styleFrom(
+                          foregroundColor: TidyColors.danger,
+                        ),
+                        child: Text(l10n.cancel),
+                      ),
+                    if (showBookAgain)
+                      TextButton(
+                        onPressed: onBookAgain,
+                        child: Text(l10n.bookAgain),
+                      ),
+                    _ActionButton(
+                      label: primaryLabel,
+                      onPressed: primaryAction,
+                    ),
+                  ],
                 ),
-              if (showBookAgain)
-                TextButton(
-                  onPressed: onBookAgain,
-                  child: Text(l10n.bookAgain),
-                ),
-              const SizedBox(width: 4),
-              _ActionButton(label: primaryLabel, onPressed: primaryAction),
+              ),
             ],
           ),
         ],

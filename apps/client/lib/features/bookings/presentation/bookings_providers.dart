@@ -65,7 +65,10 @@ class BookingsList extends _$BookingsList {
   }
 
   /// Reloads from the first page; the old list stays visible meanwhile.
-  Future<void> refresh() => ref.refresh(bookingsListProvider(scope).future);
+  Future<void> refresh() {
+    ref.invalidateSelf(asReload: true);
+    return future;
+  }
 
   /// Swaps in a booking that changed (cancelled, status update).
   void replace(Booking booking) {
