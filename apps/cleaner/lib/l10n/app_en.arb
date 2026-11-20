@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tidy Cleaner",
+  "homePlaceholderTitle": "Coming soon",
+  "homePlaceholderBody": "Your jobs and earnings will appear here.",
+  "@homePlaceholderTitle": {
+    "description": "Heading of the placeholder home screen"
+  }
+}
