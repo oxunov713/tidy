@@ -107,6 +107,11 @@ func (c *Catalogue) Services(ctx context.Context) ([]domain.Service, error) {
 	return c.store.ListServices(ctx, true)
 }
 
+// AllServices includes inactive ones, for the admin panel.
+func (c *Catalogue) AllServices(ctx context.Context) ([]domain.Service, error) {
+	return c.store.ListServices(ctx, false)
+}
+
 func (c *Catalogue) Extras(ctx context.Context) ([]domain.Extra, error) {
 	return c.store.ListExtras(ctx)
 }
