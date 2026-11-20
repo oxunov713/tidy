@@ -1,9 +1,219 @@
 {
   "@@locale": "en",
   "appTitle": "Tidy Admin",
-  "homePlaceholderTitle": "Coming soon",
-  "homePlaceholderBody": "Bookings and cleaner approvals will appear here.",
-  "@homePlaceholderTitle": {
-    "description": "Heading of the placeholder home screen"
-  }
+  "retry": "Try again",
+  "refresh": "Refresh",
+  "loading": "Loading",
+  "cancel": "Cancel",
+  "close": "Close",
+  "back": "Back",
+  "save": "Save",
+  "signOut": "Sign out",
+  "accountMenu": "Account menu",
+  "errorTitle": "Something went wrong",
+  "errorSlotTaken": "This cleaner already has a job at that time. Pick someone else.",
+  "errorInvalidTransition": "The booking is in a state where this is not possible any more.",
+  "errorUnauthorized": "Your session has expired. Sign in again.",
+  "errorForbidden": "You do not have permission to do that.",
+  "errorNotFound": "That item no longer exists.",
+  "errorTooManyRequests": "Too many attempts. Wait a minute and try again.",
+  "errorNetwork": "Cannot reach the server. Check your connection.",
+  "errorServer": "The server had a problem. Try again in a moment.",
+  "errorUnknown": "Something unexpected happened.",
+  "loginTitle": "Sign in",
+  "loginPhoneSubtitle": "Enter the phone number of your admin account.",
+  "loginCodeSubtitle": "We sent a 6-digit code to {phone}.",
+  "@loginCodeSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "loginPhoneLabel": "Phone number",
+  "loginPhoneInvalid": "Use the international format, for example +447700900001.",
+  "loginCodeLabel": "Verification code",
+  "loginCodeInvalid": "Enter the 6-digit code.",
+  "loginSendCode": "Send code",
+  "loginSignIn": "Sign in",
+  "loginChangeNumber": "Use a different number",
+  "loginNoAdminAccess": "This account has no admin access.",
+  "navBookings": "Bookings",
+  "navCleaners": "Cleaners",
+  "navServices": "Services and prices",
+  "navMenu": "Open menu",
+  "navExpand": "Expand menu",
+  "navCollapse": "Collapse menu",
+  "statBookingsToday": "Bookings today",
+  "statRevenueToday": "Revenue today",
+  "statCleanersOnline": "Cleaners online",
+  "statAwaitingApproval": "Awaiting approval",
+  "searchBookingsHint": "Search by ID, customer or cleaner",
+  "clearSearch": "Clear search",
+  "filterAll": "All",
+  "statusPending": "Pending",
+  "statusConfirmed": "Confirmed",
+  "statusAssigned": "Assigned",
+  "statusOnTheWay": "On the way",
+  "statusInProgress": "In progress",
+  "statusCompleted": "Completed",
+  "statusCancelled": "Cancelled",
+  "frequencyOnce": "One-off",
+  "frequencyWeekly": "Weekly",
+  "frequencyFortnightly": "Fortnightly",
+  "columnId": "ID",
+  "columnCustomer": "Customer",
+  "columnService": "Service",
+  "columnTime": "Time",
+  "columnCleaner": "Cleaner",
+  "columnStatus": "Status",
+  "columnAmount": "Amount",
+  "bookingsEmptyTitle": "No bookings found",
+  "bookingsEmpty": "Bookings will show up here as customers place them.",
+  "bookingsEmptyFiltered": "Nothing matches these filters.",
+  "clearFilters": "Clear filters",
+  "loadMore": "Load more",
+  "bookingDetails": "Booking",
+  "sectionVisit": "Visit",
+  "sectionCustomer": "Customer",
+  "sectionAddress": "Address",
+  "sectionCleaner": "Cleaner",
+  "sectionPayment": "Payment",
+  "sectionReview": "Review",
+  "sectionTimeline": "Timeline",
+  "fieldService": "Service",
+  "fieldWhen": "When",
+  "fieldRooms": "Rooms",
+  "fieldFrequency": "Frequency",
+  "fieldName": "Name",
+  "fieldPhone": "Phone",
+  "fieldSubtotal": "Subtotal",
+  "fieldDiscount": "Discount",
+  "fieldTotal": "Total",
+  "fieldCleanerPayout": "Cleaner payout",
+  "notAssigned": "No cleaner assigned yet.",
+  "timelineEmpty": "No events yet.",
+  "assignCleaner": "Assign a cleaner",
+  "reassignCleaner": "Reassign cleaner",
+  "reassignTitle": "Reassign cleaner",
+  "reassignHint": "Pick an approved cleaner. They are told about the job straight away.",
+  "reassignConfirm": "Reassign",
+  "noApprovedCleaners": "There are no other approved cleaners.",
+  "cleanerReassigned": "Cleaner reassigned.",
+  "cancelBooking": "Cancel booking",
+  "cancelBookingTitle": "Cancel booking {code}?",
+  "@cancelBookingTitle": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelBookingBody": "The customer is refunded in full and the cleaner is told. This cannot be undone.",
+  "keepBooking": "Keep booking",
+  "bookingCancelled": "Booking cancelled.",
+  "roomsValue": "{bedrooms} bed, {bathrooms} bath",
+  "@roomsValue": {
+    "placeholders": {
+      "bedrooms": {
+        "type": "int"
+      },
+      "bathrooms": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingSummary": "{rating} ({count, plural, =1{1 review} other{{count} reviews}})",
+  "@ratingSummary": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewRating": "Rated {rating} out of 5",
+  "@reviewRating": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "tabPending": "Pending",
+  "tabApproved": "Approved",
+  "tabSuspended": "Suspended",
+  "noPendingCleaners": "No cleaners waiting for approval.",
+  "noApprovedCleanersTab": "No approved cleaners yet.",
+  "noSuspendedCleaners": "No suspended cleaners.",
+  "approve": "Approve",
+  "reject": "Reject",
+  "suspend": "Suspend",
+  "reinstate": "Reinstate",
+  "online": "Online",
+  "offline": "Offline",
+  "noRatingsYet": "No ratings yet",
+  "cleanerApproved": "{name} approved.",
+  "@cleanerApproved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerSuspended": "{name} suspended.",
+  "@cleanerSuspended": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerUpdateFailed": "Could not update the cleaner.",
+  "servicesIntro": "Prices are in pounds. Changes apply to new quotes straight away.",
+  "noServices": "No services yet.",
+  "columnPerBedroom": "Per bedroom",
+  "columnPerBathroom": "Per bathroom",
+  "columnDuration": "Duration",
+  "columnActive": "Active",
+  "durationSummary": "{base} min + {perRoom} per room",
+  "@durationSummary": {
+    "placeholders": {
+      "base": {
+        "type": "int"
+      },
+      "perRoom": {
+        "type": "int"
+      }
+    }
+  },
+  "editService": "Edit service",
+  "fieldServiceName": "Name",
+  "fieldBasePrice": "Base price",
+  "fieldPerBedroom": "Per extra bedroom",
+  "fieldPerBathroom": "Per extra bathroom",
+  "fieldBaseMinutes": "Base duration",
+  "fieldMinutesPerRoom": "Extra time per extra room",
+  "minutesSuffix": "min",
+  "fieldActive": "Active",
+  "fieldActiveHint": "Inactive services cannot be booked.",
+  "validationTitle": "Enter a name of up to 80 characters.",
+  "validationPrice": "Enter an amount in pounds, like 68 or 68.50.",
+  "validationPricePositive": "The price must be more than £0.",
+  "validationPriceTooHigh": "The most you can enter is £10,000.",
+  "validationMinutes": "Enter whole minutes from {min} to {max}.",
+  "@validationMinutes": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "serviceSaved": "Service saved.",
+  "serviceUpdateFailed": "Could not update the service."
 }
