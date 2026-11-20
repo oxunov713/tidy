@@ -577,4 +577,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeline => 'Timeline';
+
+  @override
+  String get stepConfirmed => 'Confirmed';
+
+  @override
+  String get stepOnTheWay => 'On the way';
+
+  @override
+  String get stepCleaning => 'Cleaning';
+
+  @override
+  String get stepDone => 'Done';
+
+  @override
+  String get arrivingIn => 'Arriving in';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get onTheWayHeadline => 'On the way';
+
+  @override
+  String get startsAt => 'Starts at';
+
+  @override
+  String get rightNow => 'Right now';
+
+  @override
+  String get cleaningHeadline => 'Cleaning';
+
+  @override
+  String get finished => 'Finished';
+
+  @override
+  String get allDone => 'All done';
+
+  @override
+  String get bookingLabel => 'Booking';
+
+  @override
+  String get needToChange => 'Need to change something?';
+
+  @override
+  String callCleaner(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String get callUnavailable =>
+      'Calling is not available yet. Send a message instead.';
 }

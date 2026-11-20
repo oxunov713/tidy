@@ -358,5 +358,35 @@
       }
     }
   },
-  "timeline": "Timeline"
+  "timeline": "Timeline",
+  "stepConfirmed": "Confirmed",
+  "stepOnTheWay": "On the way",
+  "stepCleaning": "Cleaning",
+  "stepDone": "Done",
+  "arrivingIn": "Arriving in",
+  "minutesShort": "{minutes} min",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onTheWayHeadline": "On the way",
+  "startsAt": "Starts at",
+  "rightNow": "Right now",
+  "cleaningHeadline": "Cleaning",
+  "finished": "Finished",
+  "allDone": "All done",
+  "bookingLabel": "Booking",
+  "needToChange": "Need to change something?",
+  "callCleaner": "Call {name}",
+  "@callCleaner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callUnavailable": "Calling is not available yet. Send a message instead."
 }

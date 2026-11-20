@@ -168,5 +168,21 @@
   "rateYourClean": "Оценить уборку",
   "yourReview": "Ваш отзыв",
   "tipAmount": "Чаевые {amount}",
-  "timeline": "История"
+  "timeline": "История",
+  "stepConfirmed": "Принят",
+  "stepOnTheWay": "В пути",
+  "stepCleaning": "Уборка",
+  "stepDone": "Готово",
+  "arrivingIn": "Приедет через",
+  "minutesShort": "{minutes} мин",
+  "onTheWayHeadline": "В пути",
+  "startsAt": "Начало в",
+  "rightNow": "Сейчас",
+  "cleaningHeadline": "Идёт уборка",
+  "finished": "Завершено",
+  "allDone": "Всё готово",
+  "bookingLabel": "Заказ",
+  "needToChange": "Нужно что-то изменить?",
+  "callCleaner": "Позвонить: {name}",
+  "callUnavailable": "Звонки пока недоступны. Напишите сообщение."
 }

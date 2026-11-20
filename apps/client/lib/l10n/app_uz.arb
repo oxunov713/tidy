@@ -168,5 +168,21 @@
   "rateYourClean": "Tozalashni baholash",
   "yourReview": "Sizning sharhingiz",
   "tipAmount": "Choychaqa {amount}",
-  "timeline": "Tarix"
+  "timeline": "Tarix",
+  "stepConfirmed": "Tasdiqlandi",
+  "stepOnTheWay": "Yo‘lda",
+  "stepCleaning": "Tozalash",
+  "stepDone": "Tayyor",
+  "arrivingIn": "Yetib keladi",
+  "minutesShort": "{minutes} daqiqa",
+  "onTheWayHeadline": "Yo‘lda",
+  "startsAt": "Boshlanishi",
+  "rightNow": "Hozir",
+  "cleaningHeadline": "Tozalanmoqda",
+  "finished": "Yakunlandi",
+  "allDone": "Hammasi tayyor",
+  "bookingLabel": "Buyurtma",
+  "needToChange": "Nimanidir o‘zgartirish kerakmi?",
+  "callCleaner": "{name} ga qo‘ng‘iroq qilish",
+  "callUnavailable": "Qo‘ng‘iroq hozircha mavjud emas. Xabar yozing."
 }

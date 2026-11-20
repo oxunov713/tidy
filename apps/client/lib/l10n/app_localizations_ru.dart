@@ -577,4 +577,56 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get timeline => 'История';
+
+  @override
+  String get stepConfirmed => 'Принят';
+
+  @override
+  String get stepOnTheWay => 'В пути';
+
+  @override
+  String get stepCleaning => 'Уборка';
+
+  @override
+  String get stepDone => 'Готово';
+
+  @override
+  String get arrivingIn => 'Приедет через';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes мин';
+  }
+
+  @override
+  String get onTheWayHeadline => 'В пути';
+
+  @override
+  String get startsAt => 'Начало в';
+
+  @override
+  String get rightNow => 'Сейчас';
+
+  @override
+  String get cleaningHeadline => 'Идёт уборка';
+
+  @override
+  String get finished => 'Завершено';
+
+  @override
+  String get allDone => 'Всё готово';
+
+  @override
+  String get bookingLabel => 'Заказ';
+
+  @override
+  String get needToChange => 'Нужно что-то изменить?';
+
+  @override
+  String callCleaner(String name) {
+    return 'Позвонить: $name';
+  }
+
+  @override
+  String get callUnavailable => 'Звонки пока недоступны. Напишите сообщение.';
 }

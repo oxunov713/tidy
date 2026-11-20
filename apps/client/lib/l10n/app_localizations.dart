@@ -1113,6 +1113,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Timeline'**
   String get timeline;
+
+  /// No description provided for @stepConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get stepConfirmed;
+
+  /// No description provided for @stepOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get stepOnTheWay;
+
+  /// No description provided for @stepCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning'**
+  String get stepCleaning;
+
+  /// No description provided for @stepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get stepDone;
+
+  /// No description provided for @arrivingIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving in'**
+  String get arrivingIn;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String minutesShort(int minutes);
+
+  /// No description provided for @onTheWayHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get onTheWayHeadline;
+
+  /// No description provided for @startsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at'**
+  String get startsAt;
+
+  /// No description provided for @rightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Right now'**
+  String get rightNow;
+
+  /// No description provided for @cleaningHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning'**
+  String get cleaningHeadline;
+
+  /// No description provided for @finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get finished;
+
+  /// No description provided for @allDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All done'**
+  String get allDone;
+
+  /// No description provided for @bookingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get bookingLabel;
+
+  /// No description provided for @needToChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Need to change something?'**
+  String get needToChange;
+
+  /// No description provided for @callCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Call {name}'**
+  String callCleaner(String name);
+
+  /// No description provided for @callUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling is not available yet. Send a message instead.'**
+  String get callUnavailable;
 }
 
 class _AppLocalizationsDelegate

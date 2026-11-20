@@ -15,6 +15,7 @@ import 'package:tidy_client/features/booking_wizard/presentation/schedule_screen
 import 'package:tidy_client/features/bookings/presentation/booking_details_screen.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_screen.dart';
 import 'package:tidy_client/features/home/presentation/home_screen.dart';
+import 'package:tidy_client/features/tracking/presentation/tracking_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -94,6 +95,13 @@ GoRouter appRouter(Ref ref) {
         path: '/booking/:id',
         builder: (context, state) =>
             BookingDetailsScreen(bookingId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'track',
+            builder: (context, state) =>
+                TrackingScreen(bookingId: state.pathParameters['id']!),
+          ),
+        ],
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => MainShell(shell: shell),

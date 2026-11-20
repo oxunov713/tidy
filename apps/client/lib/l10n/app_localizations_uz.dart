@@ -581,4 +581,57 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get timeline => 'Tarix';
+
+  @override
+  String get stepConfirmed => 'Tasdiqlandi';
+
+  @override
+  String get stepOnTheWay => 'Yo‘lda';
+
+  @override
+  String get stepCleaning => 'Tozalash';
+
+  @override
+  String get stepDone => 'Tayyor';
+
+  @override
+  String get arrivingIn => 'Yetib keladi';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes daqiqa';
+  }
+
+  @override
+  String get onTheWayHeadline => 'Yo‘lda';
+
+  @override
+  String get startsAt => 'Boshlanishi';
+
+  @override
+  String get rightNow => 'Hozir';
+
+  @override
+  String get cleaningHeadline => 'Tozalanmoqda';
+
+  @override
+  String get finished => 'Yakunlandi';
+
+  @override
+  String get allDone => 'Hammasi tayyor';
+
+  @override
+  String get bookingLabel => 'Buyurtma';
+
+  @override
+  String get needToChange => 'Nimanidir o‘zgartirish kerakmi?';
+
+  @override
+  String callCleaner(String name) {
+    return '$name ga qo‘ng‘iroq qilish';
+  }
+
+  @override
+  String get callUnavailable =>
+      'Qo‘ng‘iroq hozircha mavjud emas. Xabar yozing.';
 }
