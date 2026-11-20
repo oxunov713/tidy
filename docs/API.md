@@ -21,7 +21,14 @@ Every error has the same shape:
 | 404 | `not_found` | |
 | 409 | `slot_taken` | the cleaner was booked at that time |
 | 409 | `invalid_transition` | e.g. finishing a booking that hasn't started |
+| 409 | `offer_gone` | the offer expired or another cleaner took the job |
 | 429 | `too_many_requests` | OTP or login rate limit |
+| 500 | `internal` | anything unexpected; the request id is in the `X-Request-Id` header |
+
+## Pagination
+
+Paginated lists take `cursor` and `limit` (default 20, max 50) and return
+`{ "items": [...], "next_cursor": "…" }`. `next_cursor` is empty on the last page.
 
 ## Auth
 
@@ -60,8 +67,10 @@ OTP: 6 digits, valid 5 minutes, 5 attempts, max 3 requests per phone per 10 minu
 { "service_id": "…", "bedrooms": 2, "bathrooms": 1, "extra_ids": ["…"], "frequency": "weekly" }
 ```
 
+No login needed. `minutes` includes the time for extras.
+
 ```json
-{ "subtotal": 8000, "discount": 1200, "total": 6800, "minutes": 150,
+{ "subtotal": 8000, "discount": 1200, "total": 6800, "minutes": 180,
   "lines": [ { "label": "Standard clean · 2 bed, 1 bath", "amount": 6000 },
              { "label": "Inside oven", "amount": 2000 },
              { "label": "Weekly discount (15%)", "amount": -1200 } ] }
@@ -85,7 +94,7 @@ Optional `cleaner_id` limits the check to one cleaner ("book Sarah again").
 | POST | `/bookings` | quote fields + `{ address_id, start, cleaner_id? }` → `201 { booking, payment: { client_secret } }` |
 | GET | `/bookings?scope=upcoming\|past&cursor=` | own bookings, paginated |
 | GET | `/bookings/{id}` | includes cleaner, last location, events |
-| POST | `/bookings/{id}/cancel` | free until 24 h before start |
+| POST | `/bookings/{id}/cancel` | `{ booking, refunded }`. Free until 24 h before start; later the full price is charged |
 | POST | `/bookings/{id}/review` | `{ rating, tags, comment, tip }`, only after `completed` |
 | GET | `/bookings/{id}/messages` | chat history |
 | POST | `/bookings/{id}/messages` | `{ body }` |
@@ -95,14 +104,14 @@ Optional `cleaner_id` limits the check to one cleaner ("book Sarah again").
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/cleaner/online` | `{ online: true, lat, lng }` |
-| GET | `/cleaner/offers` | open offers sent to me |
+| GET | `/cleaner/offers` | open offers sent to me: `[{ booking, expires_at, distance_km, postcode, city }]` |
 | POST | `/cleaner/offers/{booking_id}/accept` | `409 slot_taken` if I'm busy then |
 | POST | `/cleaner/offers/{booking_id}/decline` | |
 | GET | `/cleaner/jobs?from=&to=` | my schedule |
-| POST | `/cleaner/jobs/{id}/status` | `{ status: "on_the_way" \| "in_progress" \| "completed" }` |
+| POST | `/cleaner/jobs/{id}/status` | `{ status: "on_the_way" \| "in_progress" \| "completed" }`; `on_the_way` from 3 h before the start |
 | GET | `/cleaner/availability` | weekly hours |
 | PUT | `/cleaner/availability` | `[{ weekday, start_time, end_time }]` |
-| GET | `/cleaner/earnings?period=week` | totals, per-day bars, recent jobs |
+| GET | `/cleaner/earnings?period=week` | `week` or `month`: `{ total, tips, jobs, minutes, days: [{ date, amount }], recent: [...] }` |
 
 ## Admin
 
@@ -114,6 +123,7 @@ Optional `cleaner_id` limits the check to one cleaner ("book Sarah again").
 | GET | `/admin/cleaners?status=` | |
 | POST | `/admin/cleaners/{id}/approve` | |
 | POST | `/admin/cleaners/{id}/suspend` | |
+| GET | `/admin/services` | every service with all price fields, inactive ones too |
 | PUT | `/admin/services/{id}` | prices and duration |
 
 ## Payments
@@ -141,6 +151,8 @@ Server → client:
 { "type": "offer.new", "booking": { … }, "expires_at": "…" }
 { "type": "offer.gone", "booking_id": "…" }
 { "type": "message.new", "booking_id": "…", "message": { … } }
+{ "type": "subscribed", "room": "booking:3f2c…" }
+{ "type": "error", "code": "forbidden", "message": "…" }
 ```
 
 Only the client and the assigned cleaner can join `booking:<id>`. Only cleaners
