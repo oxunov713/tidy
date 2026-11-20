@@ -63,12 +63,17 @@ class OfferCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Countdown(
-                until: offer.expiresAt,
-                builder: (context, left) => Text(
-                  l10n.expiresIn(Fmt.countdown(left)),
-                  key: const Key('offerCountdown'),
-                  style: text.labelLarge?.copyWith(color: TidyColors.muted),
+              const SizedBox(width: TidySpacing.sm),
+              Flexible(
+                child: Countdown(
+                  until: offer.expiresAt,
+                  builder: (context, left) => Text(
+                    l10n.expiresIn(Fmt.countdown(left)),
+                    key: const Key('offerCountdown'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.labelLarge?.copyWith(color: TidyColors.muted),
+                  ),
                 ),
               ),
             ],
