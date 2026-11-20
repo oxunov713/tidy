@@ -406,16 +406,16 @@ func (s *Store) LastLocation(ctx context.Context, bookingID uuid.UUID) (*domain.
 	return &l, err
 }
 
-func (s *Store) SaveLocation(ctx context.Context, bookingID, cleanerID uuid.UUID, lat, lng float64) error {
+func (s *Store) SaveLocation(ctx context.Context, bookingID, cleanerID uuid.UUID, lat, lng float64, now time.Time) error {
 	return s.inTx(ctx, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
-			INSERT INTO booking_locations (booking_id, lat, lng, recorded_at) VALUES ($1, $2, $3, now())
-			ON CONFLICT (booking_id) DO UPDATE SET lat = $2, lng = $3, recorded_at = now()`, bookingID, lat, lng)
+			INSERT INTO booking_locations (booking_id, lat, lng, recorded_at) VALUES ($1, $2, $3, $4)
+			ON CONFLICT (booking_id) DO UPDATE SET lat = $2, lng = $3, recorded_at = $4`, bookingID, lat, lng, now)
 		if err != nil {
 			return err
 		}
-		_, err = tx.Exec(ctx, `UPDATE cleaners SET last_lat = $2, last_lng = $3, last_seen_at = now() WHERE user_id = $1`,
-			cleanerID, lat, lng)
+		_, err = tx.Exec(ctx, `UPDATE cleaners SET last_lat = $2, last_lng = $3, last_seen_at = $4 WHERE user_id = $1`,
+			cleanerID, lat, lng, now)
 		return err
 	})
 }

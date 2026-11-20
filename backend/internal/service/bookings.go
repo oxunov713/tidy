@@ -31,6 +31,7 @@ type BookingsStore interface {
 
 type Bookings struct {
 	store    BookingsStore
+	cleaners CleanerStore
 	matcher  *matcher
 	payments *Payments
 	events   Events
@@ -42,6 +43,7 @@ type Bookings struct {
 func NewBookings(store BookingsStore, cleaners CleanerStore, payments *Payments, events Events, push *Pusher, loc *time.Location, radiusKm float64, clock Clock, log *slog.Logger) *Bookings {
 	return &Bookings{
 		store:    store,
+		cleaners: cleaners,
 		matcher:  &matcher{store: cleaners, loc: loc, radiusKm: radiusKm},
 		payments: payments,
 		events:   events,
@@ -502,6 +504,12 @@ func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (b
 	return err == nil, err
 }
 
+// CleanerSeen records a sign of life from the cleaner app, e.g. a WebSocket
+// heartbeat, so dispatch knows the cleaner is really there.
+func (s *Bookings) CleanerSeen(ctx context.Context, cleanerID uuid.UUID) error {
+	return s.cleaners.TouchCleaner(ctx, cleanerID, s.clock.now())
+}
+
 // RecordLocation stores the cleaner's latest position on the way to a job
 // and returns a rough ETA in minutes.
 func (s *Bookings) RecordLocation(ctx context.Context, cleanerID, bookingID uuid.UUID, lat, lng float64) (int, error) {
@@ -521,7 +529,7 @@ func (s *Bookings) RecordLocation(ctx context.Context, cleanerID, bookingID uuid
 	if b.Status != domain.StatusAssigned && b.Status != domain.StatusOnTheWay {
 		return 0, domain.InvalidTransition("Location is only shared on the way to a job.")
 	}
-	if err := s.store.SaveLocation(ctx, bookingID, cleanerID, lat, lng); err != nil {
+	if err := s.store.SaveLocation(ctx, bookingID, cleanerID, lat, lng, s.clock.now()); err != nil {
 		return 0, err
 	}
 	addr, err := s.store.GetAddress(ctx, b.AddressID)

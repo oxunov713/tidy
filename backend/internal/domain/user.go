@@ -66,6 +66,10 @@ func (s CleanerStatus) Valid() bool {
 	return false
 }
 
+// CleanerSeenWithin: an online cleaner not heard from for longer (location,
+// online toggle or WebSocket heartbeat) gets no offers.
+const CleanerSeenWithin = 10 * time.Minute
+
 type Cleaner struct {
 	UserID      uuid.UUID     `json:"user_id"`
 	Status      CleanerStatus `json:"status"`

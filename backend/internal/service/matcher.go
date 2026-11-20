@@ -39,9 +39,10 @@ func (c candidate) freeFor(visit domain.Period, loc *time.Location) bool {
 }
 
 type matchQuery struct {
-	lat, lng   float64
-	day        time.Time
-	onlineOnly bool
+	lat, lng float64
+	day      time.Time
+	// onlineSince limits the search to cleaners online and seen since then.
+	onlineSince *time.Time
 	// only limits the search to one cleaner, e.g. "book Sarah again".
 	only *uuid.UUID
 }
@@ -50,7 +51,7 @@ type matchQuery struct {
 // nearest first. Distance is computed in Go: with a few hundred cleaners per
 // city that is cheaper than maintaining a geo index.
 func (m *matcher) candidates(ctx context.Context, q matchQuery) ([]candidate, error) {
-	cleaners, err := m.store.ListApprovedCleaners(ctx, q.onlineOnly)
+	cleaners, err := m.store.ListApprovedCleaners(ctx, q.onlineSince)
 	if err != nil {
 		return nil, err
 	}

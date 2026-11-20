@@ -31,6 +31,23 @@ var (
 type fakeBackend struct {
 	mu      sync.Mutex
 	revoked map[uuid.UUID]bool
+	seen    map[uuid.UUID]int
+}
+
+func (f *fakeBackend) CleanerSeen(_ context.Context, id uuid.UUID) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.seen == nil {
+		f.seen = map[uuid.UUID]int{}
+	}
+	f.seen[id]++
+	return nil
+}
+
+func (f *fakeBackend) seenCount(id uuid.UUID) int {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.seen[id]
 }
 
 func (f *fakeBackend) revoke(userID uuid.UUID) {
@@ -262,4 +279,27 @@ func TestFanOutChecksAccessAgain(t *testing.T) {
 	hub.MessageNew(bookingID, domain.Message{BookingID: bookingID, Body: "hello"})
 	receive(t, ctx, watcher)
 	expectSilence(t, ctx, cleaner)
+}
+
+func TestCleanerHeartbeatCountsAsSeen(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, url, backend := startHubWith(t, Options{PingInterval: 20 * time.Millisecond})
+	cleaner := dial(t, ctx, url, "cleaner")
+	client := dial(t, ctx, url, "client")
+	// Pongs are answered while the app reads.
+	for _, conn := range []*websocket.Conn{cleaner, client} {
+		go func() { _, _, _ = conn.Read(ctx) }()
+	}
+
+	deadline := time.Now().Add(2 * time.Second)
+	for backend.seenCount(cleanerID) < 2 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if n := backend.seenCount(cleanerID); n < 2 {
+		t.Errorf("cleaner seen %d times, want a mark for every heartbeat", n)
+	}
+	if n := backend.seenCount(clientID); n != 0 {
+		t.Errorf("client recorded as a seen cleaner %d times", n)
+	}
 }

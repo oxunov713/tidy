@@ -79,12 +79,16 @@ type CatalogueStore interface {
 
 type CleanerStore interface {
 	GetCleaner(ctx context.Context, id uuid.UUID) (domain.Cleaner, error)
-	ListApprovedCleaners(ctx context.Context, onlineOnly bool) ([]domain.Cleaner, error)
+	// ListApprovedCleaners returns every approved cleaner, or with
+	// onlineSince only those online and seen since then.
+	ListApprovedCleaners(ctx context.Context, onlineSince *time.Time) ([]domain.Cleaner, error)
 	AvailabilityFor(ctx context.Context, cleanerIDs []uuid.UUID, weekday int) (map[uuid.UUID]domain.Availability, error)
 	// BusyPeriods returns visits of each cleaner that overlap [from, to),
 	// cancelled ones excluded.
 	BusyPeriods(ctx context.Context, cleanerIDs []uuid.UUID, from, to time.Time) (map[uuid.UUID][]domain.Period, error)
-	SetCleanerOnline(ctx context.Context, id uuid.UUID, online bool, lat, lng *float64) error
+	// SetCleanerOnline and TouchCleaner also record the cleaner as seen at now.
+	SetCleanerOnline(ctx context.Context, id uuid.UUID, online bool, lat, lng *float64, now time.Time) error
+	TouchCleaner(ctx context.Context, id uuid.UUID, now time.Time) error
 	GetAvailability(ctx context.Context, id uuid.UUID) ([]domain.Availability, error)
 	ReplaceAvailability(ctx context.Context, id uuid.UUID, list []domain.Availability) error
 	CompletedJobs(ctx context.Context, cleanerID uuid.UUID, from, to time.Time) ([]EarningJob, error)
@@ -120,7 +124,7 @@ type BookingStore interface {
 	AssignCleaner(ctx context.Context, bookingID, cleanerID uuid.UUID, actor *uuid.UUID) (domain.Booking, []uuid.UUID, error)
 	BookingEvents(ctx context.Context, id uuid.UUID) ([]domain.BookingEvent, error)
 	LastLocation(ctx context.Context, bookingID uuid.UUID) (*domain.Location, error)
-	SaveLocation(ctx context.Context, bookingID, cleanerID uuid.UUID, lat, lng float64) error
+	SaveLocation(ctx context.Context, bookingID, cleanerID uuid.UUID, lat, lng float64, now time.Time) error
 
 	CreateReview(ctx context.Context, r domain.Review) (domain.Review, error)
 	GetReview(ctx context.Context, bookingID uuid.UUID) (*domain.Review, error)

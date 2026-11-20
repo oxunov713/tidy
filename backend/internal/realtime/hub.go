@@ -44,6 +44,8 @@ type Authenticator func(token string) (service.Principal, error)
 type Backend interface {
 	CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (bool, error)
 	RecordLocation(ctx context.Context, cleanerID, bookingID uuid.UUID, lat, lng float64) (int, error)
+	// CleanerSeen is called for every heartbeat a cleaner's app answers.
+	CleanerSeen(ctx context.Context, cleanerID uuid.UUID) error
 }
 
 type Options struct {
@@ -181,6 +183,11 @@ func (h *Hub) pingLoop(ctx context.Context, conn *websocket.Conn, c *client) {
 				h.log.Debug("dropping silent websocket", "user_id", c.UserID)
 				c.cancel()
 				return
+			}
+			if c.Role == domain.RoleCleaner && c.backend != nil {
+				if err := c.backend.CleanerSeen(ctx, c.UserID); err != nil && ctx.Err() == nil {
+					h.log.Error("record cleaner heartbeat", "user_id", c.UserID, "err", err)
+				}
 			}
 		}
 	}

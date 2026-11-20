@@ -85,7 +85,10 @@ func (d *Dispatcher) nextCandidate(ctx context.Context, b domain.Booking, addr d
 		q.only = nil
 	}
 
-	q.onlineOnly = true
+	// An app that crashed or lost signal leaves is_online set; only
+	// cleaners seen recently get offers.
+	seen := d.clock.now().Add(-domain.CleanerSeenWithin)
+	q.onlineSince = &seen
 	cands, err := d.matcher.candidates(ctx, q)
 	if err != nil {
 		return nil, err

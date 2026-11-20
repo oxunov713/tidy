@@ -344,8 +344,8 @@ func (e *testEnv) cleaner(phone string, lat, lng float64, online bool) cleaner {
 	s := e.login(phone, domain.RoleCleaner)
 	ctx := context.Background()
 	_, err := e.store.Pool().Exec(ctx, `
-		UPDATE cleaners SET status = 'approved', is_online = $2, last_lat = $3, last_lng = $4
-		WHERE user_id = $1`, s.User.ID, online, lat, lng)
+		UPDATE cleaners SET status = 'approved', is_online = $2, last_lat = $3, last_lng = $4, last_seen_at = $5
+		WHERE user_id = $1`, s.User.ID, online, lat, lng, e.now())
 	if err != nil {
 		e.t.Fatal(err)
 	}
