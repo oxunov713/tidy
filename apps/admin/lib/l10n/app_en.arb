@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tidy Admin",
+  "homePlaceholderTitle": "Coming soon",
+  "homePlaceholderBody": "Bookings and cleaner approvals will appear here.",
+  "@homePlaceholderTitle": {
+    "description": "Heading of the placeholder home screen"
+  }
+}
