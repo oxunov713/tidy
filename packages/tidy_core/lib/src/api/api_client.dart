@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:tidy_core/src/api/admin_api.dart';
 import 'package:tidy_core/src/api/api_config.dart';
+import 'package:tidy_core/src/api/api_exception.dart';
 import 'package:tidy_core/src/api/api_transport.dart';
 import 'package:tidy_core/src/api/auth_api.dart';
 import 'package:tidy_core/src/api/auth_interceptor.dart';
@@ -36,14 +37,13 @@ class ApiClient {
       dio.httpClientAdapter = httpClientAdapter;
       refreshDio.httpClientAdapter = httpClientAdapter;
     }
-    dio.interceptors.add(
-      AuthInterceptor(
-        storage: tokenStorage,
-        dio: dio,
-        refreshDio: refreshDio,
-        onSessionExpired: () => _sessionExpired.add(null),
-      ),
+    _authInterceptor = AuthInterceptor(
+      storage: tokenStorage,
+      dio: dio,
+      refreshDio: refreshDio,
+      onSessionExpired: () => _sessionExpired.add(null),
     );
+    dio.interceptors.add(_authInterceptor);
     _dio = dio;
     _refreshDio = refreshDio;
 
@@ -58,6 +58,7 @@ class ApiClient {
 
   late final Dio _dio;
   late final Dio _refreshDio;
+  late final AuthInterceptor _authInterceptor;
   final _sessionExpired = StreamController<void>.broadcast();
 
   late final AuthApi auth;
@@ -70,6 +71,16 @@ class ApiClient {
   /// Fires when a refresh was rejected and the stored tokens were cleared.
   /// Listen to it to send the user back to the sign-in screen.
   Stream<void> get sessionExpired => _sessionExpired.stream;
+
+  /// Renews the access token now, e.g. before opening a WebSocket. Returns
+  /// false when the refresh token was rejected.
+  Future<bool> refreshSession() async {
+    try {
+      return await _authInterceptor.refresh();
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
 
   void close() {
     _dio.close();

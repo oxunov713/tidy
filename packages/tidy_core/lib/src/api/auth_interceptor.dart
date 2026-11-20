@@ -70,7 +70,7 @@ class AuthInterceptor extends Interceptor {
 
     final sentWith = request.extra[_generationKey] as int? ?? _generation;
     try {
-      final ok = sentWith != _generation || await _refresh();
+      final ok = sentWith != _generation || await refresh();
       if (!ok) return handler.next(err);
 
       // onRequest runs again for the replay and picks up the new token.
@@ -81,7 +81,9 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  Future<bool> _refresh() {
+  /// Refreshes the tokens now, joining a refresh that is already running.
+  /// Returns false when the session could not be renewed.
+  Future<bool> refresh() {
     final running = _inFlight;
     if (running != null) return running;
     final attempt = _doRefresh();
