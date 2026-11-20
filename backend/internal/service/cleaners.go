@@ -119,6 +119,9 @@ func (s *Cleaners) UpdateJobStatus(ctx context.Context, p Principal, bookingID u
 	if !b.Status.CanTransitionTo(status) {
 		return domain.Booking{}, domain.InvalidTransition("A job that is " + string(b.Status) + " can't become " + string(status) + ".")
 	}
+	if status == domain.StatusOnTheWay && s.clock.now().Before(b.Start.Add(-domain.EarliestDeparture)) {
+		return domain.Booking{}, domain.InvalidTransition("You can set off at most 3 hours before the visit.")
+	}
 	b, err = s.store.SetBookingStatus(ctx, bookingID, b.Status, status, &p.UserID)
 	if err != nil {
 		return domain.Booking{}, err

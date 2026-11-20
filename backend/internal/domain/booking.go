@@ -52,6 +52,9 @@ func (s BookingStatus) CanTransitionTo(next BookingStatus) bool {
 // IsFinal reports whether nothing can happen to the booking any more.
 func (s BookingStatus) IsFinal() bool { return len(transitions[s]) == 0 }
 
+// EarliestDeparture is how long before the start a cleaner can set off.
+const EarliestDeparture = 3 * time.Hour
+
 // FreeCancellationWindow: cancelling later than this before the start is
 // charged in full.
 const FreeCancellationWindow = 24 * time.Hour
