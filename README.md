@@ -1,5 +1,7 @@
 # Tidy
 
+[![Backend CI](https://github.com/oxunov713/tidy/actions/workflows/backend.yml/badge.svg)](https://github.com/oxunov713/tidy/actions/workflows/backend.yml) [![Flutter CI](https://github.com/oxunov713/tidy/actions/workflows/flutter.yml/badge.svg)](https://github.com/oxunov713/tidy/actions/workflows/flutter.yml)
+
 Book a home cleaner in a minute. Tidy is a full marketplace: a customer app, a
 cleaner app and an admin panel, all in Flutter, on top of a Go backend.
 
