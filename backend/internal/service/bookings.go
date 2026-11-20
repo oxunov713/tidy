@@ -290,13 +290,28 @@ func (s *Bookings) Get(ctx context.Context, p Principal, id uuid.UUID) (BookingD
 }
 
 type Cancellation struct {
-	Booking  domain.Booking `json:"booking"`
-	Refunded bool           `json:"refunded"`
+	Booking   domain.Booking `json:"booking"`
+	Refunded  bool           `json:"refunded"`
+	PlanEnded bool           `json:"plan_ended"`
 }
 
+// CancelScope says whether a cancellation also ends the recurring plan.
+type CancelScope string
+
+const (
+	CancelVisit  CancelScope = "visit"
+	CancelSeries CancelScope = "series"
+)
+
 // Cancel is free until FreeCancellationWindow before the start; later the
-// held payment is charged.
-func (s *Bookings) Cancel(ctx context.Context, p Principal, id uuid.UUID) (Cancellation, error) {
+// held payment is charged. With CancelSeries the plan ends too.
+func (s *Bookings) Cancel(ctx context.Context, p Principal, id uuid.UUID, scope CancelScope) (Cancellation, error) {
+	if scope == "" {
+		scope = CancelVisit
+	}
+	if scope != CancelVisit && scope != CancelSeries {
+		return Cancellation{}, domain.Invalid("scope", "must be visit or series")
+	}
 	b, err := s.store.GetBooking(ctx, id)
 	if err != nil {
 		return Cancellation{}, err
@@ -304,7 +319,16 @@ func (s *Bookings) Cancel(ctx context.Context, p Principal, id uuid.UUID) (Cance
 	if b.ClientID != p.UserID {
 		return Cancellation{}, domain.Forbidden("This isn't your booking.")
 	}
-	return s.cancel(ctx, b, p.UserID, b.CancellationIsFree(s.clock.now()))
+	c, err := s.cancel(ctx, b, p.UserID, b.CancellationIsFree(s.clock.now()))
+	if err != nil {
+		return Cancellation{}, err
+	}
+	if scope == CancelSeries && b.PlanID != nil {
+		if c.PlanEnded, err = s.endPlan(ctx, *b.PlanID, &p.UserID); err != nil {
+			return Cancellation{}, err
+		}
+	}
+	return c, nil
 }
 
 // CancelByAdmin always refunds in full.
@@ -324,13 +348,20 @@ func (s *Bookings) cancel(ctx context.Context, b domain.Booking, actor uuid.UUID
 	if err != nil {
 		return Cancellation{}, err
 	}
+	refunded := s.afterCancel(ctx, CancelledBooking{Booking: b, Withdrawn: withdrawn}, refund)
+	return Cancellation{Booking: b, Refunded: refunded}, nil
+}
+
+// afterCancel settles the payment and tells everyone involved. It reports
+// whether the client got their money back.
+func (s *Bookings) afterCancel(ctx context.Context, c CancelledBooking, refund bool) bool {
+	b := c.Booking
 	refunded, err := s.payments.Settle(ctx, b.ID, refund)
 	if err != nil {
 		// The booking is cancelled either way; a failed refund is fixed by hand.
 		s.log.Error("settle payment after cancel", "booking_id", b.ID, "err", err)
 	}
-
-	for _, cleanerID := range withdrawn {
+	for _, cleanerID := range c.Withdrawn {
 		s.events.OfferGone(cleanerID, b.ID)
 	}
 	s.events.BookingStatus(b, s.clock.now())
@@ -341,7 +372,7 @@ func (s *Bookings) cancel(ctx context.Context, b domain.Booking, actor uuid.UUID
 			Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String()},
 		})
 	}
-	return Cancellation{Booking: b, Refunded: refunded}, nil
+	return refunded
 }
 
 type ReviewRequest struct {
@@ -450,75 +481,6 @@ func (s *Bookings) RecordLocation(ctx context.Context, cleanerID, bookingID uuid
 		return 0, err
 	}
 	return domain.ETAMinutes(domain.DistanceKm(lat, lng, addr.Lat, addr.Lng)), nil
-}
-
-// RunPlans creates the bookings of recurring plans that are due within the
-// next week. Returns how many bookings were created.
-func (s *Bookings) RunPlans(ctx context.Context) (int, error) {
-	now := s.clock.now()
-	plans, err := s.store.DuePlans(ctx, dateOf(now.In(s.loc()).Add(planLookahead)))
-	if err != nil {
-		return 0, err
-	}
-	created := 0
-	for _, plan := range plans {
-		if err := ctx.Err(); err != nil {
-			return created, err
-		}
-		ok, err := s.runPlan(ctx, plan, now)
-		if err != nil {
-			s.log.Error("run booking plan", "plan_id", plan.ID, "err", err)
-			continue
-		}
-		if ok {
-			created++
-		}
-	}
-	return created, nil
-}
-
-func (s *Bookings) runPlan(ctx context.Context, plan domain.Plan, now time.Time) (bool, error) {
-	t := plan.Template
-	next := plan.NextRunOn.AddDate(0, 0, plan.Frequency.IntervalDays())
-	start := t.StartTime.On(plan.NextRunOn, s.loc()).UTC()
-	if start.Before(now.Add(minLeadTime)) {
-		// Missed while the service was down; skip rather than book at short notice.
-		return false, s.store.AdvancePlan(ctx, plan.ID, next)
-	}
-
-	q, extras, err := s.quote(ctx, QuoteRequest{
-		ServiceID: t.ServiceID, Bedrooms: t.Bedrooms, Bathrooms: t.Bathrooms,
-		ExtraIDs: t.ExtraIDs, Frequency: plan.Frequency,
-	})
-	if err != nil {
-		return false, err
-	}
-	b, err := s.store.CreateBooking(ctx, domain.NewBooking{
-		ClientID:           plan.ClientID,
-		ServiceID:          t.ServiceID,
-		AddressID:          t.AddressID,
-		RequestedCleanerID: t.CleanerID,
-		Bedrooms:           t.Bedrooms,
-		Bathrooms:          t.Bathrooms,
-		Frequency:          plan.Frequency,
-		Start:              start,
-		End:                start.Add(time.Duration(q.Minutes) * time.Minute),
-		Quote:              q,
-		Extras:             extras,
-		FromPlan:           &domain.PlanRun{PlanID: plan.ID, NextRunOn: next},
-	})
-	if err != nil {
-		return false, err
-	}
-	if _, err := s.payments.Start(ctx, b); err != nil {
-		return false, err
-	}
-	s.push.Notify(plan.ClientID, domain.Notification{
-		Title: "Next clean booked",
-		Body:  b.ServiceTitle + " on " + b.Start.In(s.loc()).Format("Mon 2 Jan 15:04"),
-		Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String()},
-	})
-	return true, nil
 }
 
 // accessible loads a booking the caller may see: its client, its cleaner or an admin.

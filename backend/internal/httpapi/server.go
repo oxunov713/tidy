@@ -121,6 +121,8 @@ func (s *Server) bookingRoutes(r chi.Router) {
 		r.Get("/bookings", s.handle(s.listBookings))
 		r.Post("/bookings/{id}/cancel", s.handle(s.cancelBooking))
 		r.Post("/bookings/{id}/review", s.handle(s.reviewBooking))
+		r.Get("/plans", s.handle(s.listPlans))
+		r.Delete("/plans/{id}", s.handle(s.endPlan))
 	})
 	// Client, assigned cleaner or admin; the service checks which.
 	r.Get("/bookings/{id}", s.handle(s.getBooking))

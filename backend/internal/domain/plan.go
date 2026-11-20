@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,7 +25,11 @@ type Plan struct {
 	Template  PlanTemplate
 	// NextRunOn is the local date of the next visit the scheduler creates.
 	NextRunOn time.Time
+	IsActive  bool
 }
+
+// ErrPlanEnded means the plan was ended while a visit was being created.
+var ErrPlanEnded = errors.New("plan has ended")
 
 type NewPlan struct {
 	Frequency Frequency

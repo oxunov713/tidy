@@ -113,10 +113,14 @@ func (s *Store) CreateBooking(ctx context.Context, nb domain.NewBooking) (domain
 		}
 		if nb.FromPlan != nil {
 			planID = &nb.FromPlan.PlanID
-			_, err := tx.Exec(ctx, `UPDATE booking_plans SET next_run_on = $2::date WHERE id = $1`,
+			// The plan may have ended since the scheduler read it.
+			tag, err := tx.Exec(ctx, `UPDATE booking_plans SET next_run_on = $2::date WHERE id = $1 AND is_active`,
 				nb.FromPlan.PlanID, nb.FromPlan.NextRunOn.Format(time.DateOnly))
 			if err != nil {
 				return fmt.Errorf("advance plan: %w", err)
+			}
+			if tag.RowsAffected() == 0 {
+				return domain.ErrPlanEnded
 			}
 		}
 
@@ -427,30 +431,6 @@ func (s *Store) CreateMessage(ctx context.Context, m domain.Message) (domain.Mes
 		INSERT INTO messages (booking_id, sender_id, body) VALUES ($1, $2, $3)
 		RETURNING id, created_at`, m.BookingID, m.SenderID, m.Body).Scan(&m.ID, &m.CreatedAt)
 	return m, err
-}
-
-func (s *Store) DuePlans(ctx context.Context, until time.Time) ([]domain.Plan, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, client_id, frequency, template, next_run_on FROM booking_plans
-		WHERE is_active AND next_run_on <= $1::date ORDER BY next_run_on`, until.Format(time.DateOnly))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []domain.Plan
-	for rows.Next() {
-		var p domain.Plan
-		if err := rows.Scan(&p.ID, &p.ClientID, &p.Frequency, &p.Template, &p.NextRunOn); err != nil {
-			return nil, err
-		}
-		out = append(out, p)
-	}
-	return out, rows.Err()
-}
-
-func (s *Store) AdvancePlan(ctx context.Context, id uuid.UUID, next time.Time) error {
-	_, err := s.pool.Exec(ctx, `UPDATE booking_plans SET next_run_on = $2::date WHERE id = $1`, id, next.Format(time.DateOnly))
-	return err
 }
 
 func (s *Store) StatsBetween(ctx context.Context, from, to time.Time) (service.Stats, error) {

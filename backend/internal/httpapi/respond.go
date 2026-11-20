@@ -80,9 +80,18 @@ func noContent(w http.ResponseWriter) error {
 }
 
 func decode(w http.ResponseWriter, r *http.Request, v any) error {
+	return decodeBody(w, r, v, false)
+}
+
+// decodeOptional is decode for endpoints where the whole body may be left out.
+func decodeOptional(w http.ResponseWriter, r *http.Request, v any) error {
+	return decodeBody(w, r, v, true)
+}
+
+func decodeBody(w http.ResponseWriter, r *http.Request, v any, optional bool) error {
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodyBytes))
 	err := dec.Decode(v)
-	if err == nil {
+	if err == nil || (optional && errors.Is(err, io.EOF)) {
 		return nil
 	}
 	var typeErr *json.UnmarshalTypeError

@@ -130,12 +130,38 @@ func (s *Server) cancelBooking(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	c, err := s.bookings.Cancel(r.Context(), principal(r), id)
+	var in struct {
+		Scope service.CancelScope `json:"scope"`
+	}
+	if err := decodeOptional(w, r, &in); err != nil {
+		return err
+	}
+	c, err := s.bookings.Cancel(r.Context(), principal(r), id, in.Scope)
 	if err != nil {
 		return err
 	}
 	writeJSON(w, http.StatusOK, c)
 	return nil
+}
+
+func (s *Server) listPlans(w http.ResponseWriter, r *http.Request) error {
+	plans, err := s.bookings.Plans(r.Context(), principal(r))
+	if err != nil {
+		return err
+	}
+	writeJSON(w, http.StatusOK, plans)
+	return nil
+}
+
+func (s *Server) endPlan(w http.ResponseWriter, r *http.Request) error {
+	id, err := pathID(r, "id")
+	if err != nil {
+		return err
+	}
+	if err := s.bookings.EndPlan(r.Context(), principal(r), id); err != nil {
+		return err
+	}
+	return noContent(w)
 }
 
 func (s *Server) reviewBooking(w http.ResponseWriter, r *http.Request) error {

@@ -115,8 +115,14 @@ type BookingStore interface {
 	ListMessages(ctx context.Context, bookingID uuid.UUID) ([]domain.Message, error)
 	CreateMessage(ctx context.Context, m domain.Message) (domain.Message, error)
 
+	GetPlan(ctx context.Context, id uuid.UUID) (domain.Plan, error)
+	ListPlans(ctx context.Context, clientID uuid.UUID) ([]PlanSummary, error)
 	DuePlans(ctx context.Context, until time.Time) ([]domain.Plan, error)
+	// AdvancePlan moves an active plan to its next date.
 	AdvancePlan(ctx context.Context, id uuid.UUID, next time.Time) error
+	// EndPlan deactivates the plan and cancels its future visits that have
+	// no cleaner yet. Ending a plan twice is not an error.
+	EndPlan(ctx context.Context, id uuid.UUID, now time.Time, actor *uuid.UUID) (EndedPlan, error)
 
 	StatsBetween(ctx context.Context, from, to time.Time) (Stats, error)
 }

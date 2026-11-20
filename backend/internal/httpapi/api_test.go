@@ -115,6 +115,7 @@ type testEnv struct {
 	codes    *codeBook
 	payments *recordingProvider
 	dispatch *service.Dispatcher
+	bookings *service.Bookings
 
 	mu     sync.Mutex
 	offset time.Duration
@@ -161,13 +162,14 @@ func newEnv(t *testing.T) *testEnv {
 
 	auth := service.NewAuth(store, e.codes, service.AuthConfig{
 		// Long enough to survive the clock jumps some tests make.
-		Secret: []byte("test-secret-test-secret-test-secret"), AccessTTL: 72 * time.Hour, RefreshTTL: time.Hour,
+		Secret: []byte("test-secret-test-secret-test-secret"), AccessTTL: 60 * 24 * time.Hour, RefreshTTL: time.Hour,
 	}, clock)
 	hub := realtime.NewHub(auth.ParseAccessToken, realtime.Options{}, log)
 	pusher := service.NewPusher(store, push.Log{Log: log}, log)
 	e.dispatch = service.NewDispatcher(store, store, hub, pusher, london, 15, clock, log)
 	payments := service.NewPayments(store, e.payments, e.dispatch, hub, clock, log)
 	bookings := service.NewBookings(store, store, payments, hub, pusher, london, 15, clock, log)
+	e.bookings = bookings
 
 	api := httpapi.New(httpapi.Deps{
 		Auth:      auth,
@@ -344,9 +346,14 @@ type createdBooking struct {
 // book creates a standard 2 bed, 1 bath clean (150 minutes).
 func (e *testEnv) book(c client, start time.Time) domain.Booking {
 	e.t.Helper()
+	return e.bookEvery(c, start, domain.FrequencyOnce)
+}
+
+func (e *testEnv) bookEvery(c client, start time.Time, f domain.Frequency) domain.Booking {
+	e.t.Helper()
 	r := e.expect(e.do("POST", "/bookings", c.AccessToken, map[string]any{
 		"service_id": e.serviceID("standard"), "bedrooms": 2, "bathrooms": 1,
-		"frequency": "once", "address_id": c.AddressID, "start": start,
+		"frequency": f, "address_id": c.AddressID, "start": start,
 	}), http.StatusCreated)
 	var cb createdBooking
 	r.decode(e.t, &cb)
