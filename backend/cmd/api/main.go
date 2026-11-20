@@ -73,7 +73,7 @@ func run() error {
 	hub := realtime.NewHub(auth.ParseAccessToken, realtime.Options{OriginPatterns: cfg.WSOriginPatterns}, log)
 	pusher := service.NewPusher(store, notifier, log)
 	dispatch := service.NewDispatcher(store, store, hub, pusher, loc, radius, nil, log)
-	payments := service.NewPayments(store, provider, dispatch, hub, nil, log)
+	payments := service.NewPayments(store, provider, dispatch, hub, pusher, nil, log)
 	bookings := service.NewBookings(store, store, payments, hub, pusher, loc, radius, nil, log)
 	cleaners := service.NewCleaners(store, payments, hub, pusher, loc, nil, log)
 	admin := service.NewAdmin(store, bookings, dispatch, hub, pusher, loc, nil, log)

@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/oxunov713/tidy/backend/internal/domain"
+	"github.com/oxunov713/tidy/backend/internal/service"
 )
 
 func (s *Store) CreatePayment(ctx context.Context, p domain.Payment) error {
@@ -33,8 +34,8 @@ func (s *Store) SetPaymentStatus(ctx context.Context, id uuid.UUID, status domai
 	return err
 }
 
-func (s *Store) ApplyPaymentEvent(ctx context.Context, provider string, ev domain.PaymentEvent) (*domain.Booking, error) {
-	var changed *domain.Booking
+func (s *Store) ApplyPaymentEvent(ctx context.Context, provider string, ev domain.PaymentEvent) (service.AppliedPayment, error) {
+	var out service.AppliedPayment
 	err := s.inTx(ctx, func(tx pgx.Tx) error {
 		if ev.ID != "" {
 			tag, err := tx.Exec(ctx, `
@@ -44,43 +45,81 @@ func (s *Store) ApplyPaymentEvent(ctx context.Context, provider string, ev domai
 				return err
 			}
 		}
-
-		var paymentStatus domain.PaymentStatus
-		var bookingTo domain.BookingStatus
 		switch ev.Kind {
 		case domain.PaymentEventAuthorized:
-			paymentStatus, bookingTo = domain.PaymentAuthorized, domain.StatusConfirmed
+			return applyAuthorized(ctx, tx, provider, ev.Ref, &out)
 		case domain.PaymentEventFailed:
-			paymentStatus, bookingTo = domain.PaymentFailed, domain.StatusCancelled
-		default:
-			return nil
-		}
-
-		var bookingID uuid.UUID
-		err := tx.QueryRow(ctx, `
-			UPDATE payments SET status = $3
-			WHERE provider = $1 AND provider_ref = $2 AND status = 'requires_action'
-			RETURNING booking_id`, provider, ev.Ref, paymentStatus).Scan(&bookingID)
-		if isNoRows(err) {
-			// Unknown intent, or already handled through another event.
-			return nil
-		}
-		if err != nil {
+			// The client retries in the same payment sheet; nothing else changes.
+			_, err := tx.Exec(ctx, `
+				UPDATE payments SET status = 'failed'
+				WHERE provider = $1 AND provider_ref = $2 AND status = 'requires_action'`, provider, ev.Ref)
 			return err
+		case domain.PaymentEventCanceled:
+			return applyCanceled(ctx, tx, provider, ev.Ref, &out)
 		}
-
-		tag, err := tx.Exec(ctx, `
-			UPDATE bookings SET status = $2, updated_at = now()
-			WHERE id = $1 AND status = 'pending'`, bookingID, bookingTo)
-		if err != nil || tag.RowsAffected() == 0 {
-			return err
-		}
-		if err := addEvent(ctx, tx, bookingID, bookingTo, nil); err != nil {
-			return err
-		}
-		b, err := getBooking(ctx, tx, bookingID)
-		changed = &b
-		return err
+		return nil
 	})
-	return changed, err
+	return out, err
+}
+
+func applyAuthorized(ctx context.Context, tx pgx.Tx, provider, ref string, out *service.AppliedPayment) error {
+	var bookingID uuid.UUID
+	err := tx.QueryRow(ctx, `
+		UPDATE payments SET status = 'authorized'
+		WHERE provider = $1 AND provider_ref = $2 AND status IN ('requires_action', 'failed')
+		RETURNING booking_id`, provider, ref).Scan(&bookingID)
+	if isNoRows(err) {
+		// Unknown intent, or already handled through another event.
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	tag, err := tx.Exec(ctx, `
+		UPDATE bookings SET status = 'confirmed', updated_at = now()
+		WHERE id = $1 AND status = 'pending'`, bookingID)
+	if err != nil || tag.RowsAffected() == 0 {
+		return err
+	}
+	if err := addEvent(ctx, tx, bookingID, domain.StatusConfirmed, nil); err != nil {
+		return err
+	}
+	b, err := getBooking(ctx, tx, bookingID)
+	out.Booking = &b
+	return err
+}
+
+// applyCanceled cancels the booking when the intent that went away is the
+// one the booking relies on. An older intent the client replaced doesn't count.
+func applyCanceled(ctx context.Context, tx pgx.Tx, provider, ref string, out *service.AppliedPayment) error {
+	var bookingID uuid.UUID
+	var latest bool
+	err := tx.QueryRow(ctx, `
+		UPDATE payments p SET status = 'canceled'
+		WHERE provider = $1 AND provider_ref = $2 AND status IN ('requires_action', 'failed', 'authorized')
+		RETURNING booking_id, NOT EXISTS (
+			SELECT 1 FROM payments n WHERE n.booking_id = p.booking_id AND n.created_at > p.created_at)`,
+		provider, ref).Scan(&bookingID, &latest)
+	if isNoRows(err) || (err == nil && !latest) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var status domain.BookingStatus
+	if err := tx.QueryRow(ctx, `SELECT status FROM bookings WHERE id = $1 FOR UPDATE`, bookingID).Scan(&status); err != nil {
+		return err
+	}
+	if !status.CanTransitionTo(domain.StatusCancelled) {
+		return nil
+	}
+	if err := setStatus(ctx, tx, bookingID, status, domain.StatusCancelled, nil); err != nil {
+		return err
+	}
+	if out.Withdrawn, err = withdrawOffers(ctx, tx, bookingID); err != nil {
+		return err
+	}
+	b, err := getBooking(ctx, tx, bookingID)
+	out.Booking = &b
+	return err
 }

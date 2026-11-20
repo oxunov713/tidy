@@ -82,6 +82,8 @@ func (s *Stripe) ParseWebhook(payload []byte, signature string) (domain.PaymentE
 		out.Kind = domain.PaymentEventAuthorized
 	case stripe.EventTypePaymentIntentPaymentFailed:
 		out.Kind = domain.PaymentEventFailed
+	case stripe.EventTypePaymentIntentCanceled:
+		out.Kind = domain.PaymentEventCanceled
 	default:
 		return out, nil
 	}

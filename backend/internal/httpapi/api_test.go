@@ -69,7 +69,8 @@ func (c *codeBook) last(phone string) string {
 
 // recordingProvider is the mock provider that remembers what it was asked
 // to do. With hold set it behaves like Stripe: payments stay pending until a
-// webhook arrives. Its "signed" webhook body is {"id", "ref"}.
+// webhook arrives. Its "signed" webhook body is {"id", "ref", "kind"}; kind
+// defaults to authorized.
 type recordingProvider struct {
 	payment.Mock
 	hold     bool
@@ -87,11 +88,17 @@ func (p *recordingProvider) CreateIntent(ctx context.Context, b domain.Booking) 
 }
 
 func (p *recordingProvider) ParseWebhook(payload []byte, signature string) (domain.PaymentEvent, error) {
-	var ev struct{ ID, Ref string }
+	var ev struct {
+		ID, Ref string
+		Kind    domain.PaymentEventKind
+	}
 	if signature != "valid" || json.Unmarshal(payload, &ev) != nil {
 		return domain.PaymentEvent{}, fmt.Errorf("bad signature")
 	}
-	return domain.PaymentEvent{ID: ev.ID, Kind: domain.PaymentEventAuthorized, Ref: ev.Ref}, nil
+	if ev.Kind == "" {
+		ev.Kind = domain.PaymentEventAuthorized
+	}
+	return domain.PaymentEvent{ID: ev.ID, Kind: ev.Kind, Ref: ev.Ref}, nil
 }
 
 func (p *recordingProvider) Capture(_ context.Context, ref string) error {
@@ -167,7 +174,7 @@ func newEnv(t *testing.T) *testEnv {
 	hub := realtime.NewHub(auth.ParseAccessToken, realtime.Options{}, log)
 	pusher := service.NewPusher(store, push.Log{Log: log}, log)
 	e.dispatch = service.NewDispatcher(store, store, hub, pusher, london, 15, clock, log)
-	payments := service.NewPayments(store, e.payments, e.dispatch, hub, clock, log)
+	payments := service.NewPayments(store, e.payments, e.dispatch, hub, pusher, clock, log)
 	bookings := service.NewBookings(store, store, payments, hub, pusher, london, 15, clock, log)
 	e.bookings = bookings
 

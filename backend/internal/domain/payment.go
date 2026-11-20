@@ -39,7 +39,11 @@ type PaymentEventKind string
 
 const (
 	PaymentEventAuthorized PaymentEventKind = "authorized"
-	PaymentEventFailed     PaymentEventKind = "failed"
+	// PaymentEventFailed is a declined attempt. The client can try again
+	// with the same intent, so the booking stays pending.
+	PaymentEventFailed PaymentEventKind = "failed"
+	// PaymentEventCanceled means the intent can never be paid any more.
+	PaymentEventCanceled PaymentEventKind = "canceled"
 	// PaymentEventIgnored is any provider event we don't act on.
 	PaymentEventIgnored PaymentEventKind = "ignored"
 )

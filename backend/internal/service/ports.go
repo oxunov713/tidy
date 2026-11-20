@@ -148,10 +148,16 @@ type PaymentStore interface {
 	PaymentForBooking(ctx context.Context, bookingID uuid.UUID) (domain.Payment, error)
 	SetPaymentStatus(ctx context.Context, id uuid.UUID, status domain.PaymentStatus) error
 	// ApplyPaymentEvent records the event id and updates payment and booking
-	// in one transaction. It returns the booking when its status changed and
-	// nil when there was nothing to do, including a repeated event.
-	ApplyPaymentEvent(ctx context.Context, provider string, ev domain.PaymentEvent) (*domain.Booking, error)
+	// in one transaction. Booking is set when the booking's status changed;
+	// a repeated event changes nothing.
+	ApplyPaymentEvent(ctx context.Context, provider string, ev domain.PaymentEvent) (AppliedPayment, error)
 	SetBookingStatus(ctx context.Context, id uuid.UUID, from, to domain.BookingStatus, actor *uuid.UUID) (domain.Booking, error)
+}
+
+type AppliedPayment struct {
+	Booking *domain.Booking
+	// Withdrawn are cleaners whose offers went away with a cancelled booking.
+	Withdrawn []uuid.UUID
 }
 
 type AdminStore interface {

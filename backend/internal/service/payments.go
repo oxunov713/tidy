@@ -18,12 +18,13 @@ type Payments struct {
 	provider PaymentProvider
 	dispatch *Dispatcher
 	events   Events
+	push     *Pusher
 	clock    Clock
 	log      *slog.Logger
 }
 
-func NewPayments(store PaymentStore, provider PaymentProvider, dispatch *Dispatcher, events Events, clock Clock, log *slog.Logger) *Payments {
-	return &Payments{store: store, provider: provider, dispatch: dispatch, events: events, clock: clock, log: log}
+func NewPayments(store PaymentStore, provider PaymentProvider, dispatch *Dispatcher, events Events, push *Pusher, clock Clock, log *slog.Logger) *Payments {
+	return &Payments{store: store, provider: provider, dispatch: dispatch, events: events, push: push, clock: clock, log: log}
 }
 
 // Start creates the payment intent for a new booking and returns the client
@@ -71,18 +72,42 @@ func (p *Payments) HandleWebhook(ctx context.Context, payload []byte, signature 
 }
 
 func (p *Payments) apply(ctx context.Context, ev domain.PaymentEvent) error {
-	b, err := p.store.ApplyPaymentEvent(ctx, p.provider.Name(), ev)
-	if err != nil || b == nil {
+	res, err := p.store.ApplyPaymentEvent(ctx, p.provider.Name(), ev)
+	if err != nil || res.Booking == nil {
 		return err
 	}
-	p.events.BookingStatus(*b, p.clock.now())
-	if b.Status == domain.StatusConfirmed {
+	b := *res.Booking
+	p.events.BookingStatus(b, p.clock.now())
+	switch b.Status {
+	case domain.StatusConfirmed:
 		if err := p.dispatch.Dispatch(ctx, b.ID); err != nil {
 			// The scheduler retries dispatch, so the payment still counts.
 			p.log.Error("dispatch confirmed booking", "booking_id", b.ID, "err", err)
 		}
+	case domain.StatusCancelled:
+		p.cancelledByProvider(b, res.Withdrawn)
 	}
 	return nil
+}
+
+func (p *Payments) cancelledByProvider(b domain.Booking, withdrawn []uuid.UUID) {
+	for _, cleanerID := range withdrawn {
+		p.events.OfferGone(cleanerID, b.ID)
+	}
+	data := map[string]string{"type": "booking.status", "booking_id": b.ID.String()}
+	p.push.Notify(b.ClientID, domain.Notification{
+		Title: "Booking cancelled",
+		Body:  "The payment for booking " + b.Code + " was cancelled, so the booking was too.",
+		Data:  data,
+	})
+	if b.CleanerID != nil {
+		p.events.BookingAccessRevoked(b.ID, *b.CleanerID)
+		p.push.Notify(*b.CleanerID, domain.Notification{
+			Title: "Job cancelled",
+			Body:  "Booking " + b.Code + " was cancelled.",
+			Data:  data,
+		})
+	}
 }
 
 // Capture charges the held money. Called when the clean is completed.
