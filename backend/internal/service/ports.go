@@ -145,13 +145,28 @@ type OfferStore interface {
 
 type PaymentStore interface {
 	CreatePayment(ctx context.Context, p domain.Payment) error
+	// PaymentForBooking returns the booking's latest payment.
 	PaymentForBooking(ctx context.Context, bookingID uuid.UUID) (domain.Payment, error)
+	CountPayments(ctx context.Context, bookingID uuid.UUID) (int, error)
 	SetPaymentStatus(ctx context.Context, id uuid.UUID, status domain.PaymentStatus) error
 	// ApplyPaymentEvent records the event id and updates payment and booking
 	// in one transaction. Booking is set when the booking's status changed;
 	// a repeated event changes nothing.
 	ApplyPaymentEvent(ctx context.Context, provider string, ev domain.PaymentEvent) (AppliedPayment, error)
 	SetBookingStatus(ctx context.Context, id uuid.UUID, from, to domain.BookingStatus, actor *uuid.UUID) (domain.Booking, error)
+
+	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
+	// PaymentCustomer fails with not_found if the user has no customer yet.
+	PaymentCustomer(ctx context.Context, userID uuid.UUID, provider string) (string, error)
+	// SavePaymentCustomer keeps the first customer stored for the user and
+	// returns it.
+	SavePaymentCustomer(ctx context.Context, userID uuid.UUID, provider, ref string) (string, error)
+
+	// ScheduleAuthorization sets when the saved card is charged; nil clears it.
+	ScheduleAuthorization(ctx context.Context, bookingID uuid.UUID, at *time.Time) error
+	// ClaimAuthorizations clears and returns pending bookings whose saved
+	// card is due to be charged, so two sweeps never charge one twice.
+	ClaimAuthorizations(ctx context.Context, now time.Time, limit int) ([]domain.Booking, error)
 }
 
 type AppliedPayment struct {
@@ -178,7 +193,17 @@ type ReleasedJobs struct {
 // PaymentProvider holds money for a booking and charges it once the clean is done.
 type PaymentProvider interface {
 	Name() string
-	CreateIntent(ctx context.Context, b domain.Booking) (domain.PaymentIntent, error)
+	// CreateCustomer registers the user, so a card can be saved for them.
+	CreateCustomer(ctx context.Context, u domain.User) (string, error)
+	// CreateIntent holds the booking total with manual capture. The app
+	// confirms it with the client secret.
+	CreateIntent(ctx context.Context, req domain.ChargeRequest) (domain.PaymentIntent, error)
+	// CreateSetup saves a card for charging later without the client.
+	CreateSetup(ctx context.Context, req domain.ChargeRequest) (domain.PaymentIntent, error)
+	// AuthorizeSaved holds the total on the customer's saved card while the
+	// client is away. A declined card is not an error: the intent comes back
+	// with PaymentFailed, and with an empty Ref if no intent was created.
+	AuthorizeSaved(ctx context.Context, req domain.ChargeRequest) (domain.PaymentIntent, error)
 	Capture(ctx context.Context, ref string) error
 	// Refund gives the money back, or releases it if it was never captured.
 	Refund(ctx context.Context, ref string) error

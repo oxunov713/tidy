@@ -103,7 +103,7 @@ func run() error {
 	jobs.Add(1)
 	go func() {
 		defer jobs.Done()
-		scheduler.New(bookings, dispatch, log).Run(ctx)
+		scheduler.New(bookings, dispatch, payments, log).Run(ctx)
 	}()
 
 	serveErr := make(chan error, 1)

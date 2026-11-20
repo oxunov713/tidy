@@ -132,7 +132,7 @@ func (s *Bookings) runPlan(ctx context.Context, plan domain.Plan, now time.Time)
 	if err != nil {
 		return false, err
 	}
-	if _, err := s.payments.Start(ctx, b); err != nil {
+	if err := s.payments.ScheduleSaved(ctx, b); err != nil {
 		return false, err
 	}
 	s.push.Notify(plan.ClientID, domain.Notification{

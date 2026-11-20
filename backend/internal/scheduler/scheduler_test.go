@@ -13,11 +13,12 @@ type counter struct{ n atomic.Int32 }
 
 func (c *counter) RunPlans(context.Context) (int, error) { c.n.Add(1); return 0, nil }
 func (c *counter) Sweep(context.Context) error           { c.n.Add(1); return nil }
+func (c *counter) AuthorizeDue(context.Context) error    { c.n.Add(1); return nil }
 
 func TestRunStopsOnCancel(t *testing.T) {
-	plans, offers := &counter{}, &counter{}
-	s := New(plans, offers, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	s.PlanInterval, s.SweepInterval = time.Hour, 10*time.Millisecond
+	plans, offers, payments := &counter{}, &counter{}, &counter{}
+	s := New(plans, offers, payments, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	s.PlanInterval, s.SweepInterval, s.PaymentInterval = time.Hour, 10*time.Millisecond, 10*time.Millisecond
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
@@ -38,5 +39,8 @@ func TestRunStopsOnCancel(t *testing.T) {
 	}
 	if got := offers.n.Load(); got < 3 {
 		t.Errorf("sweep ran %d times, want at least 3", got)
+	}
+	if got := payments.n.Load(); got < 3 {
+		t.Errorf("saved cards were checked %d times, want at least 3", got)
 	}
 }

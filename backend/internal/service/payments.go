@@ -5,14 +5,23 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/oxunov713/tidy/backend/internal/domain"
 )
 
+const (
+	// authorizeBatch bounds one sweep; the next sweep picks up the rest.
+	authorizeBatch = 50
+	// authorizeRetry is the wait after the provider could not be reached.
+	authorizeRetry = 10 * time.Minute
+)
+
 // Payments keeps the money side of a booking in step with its status: hold
-// on create, capture on completed, refund or release on cancel.
+// (or save the card) on create, capture on completed, refund or release on
+// cancel.
 type Payments struct {
 	store    PaymentStore
 	provider PaymentProvider
@@ -27,37 +36,228 @@ func NewPayments(store PaymentStore, provider PaymentProvider, dispatch *Dispatc
 	return &Payments{store: store, provider: provider, dispatch: dispatch, events: events, push: push, clock: clock, log: log}
 }
 
-// Start creates the payment intent for a new booking and returns the client
-// secret the app needs to confirm the card. If the provider authorises the
-// payment straight away (mock), the booking is confirmed and dispatched.
-func (p *Payments) Start(ctx context.Context, b domain.Booking) (string, error) {
-	intent, err := p.provider.CreateIntent(ctx, b)
+// PaymentStart tells the app which payment sheet to open.
+type PaymentStart struct {
+	Kind         domain.PaymentKind `json:"kind"`
+	ClientSecret string             `json:"client_secret"`
+}
+
+// Start begins paying for a booking the client just made: a hold for a
+// visit within DirectPaymentWindow, otherwise a saved card that is charged
+// AuthorizeAhead before the visit. If the provider succeeds straight away
+// (mock), the booking moves on at once.
+func (p *Payments) Start(ctx context.Context, b domain.Booking) (PaymentStart, error) {
+	start, err := p.begin(ctx, b, domain.PaymentKindFor(b.Start, p.clock.now()))
 	if err != nil {
 		// Without a payment the booking can never be confirmed.
 		if _, cerr := p.store.SetBookingStatus(ctx, b.ID, domain.StatusPending, domain.StatusCancelled, nil); cerr != nil {
-			p.log.Error("cancel booking after failed payment intent", "booking_id", b.ID, "err", cerr)
+			p.log.Error("cancel booking after failed payment start", "booking_id", b.ID, "err", cerr)
 		}
-		return "", fmt.Errorf("create payment intent: %w", err)
+		return PaymentStart{}, err
 	}
+	return start, nil
+}
 
-	err = p.store.CreatePayment(ctx, domain.Payment{
-		BookingID: b.ID,
-		Provider:  p.provider.Name(),
-		Ref:       intent.Ref,
-		Amount:    b.Total,
-		Status:    domain.PaymentRequiresAction,
+// ScheduleSaved is for visits the scheduler books from a plan: the card
+// saved with the first visit is charged AuthorizeAhead before this one.
+func (p *Payments) ScheduleSaved(ctx context.Context, b domain.Booking) error {
+	at := b.Start.Add(-domain.AuthorizeAhead)
+	if now := p.clock.now(); at.Before(now) {
+		at = now
+	}
+	return p.store.ScheduleAuthorization(ctx, b.ID, &at)
+}
+
+// Pay starts a new card payment for a pending booking, e.g. after the saved
+// card was declined. The previous unpaid intent is released.
+func (p *Payments) Pay(ctx context.Context, b domain.Booking) (PaymentStart, error) {
+	prev, err := p.store.PaymentForBooking(ctx, b.ID)
+	if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		return PaymentStart{}, err
+	}
+	hadPrev := err == nil
+	// The client pays now, so the scheduler must not charge the saved card too.
+	if err := p.store.ScheduleAuthorization(ctx, b.ID, nil); err != nil {
+		return PaymentStart{}, err
+	}
+	start, err := p.begin(ctx, b, domain.PaymentKindPayment)
+	if err != nil {
+		return PaymentStart{}, err
+	}
+	// Released after the new intent exists, so the old intent's canceled
+	// webhook can't be mistaken for the booking's current payment.
+	if hadPrev && prev.Kind == domain.PaymentKindPayment &&
+		(prev.Status == domain.PaymentRequiresAction || prev.Status == domain.PaymentFailed) {
+		if err := p.release(ctx, prev); err != nil {
+			p.log.Error("release replaced payment", "booking_id", b.ID, "err", err)
+		}
+	}
+	return start, nil
+}
+
+func (p *Payments) begin(ctx context.Context, b domain.Booking, kind domain.PaymentKind) (PaymentStart, error) {
+	req, err := p.chargeRequest(ctx, b)
+	if err != nil {
+		return PaymentStart{}, err
+	}
+	var intent domain.PaymentIntent
+	if kind == domain.PaymentKindSetup {
+		intent, err = p.provider.CreateSetup(ctx, req)
+	} else {
+		intent, err = p.provider.CreateIntent(ctx, req)
+	}
+	if err != nil {
+		return PaymentStart{}, fmt.Errorf("create %s intent: %w", kind, err)
+	}
+	if err := p.record(ctx, b, kind, intent.Ref); err != nil {
+		return PaymentStart{}, err
+	}
+	if err := p.applyImmediate(ctx, intent); err != nil {
+		return PaymentStart{}, err
+	}
+	return PaymentStart{Kind: kind, ClientSecret: intent.ClientSecret}, nil
+}
+
+// AuthorizeDue holds the money on saved cards for visits that start within
+// AuthorizeAhead. The scheduler calls it.
+func (p *Payments) AuthorizeDue(ctx context.Context) error {
+	due, err := p.store.ClaimAuthorizations(ctx, p.clock.now(), authorizeBatch)
+	if err != nil {
+		return err
+	}
+	for _, b := range due {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if err := p.authorizeSaved(ctx, b); err != nil {
+			p.log.Error("authorise saved card", "booking_id", b.ID, "err", err)
+			retry := p.clock.now().Add(authorizeRetry)
+			if err := p.store.ScheduleAuthorization(ctx, b.ID, &retry); err != nil {
+				p.log.Error("schedule authorisation retry", "booking_id", b.ID, "err", err)
+			}
+		}
+	}
+	return nil
+}
+
+// authorizeSaved returns an error only when it is worth trying again later.
+// A declined card asks the client to pay instead.
+func (p *Payments) authorizeSaved(ctx context.Context, b domain.Booking) error {
+	customer, err := p.store.PaymentCustomer(ctx, b.ClientID, p.provider.Name())
+	if errors.Is(err, domain.ErrNotFound) {
+		p.askToPay(b)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	req, err := p.request(ctx, b, customer)
+	if err != nil {
+		return err
+	}
+	intent, err := p.provider.AuthorizeSaved(ctx, req)
+	if err != nil {
+		return err
+	}
+	if intent.Ref != "" {
+		if err := p.record(ctx, b, domain.PaymentKindPayment, intent.Ref); err != nil {
+			return err
+		}
+	}
+	if intent.Status != domain.PaymentAuthorized {
+		if intent.Ref != "" {
+			if _, err := p.store.ApplyPaymentEvent(ctx, p.provider.Name(),
+				domain.PaymentEvent{Kind: domain.PaymentEventFailed, Ref: intent.Ref}); err != nil {
+				return err
+			}
+		}
+		p.askToPay(b)
+		return nil
+	}
+	return p.applyImmediate(ctx, intent)
+}
+
+// askToPay tells the client their saved card didn't work. The booking stays
+// pending until they pay with POST /bookings/{id}/payment.
+func (p *Payments) askToPay(b domain.Booking) {
+	p.log.Info("saved card declined", "booking_id", b.ID)
+	p.events.BookingStatus(b, p.clock.now())
+	p.push.Notify(b.ClientID, domain.Notification{
+		Title: "Payment needed",
+		Body:  "We couldn't charge your card for booking " + b.Code + ". Open the app to pay.",
+		Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String(), "status": string(b.Status)},
 	})
+}
+
+func (p *Payments) chargeRequest(ctx context.Context, b domain.Booking) (domain.ChargeRequest, error) {
+	customer, err := p.customer(ctx, b.ClientID)
+	if err != nil {
+		return domain.ChargeRequest{}, err
+	}
+	return p.request(ctx, b, customer)
+}
+
+func (p *Payments) request(ctx context.Context, b domain.Booking, customer string) (domain.ChargeRequest, error) {
+	n, err := p.store.CountPayments(ctx, b.ID)
+	if err != nil {
+		return domain.ChargeRequest{}, err
+	}
+	return domain.ChargeRequest{
+		Booking:        b,
+		Customer:       customer,
+		SaveCard:       b.PlanID != nil,
+		IdempotencyKey: fmt.Sprintf("booking-%s-%d", b.ID, n+1),
+	}, nil
+}
+
+// customer returns the user's customer with the provider, creating it the
+// first time.
+func (p *Payments) customer(ctx context.Context, userID uuid.UUID) (string, error) {
+	ref, err := p.store.PaymentCustomer(ctx, userID, p.provider.Name())
+	if !errors.Is(err, domain.ErrNotFound) {
+		return ref, err
+	}
+	user, err := p.store.GetUser(ctx, userID)
 	if err != nil {
 		return "", err
 	}
-
-	if intent.Status == domain.PaymentAuthorized {
-		ev := domain.PaymentEvent{Kind: domain.PaymentEventAuthorized, Ref: intent.Ref}
-		if err := p.apply(ctx, ev); err != nil {
-			return "", err
-		}
+	if ref, err = p.provider.CreateCustomer(ctx, user); err != nil {
+		return "", fmt.Errorf("create payment customer: %w", err)
 	}
-	return intent.ClientSecret, nil
+	return p.store.SavePaymentCustomer(ctx, userID, p.provider.Name(), ref)
+}
+
+func (p *Payments) record(ctx context.Context, b domain.Booking, kind domain.PaymentKind, ref string) error {
+	return p.store.CreatePayment(ctx, domain.Payment{
+		BookingID: b.ID,
+		Provider:  p.provider.Name(),
+		Kind:      kind,
+		Ref:       ref,
+		Amount:    b.Total,
+		Status:    domain.PaymentRequiresAction,
+	})
+}
+
+// applyImmediate handles a provider that finished without the client (the
+// mock, or an off-session charge) as if its webhook had arrived.
+func (p *Payments) applyImmediate(ctx context.Context, intent domain.PaymentIntent) error {
+	switch intent.Status {
+	case domain.PaymentAuthorized:
+		return p.apply(ctx, domain.PaymentEvent{Kind: domain.PaymentEventAuthorized, Ref: intent.Ref})
+	case domain.PaymentSaved:
+		return p.apply(ctx, domain.PaymentEvent{Kind: domain.PaymentEventSaved, Ref: intent.Ref})
+	}
+	return nil
+}
+
+func (p *Payments) release(ctx context.Context, pay domain.Payment) error {
+	if err := p.store.SetPaymentStatus(ctx, pay.ID, domain.PaymentCanceled); err != nil {
+		return err
+	}
+	if err := p.provider.Refund(ctx, pay.Ref); err != nil {
+		return fmt.Errorf("release %s: %w", pay.Ref, err)
+	}
+	return nil
 }
 
 // HandleWebhook verifies and applies a provider webhook. Repeated events
@@ -138,12 +338,15 @@ func (p *Payments) Settle(ctx context.Context, bookingID uuid.UUID, refund bool)
 	}
 
 	switch {
-	case pay.Status == domain.PaymentRequiresAction:
-		// Nothing was authorised yet; release the intent so it can't be paid later.
-		if err := p.provider.Refund(ctx, pay.Ref); err != nil {
-			return false, fmt.Errorf("release %s: %w", pay.Ref, err)
+	case pay.Kind == domain.PaymentKindSetup:
+		// Nothing was held. A saved card stays saved for the client's other visits.
+		if pay.Status == domain.PaymentRequiresAction || pay.Status == domain.PaymentFailed {
+			return true, p.store.SetPaymentStatus(ctx, pay.ID, domain.PaymentCanceled)
 		}
-		return true, p.store.SetPaymentStatus(ctx, pay.ID, domain.PaymentCanceled)
+		return true, nil
+	case pay.Status == domain.PaymentRequiresAction || pay.Status == domain.PaymentFailed:
+		// Nothing was authorised yet; release the intent so it can't be paid later.
+		return true, p.release(ctx, pay)
 	case !refund && pay.Status == domain.PaymentAuthorized:
 		if err := p.provider.Capture(ctx, pay.Ref); err != nil {
 			return false, fmt.Errorf("capture late cancellation %s: %w", pay.Ref, err)

@@ -147,12 +147,13 @@ type CreateBookingRequest struct {
 }
 
 type CreatedBooking struct {
-	Booking      domain.Booking
-	ClientSecret string
+	Booking domain.Booking `json:"booking"`
+	Payment PaymentStart   `json:"payment"`
 }
 
 // Create stores the booking in pending and starts the payment. The booking
-// is confirmed when the payment is authorised.
+// is confirmed when the money is held: now, or AuthorizeAhead before a
+// visit further away than DirectPaymentWindow.
 func (s *Bookings) Create(ctx context.Context, p Principal, in CreateBookingRequest) (CreatedBooking, error) {
 	if in.Frequency == "" {
 		in.Frequency = domain.FrequencyOnce
@@ -216,7 +217,7 @@ func (s *Bookings) Create(ctx context.Context, p Principal, in CreateBookingRequ
 	if err != nil {
 		return CreatedBooking{}, err
 	}
-	secret, err := s.payments.Start(ctx, b)
+	pay, err := s.payments.Start(ctx, b)
 	if err != nil {
 		return CreatedBooking{}, err
 	}
@@ -225,7 +226,23 @@ func (s *Bookings) Create(ctx context.Context, p Principal, in CreateBookingRequ
 	if err != nil {
 		return CreatedBooking{}, err
 	}
-	return CreatedBooking{Booking: b, ClientSecret: secret}, nil
+	return CreatedBooking{Booking: b, Payment: pay}, nil
+}
+
+// Pay lets the client pay a pending booking again, e.g. after their saved
+// card was declined.
+func (s *Bookings) Pay(ctx context.Context, p Principal, id uuid.UUID) (PaymentStart, error) {
+	b, err := s.store.GetBooking(ctx, id)
+	if err != nil {
+		return PaymentStart{}, err
+	}
+	if b.ClientID != p.UserID {
+		return PaymentStart{}, domain.Forbidden("This isn't your booking.")
+	}
+	if b.Status != domain.StatusPending {
+		return PaymentStart{}, domain.InvalidTransition("Only a booking waiting for payment can be paid.")
+	}
+	return s.payments.Pay(ctx, b)
 }
 
 func (s *Bookings) List(ctx context.Context, p Principal, upcoming bool, cursor string, limit int) (Page[domain.Booking], error) {

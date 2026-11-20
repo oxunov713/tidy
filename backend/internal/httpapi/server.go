@@ -120,6 +120,7 @@ func (s *Server) bookingRoutes(r chi.Router) {
 		r.Post("/bookings", s.handle(s.createBooking))
 		r.Get("/bookings", s.handle(s.listBookings))
 		r.Post("/bookings/{id}/cancel", s.handle(s.cancelBooking))
+		r.Post("/bookings/{id}/payment", s.handle(s.payBooking))
 		r.Post("/bookings/{id}/review", s.handle(s.reviewBooking))
 		r.Get("/plans", s.handle(s.listPlans))
 		r.Delete("/plans/{id}", s.handle(s.endPlan))

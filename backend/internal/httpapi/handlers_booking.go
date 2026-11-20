@@ -83,13 +83,20 @@ func (s *Server) createBooking(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	type payment struct {
-		ClientSecret string `json:"client_secret"`
+	writeJSON(w, http.StatusCreated, created)
+	return nil
+}
+
+func (s *Server) payBooking(w http.ResponseWriter, r *http.Request) error {
+	id, err := pathID(r, "id")
+	if err != nil {
+		return err
 	}
-	writeJSON(w, http.StatusCreated, struct {
-		Booking domain.Booking `json:"booking"`
-		Payment payment        `json:"payment"`
-	}{created.Booking, payment{created.ClientSecret}})
+	pay, err := s.bookings.Pay(r.Context(), principal(r), id)
+	if err != nil {
+		return err
+	}
+	writeJSON(w, http.StatusOK, pay)
 	return nil
 }
 
