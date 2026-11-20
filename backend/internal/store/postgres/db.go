@@ -5,12 +5,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	migratepgx "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 
@@ -22,7 +24,20 @@ type Store struct {
 }
 
 func Open(ctx context.Context, databaseURL string) (*Store, error) {
-	pool, err := pgxpool.New(ctx, databaseURL)
+	cfg, err := pgxpool.ParseConfig(databaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("parse database url: %w", err)
+	}
+	// The API promises UTC; without this pgx returns the server's local zone.
+	cfg.AfterConnect = func(_ context.Context, conn *pgx.Conn) error {
+		conn.TypeMap().RegisterType(&pgtype.Type{
+			Name:  "timestamptz",
+			OID:   pgtype.TimestamptzOID,
+			Codec: &pgtype.TimestamptzCodec{ScanLocation: time.UTC},
+		})
+		return nil
+	}
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}
