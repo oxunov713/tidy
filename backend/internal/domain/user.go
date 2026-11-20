@@ -119,9 +119,10 @@ func (t *TimeOfDay) UnmarshalText(b []byte) error {
 	return nil
 }
 
-// On returns the moment this time of day happens on the given date.
+// On returns the moment this time of day happens on the calendar date of
+// date (as written in date's own location) in loc.
 func (t TimeOfDay) On(date time.Time, loc *time.Location) time.Time {
-	y, m, d := date.In(loc).Date()
+	y, m, d := date.Date()
 	return time.Date(y, m, d, int(t)/60, int(t)%60, 0, 0, loc)
 }
 
@@ -175,6 +176,8 @@ type Address struct {
 	Lat         float64   `json:"lat"`
 	Lng         float64   `json:"lng"`
 	AccessNotes string    `json:"access_notes"`
+	// Deleted addresses stay in the database because old bookings point to them.
+	Deleted bool `json:"-"`
 }
 
 func (a Address) Validate() error {

@@ -57,27 +57,29 @@ func (s BookingStatus) IsFinal() bool { return len(transitions[s]) == 0 }
 const FreeCancellationWindow = 24 * time.Hour
 
 type Booking struct {
-	ID            uuid.UUID      `json:"id"`
-	Code          string         `json:"code"`
-	ClientID      uuid.UUID      `json:"client_id"`
-	CleanerID     *uuid.UUID     `json:"cleaner_id"`
-	ServiceID     uuid.UUID      `json:"service_id"`
-	ServiceTitle  string         `json:"service_title"`
-	AddressID     uuid.UUID      `json:"address_id"`
-	PlanID        *uuid.UUID     `json:"plan_id"`
-	Bedrooms      int            `json:"bedrooms"`
-	Bathrooms     int            `json:"bathrooms"`
-	Frequency     Frequency      `json:"frequency"`
-	Start         time.Time      `json:"start"`
-	End           time.Time      `json:"end"`
-	Status        BookingStatus  `json:"status"`
-	Subtotal      int            `json:"subtotal"`
-	Discount      int            `json:"discount"`
-	Total         int            `json:"total"`
-	CleanerPayout int            `json:"cleaner_payout"`
-	Extras        []BookingExtra `json:"extras"`
-	CreatedAt     time.Time      `json:"created_at"`
-	UpdatedAt     time.Time      `json:"updated_at"`
+	ID           uuid.UUID  `json:"id"`
+	Code         string     `json:"code"`
+	ClientID     uuid.UUID  `json:"client_id"`
+	CleanerID    *uuid.UUID `json:"cleaner_id"`
+	ServiceID    uuid.UUID  `json:"service_id"`
+	ServiceTitle string     `json:"service_title"`
+	AddressID    uuid.UUID  `json:"address_id"`
+	// RequestedCleanerID is set when the client asked for a cleaner by name.
+	RequestedCleanerID *uuid.UUID     `json:"requested_cleaner_id"`
+	PlanID             *uuid.UUID     `json:"plan_id"`
+	Bedrooms           int            `json:"bedrooms"`
+	Bathrooms          int            `json:"bathrooms"`
+	Frequency          Frequency      `json:"frequency"`
+	Start              time.Time      `json:"start"`
+	End                time.Time      `json:"end"`
+	Status             BookingStatus  `json:"status"`
+	Subtotal           int            `json:"subtotal"`
+	Discount           int            `json:"discount"`
+	Total              int            `json:"total"`
+	CleanerPayout      int            `json:"cleaner_payout"`
+	Extras             []BookingExtra `json:"extras"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
 }
 
 // IsParticipant reports whether the user is the client or the assigned cleaner.
@@ -185,6 +187,14 @@ type Offer struct {
 	DistanceKm float64     `json:"distance_km"`
 	ExpiresAt  time.Time   `json:"expires_at"`
 }
+
+// Period is a half-open time range [Start, End).
+type Period struct {
+	Start time.Time
+	End   time.Time
+}
+
+func (p Period) Overlaps(o Period) bool { return p.Start.Before(o.End) && o.Start.Before(p.End) }
 
 // OfferRef names one offer that changed, e.g. after expiry.
 type OfferRef struct {

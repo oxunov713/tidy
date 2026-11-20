@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"errors"
+
+	"github.com/google/uuid"
+)
 
 type PaymentStatus string
 
@@ -52,3 +56,7 @@ type Notification struct {
 	Body  string
 	Data  map[string]string
 }
+
+// ErrDeviceTokenGone means the push provider no longer knows the device
+// token, so it should be deleted.
+var ErrDeviceTokenGone = errors.New("device token is no longer registered")
