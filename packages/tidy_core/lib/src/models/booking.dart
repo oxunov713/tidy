@@ -261,11 +261,16 @@ abstract class CreateBookingRequest with _$CreateBookingRequest {
       _$CreateBookingRequestFromJson(json);
 }
 
+/// What to do to pay for a booking: confirm a payment or save a card, see
+/// [PaymentKind].
 @freezed
 abstract class PaymentIntentInfo with _$PaymentIntentInfo {
   const factory PaymentIntentInfo({
     /// Stripe client secret; the mock provider returns a placeholder.
     required String clientSecret,
+
+    /// Servers that predate setup intents only send payments.
+    @Default(PaymentKind.payment) PaymentKind kind,
   }) = _PaymentIntentInfo;
 
   factory PaymentIntentInfo.fromJson(Map<String, dynamic> json) =>
@@ -292,10 +297,46 @@ abstract class Cancellation with _$Cancellation {
 
     /// False when the cancellation came too late and the price is charged.
     required bool refunded,
+
+    /// True when the cancellation ended the recurring plan as well.
+    @Default(false) bool planEnded,
   }) = _Cancellation;
 
   factory Cancellation.fromJson(Map<String, dynamic> json) =>
       _$CancellationFromJson(json);
+}
+
+/// A recurring clean the client has set up (`GET /plans`).
+@freezed
+abstract class Plan with _$Plan {
+  const factory Plan({
+    required String id,
+    required Frequency frequency,
+
+    /// The day of the next booking to be created, as a calendar date.
+    @JsonKey(fromJson: _day, toJson: _dayToJson) required DateTime nextRunOn,
+    required String serviceTitle,
+
+    /// Wall-clock start in the business zone, `10:00`.
+    required String startTime,
+    required String addressId,
+  }) = _Plan;
+
+  factory Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
+}
+
+DateTime _day(String value) {
+  final parts = value.substring(0, 10).split('-');
+  return DateTime(
+    int.parse(parts[0]),
+    int.parse(parts[1]),
+    int.parse(parts[2]),
+  );
+}
+
+String _dayToJson(DateTime value) {
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${value.year.toString().padLeft(4, '0')}-${two(value.month)}-${two(value.day)}';
 }
 
 /// Body of `POST /bookings/{id}/review`.

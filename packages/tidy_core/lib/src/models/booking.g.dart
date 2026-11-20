@@ -203,10 +203,23 @@ Map<String, dynamic> _$CreateBookingRequestToJson(
 };
 
 _PaymentIntentInfo _$PaymentIntentInfoFromJson(Map<String, dynamic> json) =>
-    _PaymentIntentInfo(clientSecret: json['client_secret'] as String);
+    _PaymentIntentInfo(
+      clientSecret: json['client_secret'] as String,
+      kind:
+          $enumDecodeNullable(_$PaymentKindEnumMap, json['kind']) ??
+          PaymentKind.payment,
+    );
 
 Map<String, dynamic> _$PaymentIntentInfoToJson(_PaymentIntentInfo instance) =>
-    <String, dynamic>{'client_secret': instance.clientSecret};
+    <String, dynamic>{
+      'client_secret': instance.clientSecret,
+      'kind': _$PaymentKindEnumMap[instance.kind]!,
+    };
+
+const _$PaymentKindEnumMap = {
+  PaymentKind.payment: 'payment',
+  PaymentKind.setup: 'setup',
+};
 
 _BookingCreated _$BookingCreatedFromJson(Map<String, dynamic> json) =>
     _BookingCreated(
@@ -226,13 +239,33 @@ _Cancellation _$CancellationFromJson(Map<String, dynamic> json) =>
     _Cancellation(
       booking: Booking.fromJson(json['booking'] as Map<String, dynamic>),
       refunded: json['refunded'] as bool,
+      planEnded: json['plan_ended'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$CancellationToJson(_Cancellation instance) =>
     <String, dynamic>{
       'booking': instance.booking.toJson(),
       'refunded': instance.refunded,
+      'plan_ended': instance.planEnded,
     };
+
+_Plan _$PlanFromJson(Map<String, dynamic> json) => _Plan(
+  id: json['id'] as String,
+  frequency: $enumDecode(_$FrequencyEnumMap, json['frequency']),
+  nextRunOn: _day(json['next_run_on'] as String),
+  serviceTitle: json['service_title'] as String,
+  startTime: json['start_time'] as String,
+  addressId: json['address_id'] as String,
+);
+
+Map<String, dynamic> _$PlanToJson(_Plan instance) => <String, dynamic>{
+  'id': instance.id,
+  'frequency': _$FrequencyEnumMap[instance.frequency]!,
+  'next_run_on': _dayToJson(instance.nextRunOn),
+  'service_title': instance.serviceTitle,
+  'start_time': instance.startTime,
+  'address_id': instance.addressId,
+};
 
 _ReviewRequest _$ReviewRequestFromJson(Map<String, dynamic> json) =>
     _ReviewRequest(

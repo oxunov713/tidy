@@ -72,7 +72,7 @@ _ServiceUpdate _$ServiceUpdateFromJson(Map<String, dynamic> json) =>
       perBathroom: (json['per_bathroom'] as num).toInt(),
       baseMinutes: (json['base_minutes'] as num).toInt(),
       minutesPerRoom: (json['minutes_per_room'] as num).toInt(),
-      isActive: json['is_active'] as bool? ?? true,
+      isActive: json['is_active'] as bool,
     );
 
 Map<String, dynamic> _$ServiceUpdateToJson(_ServiceUpdate instance) =>

@@ -18,15 +18,16 @@ class AuthApi {
 
   /// `POST /auth/verify`.
   ///
-  /// [role] is only used when the phone number is new; pass `client` or
-  /// `cleaner` from the matching app. Existing accounts keep their role, and
-  /// admins sign in without one (the server rejects `admin`).
+  /// Every app sends the role it is for. A new phone number signs up as
+  /// `client` or `cleaner`; `admin` never creates an account (`403` unless the
+  /// phone already belongs to an admin). An existing account with another role
+  /// than [role] gets a `403 forbidden` ("This number is registered as a
+  /// cleaner.").
   Future<AuthSession> verify({
     required String phone,
     required String code,
     UserRole? role,
   }) async {
-    assert(role != UserRole.admin, 'Admins sign in without a role');
     final json = await _http.postObjectPublic(
       '/auth/verify',
       body: VerifyRequest(phone: phone, code: code, role: role).toJson(),

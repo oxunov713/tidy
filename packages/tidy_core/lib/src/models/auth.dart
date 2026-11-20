@@ -32,9 +32,9 @@ abstract class TokenPair with _$TokenPair {
 
 /// Body of `POST /auth/verify`.
 ///
-/// [role] (`client` or `cleaner`) only matters when the phone number signs in
-/// for the first time. Leave it out for existing accounts; admins sign in
-/// without it, the server rejects `admin`.
+/// [role] is the role of the app signing in. It decides what a new phone
+/// number signs up as, and the server refuses an existing account that has a
+/// different role. `admin` never creates an account.
 @freezed
 abstract class VerifyRequest with _$VerifyRequest {
   @JsonSerializable(includeIfNull: false)

@@ -61,8 +61,9 @@ abstract class AdminService with _$AdminService {
       _$AdminServiceFromJson(json);
 }
 
-/// Body of `PUT /admin/services/{id}`. The server replaces every field, so
-/// send the whole thing. A missing `is_active` means active.
+/// Body of `PUT /admin/services/{id}`. The server replaces every field and
+/// rejects a body with one missing, so send the whole thing, `is_active`
+/// included.
 @freezed
 abstract class ServiceUpdate with _$ServiceUpdate {
   const factory ServiceUpdate({
@@ -72,7 +73,7 @@ abstract class ServiceUpdate with _$ServiceUpdate {
     required int perBathroom,
     required int baseMinutes,
     required int minutesPerRoom,
-    @Default(true) bool isActive,
+    required bool isActive,
   }) = _ServiceUpdate;
 
   factory ServiceUpdate.fromJson(Map<String, dynamic> json) =>

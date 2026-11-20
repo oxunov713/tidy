@@ -29,6 +29,10 @@ class MeApi {
     body: {'token': token, 'platform': platform.name},
   );
 
+  /// `DELETE /me/devices/{token}`: stops pushes to this device, on sign-out.
+  Future<void> unregisterDevice(String token) =>
+      _http.deleteVoid('/me/devices/${Uri.encodeComponent(token)}');
+
   Future<List<Address>> addresses() async {
     final list = await _http.getList('/me/addresses');
     return list.map(Address.fromJson).toList();

@@ -71,9 +71,30 @@ class BookingApi {
       BookingDetails.fromJson(await _http.getObject('/bookings/$id'));
 
   /// Free until 24 hours before the start; later the full price is charged
-  /// (`refunded` is false).
-  Future<Cancellation> cancel(String id) async =>
-      Cancellation.fromJson(await _http.postObject('/bookings/$id/cancel'));
+  /// (`refunded` is false). With [CancelScope.series] the recurring plan the
+  /// booking belongs to ends too (`planEnded`).
+  Future<Cancellation> cancel(
+    String id, {
+    CancelScope scope = CancelScope.visit,
+  }) async => Cancellation.fromJson(
+    await _http.postObject('/bookings/$id/cancel', body: {'scope': scope.name}),
+  );
+
+  /// `POST /bookings/{id}/payment`: a new payment to confirm for a booking
+  /// that is still `pending`, for example after the saved card was declined.
+  Future<PaymentIntentInfo> pay(String id) async => PaymentIntentInfo.fromJson(
+    await _http.postObject('/bookings/$id/payment'),
+  );
+
+  /// `GET /plans`: the client's active recurring cleans.
+  Future<List<Plan>> plans() async {
+    final list = await _http.getList('/plans');
+    return list.map(Plan.fromJson).toList();
+  }
+
+  /// `DELETE /plans/{id}`: ends the series. Future visits that have no cleaner
+  /// yet are cancelled and refunded.
+  Future<void> endPlan(String id) => _http.deleteVoid('/plans/$id');
 
   /// Only after the booking is `completed`.
   Future<Review> review(String id, ReviewRequest review) async =>
