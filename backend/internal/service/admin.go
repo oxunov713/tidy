@@ -133,6 +133,7 @@ func (a *Admin) reassign(ctx context.Context, p Principal, id, cleanerID uuid.UU
 	}
 	a.events.BookingStatus(b, a.clock.now())
 	if before.CleanerID != nil && *before.CleanerID != cleanerID {
+		a.events.BookingAccessRevoked(b.ID, *before.CleanerID)
 		a.push.Notify(*before.CleanerID, domain.Notification{
 			Title: "Job reassigned",
 			Body:  "Booking " + b.Code + " was given to another cleaner.",

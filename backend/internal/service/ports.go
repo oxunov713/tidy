@@ -185,6 +185,9 @@ type Events interface {
 	OfferNew(cleanerID uuid.UUID, b domain.Booking, expiresAt time.Time)
 	OfferGone(cleanerID, bookingID uuid.UUID)
 	MessageNew(bookingID uuid.UUID, m domain.Message)
+	// BookingAccessRevoked removes the user from the booking's room, e.g.
+	// the old cleaner after a reassign.
+	BookingAccessRevoked(bookingID, userID uuid.UUID)
 }
 
 // NopEvents is used where nobody listens, e.g. in a one-off command.
@@ -194,3 +197,4 @@ func (NopEvents) BookingStatus(domain.Booking, time.Time)       {}
 func (NopEvents) OfferNew(uuid.UUID, domain.Booking, time.Time) {}
 func (NopEvents) OfferGone(uuid.UUID, uuid.UUID)                {}
 func (NopEvents) MessageNew(uuid.UUID, domain.Message)          {}
+func (NopEvents) BookingAccessRevoked(uuid.UUID, uuid.UUID)     {}

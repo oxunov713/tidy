@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -25,14 +26,29 @@ var (
 	bookingID  = uuid.MustParse("00000000-0000-0000-0000-0000000000b1")
 )
 
-// fakeBackend: the client and the cleaner may watch bookingID, nobody else.
-type fakeBackend struct{}
-
-func (fakeBackend) CanWatch(_ context.Context, userID, id uuid.UUID) (bool, error) {
-	return id == bookingID && (userID == clientID || userID == cleanerID), nil
+// fakeBackend: the client and the cleaner may watch bookingID, nobody else,
+// until revoke is called for them.
+type fakeBackend struct {
+	mu      sync.Mutex
+	revoked map[uuid.UUID]bool
 }
 
-func (fakeBackend) RecordLocation(_ context.Context, cleaner, id uuid.UUID, lat, lng float64) (int, error) {
+func (f *fakeBackend) revoke(userID uuid.UUID) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.revoked == nil {
+		f.revoked = map[uuid.UUID]bool{}
+	}
+	f.revoked[userID] = true
+}
+
+func (f *fakeBackend) CanWatch(_ context.Context, userID, id uuid.UUID) (bool, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return id == bookingID && (userID == clientID || userID == cleanerID) && !f.revoked[userID], nil
+}
+
+func (*fakeBackend) RecordLocation(_ context.Context, cleaner, id uuid.UUID, lat, lng float64) (int, error) {
 	if cleaner != cleanerID || id != bookingID {
 		return 0, domain.Forbidden("not your job")
 	}
@@ -53,14 +69,21 @@ func fakeAuth(token string) (service.Principal, error) {
 
 func startHub(t *testing.T) (*Hub, string) {
 	t.Helper()
+	hub, url, _ := startHubWith(t, Options{})
+	return hub, url
+}
+
+func startHubWith(t *testing.T, opts Options) (*Hub, string, *fakeBackend) {
+	t.Helper()
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	hub := NewHub(fakeAuth, Options{}, log)
-	srv := httptest.NewServer(hub.Handler(fakeBackend{}))
+	hub := NewHub(fakeAuth, opts, log)
+	backend := &fakeBackend{}
+	srv := httptest.NewServer(hub.Handler(backend))
 	t.Cleanup(func() {
 		hub.Close()
 		srv.Close()
 	})
-	return hub, "ws" + strings.TrimPrefix(srv.URL, "http")
+	return hub, "ws" + strings.TrimPrefix(srv.URL, "http"), backend
 }
 
 func dial(t *testing.T, ctx context.Context, url, token string) *websocket.Conn {
@@ -174,4 +197,69 @@ func TestRejectsBadToken(t *testing.T) {
 	if resp == nil || resp.StatusCode != 401 {
 		t.Errorf("want 401, got %v", resp)
 	}
+}
+
+// subscribed dials as token and joins the booking room.
+func subscribed(t *testing.T, ctx context.Context, url, token string) *websocket.Conn {
+	t.Helper()
+	conn := dial(t, ctx, url, token)
+	send(t, ctx, conn, map[string]any{"type": "subscribe", "room": "booking:" + bookingID.String()})
+	if got := receive(t, ctx, conn); got["type"] != "subscribed" {
+		t.Fatalf("%s: want subscribed, got %v", token, got)
+	}
+	return conn
+}
+
+// expectSilence fails if conn gets any message within a short wait.
+func expectSilence(t *testing.T, ctx context.Context, conn *websocket.Conn) {
+	t.Helper()
+	wctx, cancel := context.WithTimeout(ctx, 200*time.Millisecond)
+	defer cancel()
+	if _, data, err := conn.Read(wctx); err == nil {
+		t.Errorf("want no message, got %s", data)
+	}
+}
+
+func wantEvicted(t *testing.T, got map[string]any) {
+	t.Helper()
+	if got["type"] != "unsubscribed" || got["room"] != "booking:"+bookingID.String() || got["reason"] != "access_revoked" {
+		t.Errorf("got %v, want unsubscribed from the booking room with reason access_revoked", got)
+	}
+}
+
+func TestRevokedUserIsEvicted(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	hub, url, backend := startHubWith(t, Options{})
+	watcher := subscribed(t, ctx, url, "client")
+	cleaner := subscribed(t, ctx, url, "cleaner")
+
+	backend.revoke(cleanerID)
+	hub.BookingAccessRevoked(bookingID, cleanerID)
+	wantEvicted(t, receive(t, ctx, cleaner))
+
+	hub.MessageNew(bookingID, domain.Message{BookingID: bookingID, Body: "hello"})
+	if got := receive(t, ctx, watcher); got["type"] != "message.new" {
+		t.Errorf("client got %v, want message.new", got)
+	}
+	expectSilence(t, ctx, cleaner)
+}
+
+func TestFanOutChecksAccessAgain(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	hub, url, backend := startHubWith(t, Options{})
+	watcher := subscribed(t, ctx, url, "client")
+	cleaner := subscribed(t, ctx, url, "cleaner")
+
+	// No eviction event: the hub has to notice on its own.
+	backend.revoke(cleanerID)
+	hub.BookingStatus(domain.Booking{ID: bookingID, Status: domain.StatusConfirmed}, time.Now())
+	if got := receive(t, ctx, watcher); got["type"] != "booking.status" {
+		t.Errorf("client got %v, want booking.status", got)
+	}
+	wantEvicted(t, receive(t, ctx, cleaner))
+	hub.MessageNew(bookingID, domain.Message{BookingID: bookingID, Body: "hello"})
+	receive(t, ctx, watcher)
+	expectSilence(t, ctx, cleaner)
 }

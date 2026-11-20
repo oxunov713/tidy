@@ -366,6 +366,7 @@ func (s *Bookings) afterCancel(ctx context.Context, c CancelledBooking, refund b
 	}
 	s.events.BookingStatus(b, s.clock.now())
 	if b.CleanerID != nil {
+		s.events.BookingAccessRevoked(b.ID, *b.CleanerID)
 		s.push.Notify(*b.CleanerID, domain.Notification{
 			Title: "Job cancelled",
 			Body:  "Booking " + b.Code + " was cancelled.",
@@ -445,7 +446,8 @@ func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, b
 	return m, nil
 }
 
-// CanWatch tells the WebSocket hub who may join booking:<id>.
+// CanWatch tells the WebSocket hub who may be in booking:<id>: the client,
+// and the assigned cleaner until the booking is cancelled.
 func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (bool, error) {
 	b, err := s.store.GetBooking(ctx, bookingID)
 	if errors.Is(err, domain.ErrNotFound) {
@@ -454,7 +456,10 @@ func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (b
 	if err != nil {
 		return false, err
 	}
-	return b.IsParticipant(userID), nil
+	if b.ClientID == userID {
+		return true, nil
+	}
+	return b.IsParticipant(userID) && b.Status != domain.StatusCancelled, nil
 }
 
 // RecordLocation stores the cleaner's latest position on the way to a job
