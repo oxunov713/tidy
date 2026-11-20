@@ -17,6 +17,7 @@ export 'src/map/map_provider.dart';
 export 'src/map/yandex_map_provider.dart';
 export 'src/models/models.dart';
 export 'src/providers/providers.dart';
+export 'src/providers/room_access.dart';
 export 'src/realtime/realtime_client.dart';
 export 'src/realtime/realtime_event.dart';
 export 'src/time/business_time.dart';
