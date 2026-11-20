@@ -147,7 +147,7 @@ final class CurrentUserIdProvider
   }
 }
 
-String _$currentUserIdHash() => r'6192646c0ac4b53c1a4a2870f93bc216dd4d03d4';
+String _$currentUserIdHash() => r'a8b5f4c252a639c944f7083d232a66b67341aa46';
 
 @ProviderFor(currentUser)
 final currentUserProvider = CurrentUserProvider._();

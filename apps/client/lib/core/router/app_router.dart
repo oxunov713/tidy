@@ -9,6 +9,7 @@ import 'package:tidy_client/features/addresses/presentation/addresses_screen.dar
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_client/features/auth/presentation/otp_screen.dart';
 import 'package:tidy_client/features/auth/presentation/welcome_screen.dart';
+import 'package:tidy_client/features/home/presentation/home_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -79,7 +80,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.home,
-                builder: (context, state) => const SizedBox.shrink(),
+                builder: (context, state) => const HomeScreen(),
               ),
             ],
           ),
