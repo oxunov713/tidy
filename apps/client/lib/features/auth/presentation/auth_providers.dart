@@ -69,3 +69,11 @@ class AuthController extends _$AuthController {
     }
   }
 }
+
+/// Id of the signed-in user. Providers that hold per-user data watch this so
+/// they start over after sign out and sign in as someone else.
+@Riverpod(keepAlive: true)
+String? currentUserId(Ref ref) => ref.watch(authControllerProvider).value?.id;
+
+@Riverpod(keepAlive: true)
+User? currentUser(Ref ref) => ref.watch(authControllerProvider).value;
