@@ -1,0 +1,64 @@
+name: flutter
+
+on:
+  push:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "pubspec.yaml"
+      - ".github/workflows/flutter.yml"
+  pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "pubspec.yaml"
+      - ".github/workflows/flutter.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    name: format, analyze, test, build admin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Dart pub workspace: one pub get at the root resolves every member.
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: |
+          for dir in apps/* packages/*; do
+            if [ -d "$dir/test" ]; then
+              echo "::group::flutter test $dir"
+              (cd "$dir" && flutter test)
+              echo "::endgroup::"
+            fi
+          done
+
+      - name: Build admin (web, release)
+        working-directory: apps/admin
+        run: flutter build web --release
+
+      - name: Upload admin web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-web
+          path: apps/admin/build/web
+          if-no-files-found: error
