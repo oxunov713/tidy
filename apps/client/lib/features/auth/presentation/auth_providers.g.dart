@@ -78,7 +78,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'32daffc25339a3c430f59b51ec9f6c6bec429267';
+String _$authControllerHash() => r'46047962986bbca7bde077a982d6938cf68f943a';
 
 /// The signed-in user, or null when signed out. The router redirects on it.
 

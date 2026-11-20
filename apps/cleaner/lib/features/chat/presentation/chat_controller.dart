@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
 import 'package:tidy_cleaner/features/chat/data/api_chat_repository.dart';
 import 'package:tidy_core/tidy_core.dart';
 
@@ -13,19 +12,30 @@ part 'chat_controller.g.dart';
 class ChatController extends _$ChatController {
   @override
   Future<List<Message>> build(String bookingId) async {
-    final gateway = ref.watch(realtimeGatewayProvider);
-    final room = Rooms.booking(bookingId);
-    gateway.subscribe(room);
-    final events = gateway.events.listen((event) {
-      if (event is MessageReceived && event.bookingId == bookingId) {
-        _add(event.message);
+    final events = ref.watch(realtimeClientProvider).bookingEvents(bookingId);
+    final subscription = events.listen((event) {
+      switch (event) {
+        case MessageReceived(:final message):
+          _add(message);
+        case Reconnected():
+          // Messages sent while the socket was down.
+          unawaited(_refetch());
+        case _:
+          break;
       }
     });
-    ref.onDispose(() {
-      unawaited(events.cancel());
-      gateway.unsubscribe(room);
-    });
+    ref.onDispose(() => unawaited(subscription.cancel()));
     return _sorted(await ref.read(chatRepositoryProvider).history(bookingId));
+  }
+
+  Future<void> _refetch() async {
+    try {
+      final history = await ref.read(chatRepositoryProvider).history(bookingId);
+      if (!ref.mounted) return;
+      history.forEach(_add);
+    } on Object {
+      // The next reconnect or send tries again.
+    }
   }
 
   /// Throws when the message could not be sent.

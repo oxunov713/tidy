@@ -16,6 +16,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get back => 'Назад';
 
   @override
+  String get trackingEnded => 'Обновления по этому визиту больше не приходят.';
+
+  @override
   String get retry => 'Повторить';
 
   @override

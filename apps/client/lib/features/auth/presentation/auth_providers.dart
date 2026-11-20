@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_client/core/realtime/live_channel.dart';
 import 'package:tidy_client/features/auth/data/auth_repository_impl.dart';
 import 'package:tidy_client/features/auth/domain/auth_repository.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -57,13 +56,13 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> _endSession() async {
-    await ref.read(liveChannelProvider).disconnect();
+    await ref.read(realtimeClientProvider).disconnect();
     state = const AsyncData(null);
   }
 
   Future<void> _connectLive() async {
     try {
-      await ref.read(liveChannelProvider).connect();
+      await ref.read(realtimeClientProvider).connect();
     } on Object {
       // The client reconnects by itself; sign in must not fail because of it.
     }

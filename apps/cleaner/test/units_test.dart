@@ -209,7 +209,7 @@ void main() {
             .value!
             .map((m) => m.body);
         expect(bodies, ['Hi', 'On my way']);
-        expect(h.gateway.subscribed, contains(Rooms.booking('b1')));
+        expect(h.gateway.subscribeCalls, contains(Rooms.booking('b1')));
         c.dispose();
       },
     );

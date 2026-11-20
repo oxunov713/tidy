@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/jobs/data/cleaner_repositories.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -19,12 +18,12 @@ class JobsController extends _$JobsController {
   @override
   Future<List<Job>> build() async {
     ref.watch(currentUserIdProvider);
-    final gateway = ref.watch(realtimeGatewayProvider);
-    final events = gateway.events.listen(_onEvent);
+    final realtime = ref.watch(realtimeClientProvider);
+    final events = realtime.events.listen(_onEvent);
     ref.onDispose(() {
       unawaited(events.cancel());
       _rooms
-        ..forEach(gateway.unsubscribe)
+        ..forEach(realtime.unsubscribe)
         ..clear();
     });
 
@@ -55,22 +54,46 @@ class JobsController extends _$JobsController {
   }
 
   void _onEvent(RealtimeEvent event) {
-    if (event is! BookingStatusChanged) return;
-    final jobs = state.value;
-    if (jobs == null) return;
-    final job = jobs.where((j) => j.booking.id == event.bookingId).firstOrNull;
-    if (job == null || job.booking.status == event.status) return;
-    applyBooking(job.booking.copyWith(status: event.status));
+    switch (event) {
+      case BookingStatusChanged():
+        final jobs = state.value;
+        if (jobs == null) return;
+        final job = jobs
+            .where((j) => j.booking.id == event.bookingId)
+            .firstOrNull;
+        if (job == null || job.booking.status == event.status) return;
+        applyBooking(job.booking.copyWith(status: event.status));
+      case Reconnected():
+        // Status changes, reassignments and new jobs while the socket was
+        // down.
+        unawaited(_refetch());
+      case RoomUnsubscribed(:final room, accessRevoked: true):
+        // The job was reassigned or cancelled, or we were suspended. The
+        // client already dropped the room; forget it here and look at the
+        // schedule again.
+        _rooms.remove(room);
+        unawaited(_refetch());
+      case _:
+        break;
+    }
+  }
+
+  Future<void> _refetch() async {
+    try {
+      await refresh();
+    } on Object {
+      // Keep the list we have; pull to refresh shows the error.
+    }
   }
 
   void _syncRooms(List<Job> jobs) {
-    final gateway = ref.read(realtimeGatewayProvider);
+    final realtime = ref.read(realtimeClientProvider);
     final wanted = {
       for (final job in jobs)
         if (job.booking.status.isActive) Rooms.booking(job.booking.id),
     };
-    _rooms.difference(wanted).forEach(gateway.unsubscribe);
-    wanted.difference(_rooms).forEach(gateway.subscribe);
+    _rooms.difference(wanted).forEach(realtime.unsubscribe);
+    wanted.difference(_rooms).forEach(realtime.subscribe);
     _rooms
       ..clear()
       ..addAll(wanted);

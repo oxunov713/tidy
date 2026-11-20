@@ -15,6 +15,8 @@ import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/catalog/presentation/catalog_providers.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/testing.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 import 'fakes.dart';
@@ -25,15 +27,19 @@ class Fakes {
     FakeCatalogRepository? catalog,
     FakeAddressRepository? addresses,
     FakeBookingRepository? bookings,
-  }) : catalog = catalog ?? FakeCatalogRepository(),
+    FakeRealtimeClient? realtime,
+  }) : realtime = realtime ?? FakeRealtimeClient(),
+       catalog = catalog ?? FakeCatalogRepository(),
        addresses = addresses ?? FakeAddressRepository(),
        bookings = bookings ?? FakeBookingRepository();
 
   final FakeCatalogRepository catalog;
   final FakeAddressRepository addresses;
   final FakeBookingRepository bookings;
+  final FakeRealtimeClient realtime;
 
   List<Override> get overrides => [
+    realtimeClientProvider.overrideWithValue(realtime),
     catalogRepositoryProvider.overrideWithValue(catalog),
     addressRepositoryProvider.overrideWithValue(addresses),
     bookingRepositoryProvider.overrideWithValue(bookings),

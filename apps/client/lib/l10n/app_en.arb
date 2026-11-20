@@ -2,6 +2,7 @@
   "@@locale": "en",
   "appTitle": "Tidy",
   "back": "Back",
+  "trackingEnded": "Live updates for this visit have ended.",
   "retry": "Try again",
   "cancel": "Cancel",
   "save": "Save",

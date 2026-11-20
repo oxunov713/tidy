@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tidy_cleaner/features/active_job/presentation/location_reporter.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/jobs_controller.dart';
+import 'package:tidy_core/testing.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 import 'support/fakes.dart';
@@ -12,15 +13,15 @@ import 'support/harness.dart';
 
 void main() {
   group('LocationReporter', () {
-    late FakeGateway gateway;
+    late FakeRealtimeClient gateway;
     late FakeLocation location;
     late LocationReporter reporter;
 
     void withReporter(void Function(FakeAsync async) body) {
       fakeAsync((async) {
-        gateway = FakeGateway();
+        gateway = FakeRealtimeClient();
         location = FakeLocation();
-        reporter = LocationReporter(location: location, gateway: gateway);
+        reporter = LocationReporter(location: location, realtime: gateway);
         body(async);
         reporter.stop();
       });
@@ -31,14 +32,14 @@ void main() {
         reporter.start('b1');
         location.move(51.5, -0.1);
         async.flushMicrotasks();
-        expect(gateway.sent, hasLength(1));
-        expect(gateway.sent.single.bookingId, 'b1');
-        expect(gateway.sent.single.lat, 51.5);
+        expect(gateway.sentLocations, hasLength(1));
+        expect(gateway.sentLocations.single.bookingId, 'b1');
+        expect(gateway.sentLocations.single.lat, 51.5);
 
         async.elapse(const Duration(seconds: 5));
-        expect(gateway.sent, hasLength(2));
+        expect(gateway.sentLocations, hasLength(2));
         async.elapse(const Duration(seconds: 10));
-        expect(gateway.sent, hasLength(4));
+        expect(gateway.sentLocations, hasLength(4));
       });
     });
 
@@ -51,8 +52,8 @@ void main() {
         async
           ..flushMicrotasks()
           ..elapse(const Duration(seconds: 5));
-        expect(gateway.sent.last.lat, 51.6);
-        expect(gateway.sent.last.lng, -0.2);
+        expect(gateway.sentLocations.last.lat, 51.6);
+        expect(gateway.sentLocations.last.lng, -0.2);
       });
     });
 
@@ -60,7 +61,7 @@ void main() {
       withReporter((async) {
         reporter.start('b1');
         async.elapse(const Duration(seconds: 20));
-        expect(gateway.sent, isEmpty);
+        expect(gateway.sentLocations, isEmpty);
       });
     });
 
@@ -69,13 +70,13 @@ void main() {
         reporter.start('b1');
         location.move(51.5, -0.1);
         async.elapse(const Duration(seconds: 6));
-        final before = gateway.sent.length;
+        final before = gateway.sentLocations.length;
 
         reporter.stop();
         location.move(51.7, -0.3);
         async.elapse(const Duration(seconds: 30));
 
-        expect(gateway.sent, hasLength(before));
+        expect(gateway.sentLocations, hasLength(before));
         expect(reporter.isRunning, isFalse);
       });
     });
@@ -95,9 +96,9 @@ void main() {
         async.flushMicrotasks();
         expect(reporter.isRunning, isFalse);
 
-        final before = gateway.sent.length;
+        final before = gateway.sentLocations.length;
         async.elapse(const Duration(seconds: 20));
-        expect(gateway.sent, hasLength(before));
+        expect(gateway.sentLocations, hasLength(before));
       });
     });
 
@@ -117,7 +118,7 @@ void main() {
           ..start('b1');
         location.move(51.5, -0.1);
         async.flushMicrotasks();
-        expect(gateway.sent, hasLength(1));
+        expect(gateway.sentLocations, hasLength(1));
       });
     });
 
@@ -130,11 +131,14 @@ void main() {
         reporter.start('b2');
         async.elapse(const Duration(seconds: 5));
         // No fix yet for b2, so nothing was sent for it.
-        expect(gateway.sent.where((s) => s.bookingId == 'b2'), isEmpty);
+        expect(
+          gateway.sentLocations.where((s) => s.bookingId == 'b2'),
+          isEmpty,
+        );
 
         location.move(52, 0);
         async.flushMicrotasks();
-        expect(gateway.sent.last.bookingId, 'b2');
+        expect(gateway.sentLocations.last.bookingId, 'b2');
       });
     });
   });

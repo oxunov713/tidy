@@ -164,7 +164,7 @@ void main() {
         fx.job(),
         fx.job(id: 'b2', status: BookingStatus.completed),
       ]);
-      expect(h.gateway.subscribed, [Rooms.booking('b1')]);
+      expect(h.gateway.subscribeCalls, [Rooms.booking('b1')]);
     });
   });
 

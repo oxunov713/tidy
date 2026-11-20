@@ -287,6 +287,14 @@ class _Sheet extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               ProgressSteps(status: status),
+              if (state.accessRevoked) ...[
+                const SizedBox(height: 12),
+                Text(
+                  l10n.trackingEnded,
+                  key: const ValueKey('tracking-ended'),
+                  style: text.bodySmall?.copyWith(color: TidyColors.muted),
+                ),
+              ],
               const SizedBox(height: 16),
               if (cleaner != null)
                 _CleanerRow(

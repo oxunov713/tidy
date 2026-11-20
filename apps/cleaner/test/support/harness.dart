@@ -5,12 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tidy_cleaner/core/alerts/offer_alerts.dart';
 import 'package:tidy_cleaner/core/clock.dart';
 import 'package:tidy_cleaner/core/location/location_service.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
 import 'package:tidy_cleaner/core/storage/preferences.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/chat/data/api_chat_repository.dart';
 import 'package:tidy_cleaner/features/earnings/data/api_earnings_repository.dart';
 import 'package:tidy_cleaner/features/jobs/data/cleaner_repositories.dart';
+import 'package:tidy_core/testing.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 import 'fakes.dart';
@@ -33,7 +33,7 @@ class Harness {
 
   final User user;
   final DateTime Function() clock;
-  final gateway = FakeGateway();
+  final gateway = FakeRealtimeClient();
   final location = FakeLocation();
   final alerts = FakeAlerts();
   final offersRepo = FakeOffersRepository();
@@ -44,7 +44,7 @@ class Harness {
 
   List<Override> get overrides => [
     sessionControllerProvider.overrideWith(() => FakeSession(user)),
-    realtimeGatewayProvider.overrideWithValue(gateway),
+    realtimeClientProvider.overrideWithValue(gateway),
     locationServiceProvider.overrideWithValue(location),
     offerAlertsProvider.overrideWithValue(alerts),
     offersRepositoryProvider.overrideWithValue(offersRepo),

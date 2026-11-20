@@ -2,6 +2,7 @@
   "@@locale": "uz",
   "appTitle": "Tidy",
   "back": "Orqaga",
+  "trackingEnded": "Bu tashrif bo‘yicha jonli yangilanishlar tugadi.",
   "retry": "Qayta urinish",
   "cancel": "Bekor qilish",
   "save": "Saqlash",

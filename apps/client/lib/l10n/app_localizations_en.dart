@@ -16,6 +16,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
+  String get trackingEnded => 'Live updates for this visit have ended.';
+
+  @override
   String get retry => 'Try again';
 
   @override

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
+import 'package:tidy_core/tidy_core.dart';
 
 part 'realtime_connection.g.dart';
 
@@ -10,7 +10,7 @@ part 'realtime_connection.g.dart';
 /// shell goes away (sign-out).
 @riverpod
 void realtimeConnection(Ref ref) {
-  final gateway = ref.watch(realtimeGatewayProvider);
-  unawaited(gateway.connect());
-  ref.onDispose(() => unawaited(gateway.disconnect()));
+  final realtime = ref.watch(realtimeClientProvider);
+  unawaited(realtime.connect());
+  ref.onDispose(() => unawaited(realtime.disconnect()));
 }

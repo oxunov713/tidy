@@ -45,7 +45,7 @@ final class JobsControllerProvider
   JobsController create() => JobsController();
 }
 
-String _$jobsControllerHash() => r'238b89f14406d199e9a7adf80d6d38d5d4d31497';
+String _$jobsControllerHash() => r'b6dd736caba0f76eb787c80f1b50e91345763ba7';
 
 /// The cleaner's schedule: yesterday to two weeks ahead.
 ///

@@ -16,6 +16,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get back => 'Orqaga';
 
   @override
+  String get trackingEnded =>
+      'Bu tashrif bo‘yicha jonli yangilanishlar tugadi.';
+
+  @override
   String get retry => 'Qayta urinish';
 
   @override

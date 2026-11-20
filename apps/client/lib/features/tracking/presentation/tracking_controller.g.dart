@@ -56,7 +56,7 @@ final class TrackingProvider
   }
 }
 
-String _$trackingHash() => r'f573ac0bae514709c63983476d8cfd5bb3773c59';
+String _$trackingHash() => r'799b4225c958220a49dacc444ff02afaf6ca9a00';
 
 /// A booking's details kept live: `booking.status` and `cleaner.location`
 /// events from the `booking:<id>` room update the state as they arrive.

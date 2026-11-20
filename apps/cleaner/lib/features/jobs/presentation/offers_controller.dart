@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tidy_cleaner/core/alerts/offer_alerts.dart';
 import 'package:tidy_cleaner/core/clock.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/jobs/data/cleaner_repositories.dart';
 import 'package:tidy_cleaner/features/jobs/domain/incoming_offer.dart';
@@ -97,12 +96,12 @@ class OffersController extends _$OffersController {
   @override
   OffersState build() {
     ref.watch(currentUserIdProvider);
-    final gateway = ref.watch(realtimeGatewayProvider)
+    final realtime = ref.watch(realtimeClientProvider)
       ..subscribe(Rooms.cleanerOffers);
-    final events = gateway.events.listen(_onEvent);
+    final events = realtime.events.listen(_onEvent);
     ref.onDispose(() {
       unawaited(events.cancel());
-      gateway.unsubscribe(Rooms.cleanerOffers);
+      realtime.unsubscribe(Rooms.cleanerOffers);
       for (final timer in _expiryTimers.values) {
         timer.cancel();
       }
@@ -114,7 +113,10 @@ class OffersController extends _$OffersController {
 
   /// Fetches the open offers. Used on start and to fill in the distance and
   /// area of an offer that arrived over the socket.
-  Future<void> load() async {
+  ///
+  /// With [replace] the server's list is the truth: offers it no longer
+  /// returns (taken or expired while the socket was down) are dropped.
+  Future<void> load({bool replace = false}) async {
     final List<IncomingOffer> fresh;
     try {
       fresh = await ref.read(offersRepositoryProvider).open();
@@ -124,7 +126,11 @@ class OffersController extends _$OffersController {
     }
     if (!ref.mounted) return;
     final now = ref.read(clockProvider)();
-    final merged = {for (final o in state.offers) o.id: o};
+    final merged = {
+      for (final o in state.offers)
+        if (!replace || fresh.any((f) => f.id == o.id) || o.id == state.busyId)
+          o.id: o,
+    };
     for (final offer in fresh) {
       if (offer.isExpired(now)) continue;
       merged[offer.id] = merged[offer.id]?.mergedWith(offer) ?? offer;
@@ -187,6 +193,9 @@ class OffersController extends _$OffersController {
           unawaited(_alert());
           unawaited(load());
         }
+      case Reconnected():
+        // Offers sent or withdrawn while the socket was down.
+        unawaited(load(replace: true));
       case OfferWithdrawn(:final bookingId):
         // Our own accept or decline is already handling this offer.
         if (state.byId(bookingId) == null || state.busyId == bookingId) return;

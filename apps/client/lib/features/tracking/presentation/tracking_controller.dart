@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_client/core/realtime/live_channel.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_core/tidy_core.dart';
 
@@ -18,6 +17,10 @@ abstract class TrackingState with _$TrackingState {
     required BookingStatus status,
     GeoPoint? cleanerPosition,
     int? etaMinutes,
+
+    /// The server removed us from the booking's room (cancelled or
+    /// reassigned): no more live updates will come.
+    @Default(false) bool accessRevoked,
   }) = _TrackingState;
 
   const TrackingState._();
@@ -38,7 +41,7 @@ class Tracking extends _$Tracking {
     final last = details.lastLocation;
 
     final subscription = ref
-        .read(liveChannelProvider)
+        .read(realtimeClientProvider)
         .bookingEvents(bookingId)
         .listen(_onEvent);
     ref.onDispose(() => unawaited(subscription.cancel()));
@@ -64,6 +67,15 @@ class Tracking extends _$Tracking {
         ref
           ..invalidate(bookingsListProvider(BookingScope.upcoming))
           ..invalidate(bookingsListProvider(BookingScope.past));
+      case Reconnected():
+        // Whatever happened while the socket was down: status, cleaner, map.
+        unawaited(_reloadDetails(adoptStatus: true));
+        ref
+          ..invalidate(bookingsListProvider(BookingScope.upcoming))
+          ..invalidate(bookingsListProvider(BookingScope.past));
+      case RoomUnsubscribed(accessRevoked: true):
+        state = AsyncData(current.copyWith(accessRevoked: true));
+        unawaited(_reloadDetails(adoptStatus: true));
       case CleanerLocationUpdated(:final lat, :final lng, :final etaMinutes):
         state = AsyncData(
           current.copyWith(
@@ -76,14 +88,23 @@ class Tracking extends _$Tracking {
     }
   }
 
-  Future<void> _reloadDetails() async {
+  Future<void> _reloadDetails({bool adoptStatus = false}) async {
     try {
       final details = await ref
           .read(bookingRepositoryProvider)
           .details(bookingId);
       final current = state.value;
       if (current == null) return;
-      state = AsyncData(current.copyWith(details: details));
+      final last = details.lastLocation;
+      state = AsyncData(
+        current.copyWith(
+          details: details,
+          status: adoptStatus ? details.booking.status : current.status,
+          cleanerPosition: adoptStatus && last != null
+              ? GeoPoint(lat: last.lat, lng: last.lng)
+              : current.cleanerPosition,
+        ),
+      );
     } on Object {
       // The live status is already applied; a failed refresh is not worth an
       // error screen.

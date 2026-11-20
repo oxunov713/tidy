@@ -47,7 +47,7 @@ final class OffersControllerProvider
   }
 }
 
-String _$offersControllerHash() => r'befd6dd324771c9fb9b49e65393259fa885f9798';
+String _$offersControllerHash() => r'd79a66abb5e6ff8607be4ce40b2983473e4d661f';
 
 /// Open job offers: loaded on start, kept up to date by `offer.new` and
 /// `offer.gone` over the WebSocket, and dropped when they expire.

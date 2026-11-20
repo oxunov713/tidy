@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get back;
 
+  /// No description provided for @trackingEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Live updates for this visit have ended.'**
+  String get trackingEnded;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
