@@ -8,4 +8,7 @@ abstract final class Routes {
   static const bookings = '/bookings';
   static const chat = '/chat';
   static const profile = '/profile';
+
+  static const addresses = '/addresses';
+  static const addAddress = '/addresses/new';
 }

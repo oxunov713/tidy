@@ -115,4 +115,63 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get codeSent => 'Yangi kod yuborildi.';
+
+  @override
+  String get fieldRequired => 'Majburiy maydon';
+
+  @override
+  String get dropPinFirst => 'Avval xaritada uyingizni belgilang.';
+
+  @override
+  String get pinDropped => 'Belgi qo‘yildi. Ko‘chirish uchun bosing.';
+
+  @override
+  String get tapToDropPin => 'Belgi qo‘yish uchun xaritani bosing';
+
+  @override
+  String get addAddressTitle => 'Qayerda tozalaymiz?';
+
+  @override
+  String get addressLine1 => 'Manzil';
+
+  @override
+  String get addressLine2 => 'Xonadon, qavat (ixtiyoriy)';
+
+  @override
+  String get city => 'Shahar';
+
+  @override
+  String get postcode => 'Pochta indeksi';
+
+  @override
+  String get accessNotes => 'Kirish bo‘yicha izoh';
+
+  @override
+  String get accessNotesHint =>
+      'Kalit qutida, yuqoridagi qo‘ng‘iroqni bosing...';
+
+  @override
+  String get saveAddress => 'Manzilni saqlash';
+
+  @override
+  String get chooseAddress => 'Manzilni tanlang';
+
+  @override
+  String get myAddresses => 'Manzillarim';
+
+  @override
+  String get noAddressesTitle => 'Hozircha manzil yo‘q';
+
+  @override
+  String get noAddressesBody =>
+      'Tozalanadigan manzilni qo‘shing va tozalovchi topishi uchun xaritada belgilang.';
+
+  @override
+  String get addAddress => 'Manzil qo‘shish';
+
+  @override
+  String get deleteAddress => 'O‘chirish';
+
+  @override
+  String get deleteAddressTitle => 'Bu manzil o‘chirilsinmi?';
 }

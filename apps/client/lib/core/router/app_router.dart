@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tidy_client/core/router/main_shell.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/router/splash_screen.dart';
+import 'package:tidy_client/features/addresses/presentation/add_address_screen.dart';
+import 'package:tidy_client/features/addresses/presentation/addresses_screen.dart';
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_client/features/auth/presentation/otp_screen.dart';
 import 'package:tidy_client/features/auth/presentation/welcome_screen.dart';
@@ -57,6 +59,18 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.otp,
         builder: (context, state) => OtpScreen(phone: state.extra! as String),
+      ),
+      GoRoute(
+        path: Routes.addresses,
+        builder: (context, state) => AddressesScreen(
+          pick: state.uri.queryParameters['pick'] == '1',
+        ),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const AddAddressScreen(),
+          ),
+        ],
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => MainShell(shell: shell),

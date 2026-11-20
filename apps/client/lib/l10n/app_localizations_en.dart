@@ -116,4 +116,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get codeSent => 'A new code is on its way.';
+
+  @override
+  String get fieldRequired => 'Required';
+
+  @override
+  String get dropPinFirst => 'Tap the map to drop a pin on your home first.';
+
+  @override
+  String get pinDropped => 'Pin placed. Tap to move it.';
+
+  @override
+  String get tapToDropPin => 'Tap the map to drop a pin';
+
+  @override
+  String get addAddressTitle => 'Where should we clean?';
+
+  @override
+  String get addressLine1 => 'Address line 1';
+
+  @override
+  String get addressLine2 => 'Flat, floor (optional)';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get postcode => 'Postcode';
+
+  @override
+  String get accessNotes => 'Access notes for the cleaner';
+
+  @override
+  String get accessNotesHint => 'Key in the lockbox, ring the top bell...';
+
+  @override
+  String get saveAddress => 'Save address';
+
+  @override
+  String get chooseAddress => 'Choose address';
+
+  @override
+  String get myAddresses => 'My addresses';
+
+  @override
+  String get noAddressesTitle => 'No addresses yet';
+
+  @override
+  String get noAddressesBody =>
+      'Add the place you want cleaned and drop a pin so cleaners can find it.';
+
+  @override
+  String get addAddress => 'Add address';
+
+  @override
+  String get deleteAddress => 'Delete';
+
+  @override
+  String get deleteAddressTitle => 'Delete this address?';
 }

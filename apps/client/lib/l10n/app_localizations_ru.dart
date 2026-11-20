@@ -115,4 +115,62 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get codeSent => 'Новый код отправлен.';
+
+  @override
+  String get fieldRequired => 'Обязательное поле';
+
+  @override
+  String get dropPinFirst => 'Сначала отметьте дом на карте.';
+
+  @override
+  String get pinDropped => 'Метка поставлена. Нажмите, чтобы переместить.';
+
+  @override
+  String get tapToDropPin => 'Нажмите на карту, чтобы поставить метку';
+
+  @override
+  String get addAddressTitle => 'Где нужно убрать?';
+
+  @override
+  String get addressLine1 => 'Адрес';
+
+  @override
+  String get addressLine2 => 'Квартира, этаж (необязательно)';
+
+  @override
+  String get city => 'Город';
+
+  @override
+  String get postcode => 'Индекс';
+
+  @override
+  String get accessNotes => 'Как попасть внутрь';
+
+  @override
+  String get accessNotesHint => 'Ключ в сейфе, позвоните в верхний звонок...';
+
+  @override
+  String get saveAddress => 'Сохранить адрес';
+
+  @override
+  String get chooseAddress => 'Выберите адрес';
+
+  @override
+  String get myAddresses => 'Мои адреса';
+
+  @override
+  String get noAddressesTitle => 'Адресов пока нет';
+
+  @override
+  String get noAddressesBody =>
+      'Добавьте адрес уборки и поставьте метку на карте, чтобы клинер нашёл вас.';
+
+  @override
+  String get addAddress => 'Добавить адрес';
+
+  @override
+  String get deleteAddress => 'Удалить';
+
+  @override
+  String get deleteAddressTitle => 'Удалить этот адрес?';
 }

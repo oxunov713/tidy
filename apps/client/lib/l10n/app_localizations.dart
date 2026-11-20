@@ -291,6 +291,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A new code is on its way.'**
   String get codeSent;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get fieldRequired;
+
+  /// No description provided for @dropPinFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to drop a pin on your home first.'**
+  String get dropPinFirst;
+
+  /// No description provided for @pinDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin placed. Tap to move it.'**
+  String get pinDropped;
+
+  /// No description provided for @tapToDropPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to drop a pin'**
+  String get tapToDropPin;
+
+  /// No description provided for @addAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should we clean?'**
+  String get addAddressTitle;
+
+  /// No description provided for @addressLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Address line 1'**
+  String get addressLine1;
+
+  /// No description provided for @addressLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat, floor (optional)'**
+  String get addressLine2;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @postcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postcode'**
+  String get postcode;
+
+  /// No description provided for @accessNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Access notes for the cleaner'**
+  String get accessNotes;
+
+  /// No description provided for @accessNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Key in the lockbox, ring the top bell...'**
+  String get accessNotesHint;
+
+  /// No description provided for @saveAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Save address'**
+  String get saveAddress;
+
+  /// No description provided for @chooseAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose address'**
+  String get chooseAddress;
+
+  /// No description provided for @myAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'My addresses'**
+  String get myAddresses;
+
+  /// No description provided for @noAddressesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No addresses yet'**
+  String get noAddressesTitle;
+
+  /// No description provided for @noAddressesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the place you want cleaned and drop a pin so cleaners can find it.'**
+  String get noAddressesBody;
+
+  /// No description provided for @addAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get addAddress;
+
+  /// No description provided for @deleteAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAddress;
+
+  /// No description provided for @deleteAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this address?'**
+  String get deleteAddressTitle;
 }
 
 class _AppLocalizationsDelegate

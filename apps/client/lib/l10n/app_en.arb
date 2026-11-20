@@ -56,5 +56,24 @@
     }
   },
   "resendCode": "Resend code",
-  "codeSent": "A new code is on its way."
+  "codeSent": "A new code is on its way.",
+  "fieldRequired": "Required",
+  "dropPinFirst": "Tap the map to drop a pin on your home first.",
+  "pinDropped": "Pin placed. Tap to move it.",
+  "tapToDropPin": "Tap the map to drop a pin",
+  "addAddressTitle": "Where should we clean?",
+  "addressLine1": "Address line 1",
+  "addressLine2": "Flat, floor (optional)",
+  "city": "City",
+  "postcode": "Postcode",
+  "accessNotes": "Access notes for the cleaner",
+  "accessNotesHint": "Key in the lockbox, ring the top bell...",
+  "saveAddress": "Save address",
+  "chooseAddress": "Choose address",
+  "myAddresses": "My addresses",
+  "noAddressesTitle": "No addresses yet",
+  "noAddressesBody": "Add the place you want cleaned and drop a pin so cleaners can find it.",
+  "addAddress": "Add address",
+  "deleteAddress": "Delete",
+  "deleteAddressTitle": "Delete this address?"
 }
