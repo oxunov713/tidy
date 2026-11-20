@@ -103,20 +103,170 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tidy Cleaner'**
+  /// **'Tidy Pro'**
   String get appTitle;
 
-  /// Heading of the placeholder home screen
+  /// No description provided for @loading.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get homePlaceholderTitle;
+  /// **'Loading'**
+  String get loading;
 
-  /// No description provided for @homePlaceholderBody.
+  /// No description provided for @retry.
   ///
   /// In en, this message translates to:
-  /// **'Your jobs and earnings will appear here.'**
-  String get homePlaceholderBody;
+  /// **'Try again'**
+  String get retry;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @errorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get errorTitle;
+
+  /// No description provided for @errorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your internet and try again.'**
+  String get errorOffline;
+
+  /// No description provided for @errorTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a minute and try again.'**
+  String get errorTooManyRequests;
+
+  /// No description provided for @errorSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please sign in again.'**
+  String get errorSessionExpired;
+
+  /// No description provided for @errorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not allowed to do that.'**
+  String get errorForbidden;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Our servers had a problem. Try again in a moment.'**
+  String get errorServer;
+
+  /// No description provided for @errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work. Please try again.'**
+  String get errorGeneric;
+
+  /// No description provided for @errorPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number.'**
+  String get errorPhoneInvalid;
+
+  /// No description provided for @errorWrongRole.
+  ///
+  /// In en, this message translates to:
+  /// **'This number belongs to a customer account. Use the Tidy customer app instead.'**
+  String get errorWrongRole;
+
+  /// No description provided for @signInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next job is one tap away.'**
+  String get signInTitle;
+
+  /// No description provided for @signInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept cleaning jobs near you, follow your day and watch your earnings grow.'**
+  String get signInSubtitle;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneNumber;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCode;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and continue'**
+  String get verifyCode;
+
+  /// No description provided for @changeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different number'**
+  String get changeNumber;
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get verificationCode;
+
+  /// No description provided for @codeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a code to {phone}'**
+  String codeSentTo(String phone);
+
+  /// No description provided for @signInTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing you agree to the Terms and Privacy Policy.'**
+  String get signInTerms;
+
+  /// No description provided for @pendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is being reviewed'**
+  String get pendingTitle;
+
+  /// No description provided for @pendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for signing up! Our team checks every new cleaner, which usually takes a day. You will be able to go online as soon as you are approved.'**
+  String get pendingBody;
+
+  /// No description provided for @pullToRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to check again'**
+  String get pullToRefresh;
+
+  /// No description provided for @suspendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is suspended'**
+  String get suspendedTitle;
+
+  /// No description provided for @suspendedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot take new jobs right now. Please contact Tidy support if you think this is a mistake.'**
+  String get suspendedBody;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOut;
 }
 
 class _AppLocalizationsDelegate

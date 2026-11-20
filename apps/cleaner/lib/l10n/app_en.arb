@@ -1,9 +1,38 @@
 {
   "@@locale": "en",
-  "appTitle": "Tidy Cleaner",
-  "homePlaceholderTitle": "Coming soon",
-  "homePlaceholderBody": "Your jobs and earnings will appear here.",
-  "@homePlaceholderTitle": {
-    "description": "Heading of the placeholder home screen"
-  }
+  "appTitle": "Tidy Pro",
+  "loading": "Loading",
+  "retry": "Try again",
+  "cancel": "Cancel",
+  "errorTitle": "Something went wrong",
+  "errorOffline": "No connection. Check your internet and try again.",
+  "errorTooManyRequests": "Too many attempts. Wait a minute and try again.",
+  "errorSessionExpired": "Your session expired. Please sign in again.",
+  "errorForbidden": "You are not allowed to do that.",
+  "errorServer": "Our servers had a problem. Try again in a moment.",
+  "errorGeneric": "That did not work. Please try again.",
+  "errorPhoneInvalid": "Enter a valid phone number.",
+  "errorWrongRole": "This number belongs to a customer account. Use the Tidy customer app instead.",
+  "signInTitle": "Your next job is one tap away.",
+  "signInSubtitle": "Accept cleaning jobs near you, follow your day and watch your earnings grow.",
+  "phoneNumber": "Phone number",
+  "sendCode": "Send code",
+  "verifyCode": "Verify and continue",
+  "changeNumber": "Use a different number",
+  "verificationCode": "6-digit code",
+  "codeSentTo": "We sent a code to {phone}",
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "signInTerms": "By continuing you agree to the Terms and Privacy Policy.",
+  "pendingTitle": "Your profile is being reviewed",
+  "pendingBody": "Thanks for signing up! Our team checks every new cleaner, which usually takes a day. You will be able to go online as soon as you are approved.",
+  "pullToRefresh": "Pull down to check again",
+  "suspendedTitle": "Your account is suspended",
+  "suspendedBody": "You cannot take new jobs right now. Please contact Tidy support if you think this is a mistake.",
+  "signOut": "Sign out"
 }
