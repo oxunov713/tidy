@@ -14,11 +14,13 @@ type counter struct{ n atomic.Int32 }
 func (c *counter) RunPlans(context.Context) (int, error) { c.n.Add(1); return 0, nil }
 func (c *counter) Sweep(context.Context) error           { c.n.Add(1); return nil }
 func (c *counter) AuthorizeDue(context.Context) error    { c.n.Add(1); return nil }
+func (c *counter) SweepStuck(context.Context) error      { c.n.Add(1); return nil }
 
 func TestRunStopsOnCancel(t *testing.T) {
-	plans, offers, payments := &counter{}, &counter{}, &counter{}
-	s := New(plans, offers, payments, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	s.PlanInterval, s.SweepInterval, s.PaymentInterval = time.Hour, 10*time.Millisecond, 10*time.Millisecond
+	plans, offers, payments, stuck := &counter{}, &counter{}, &counter{}, &counter{}
+	s := New(Jobs{Plans: plans, Offers: offers, Payments: payments, Stuck: stuck}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	s.PlanInterval = time.Hour
+	s.SweepInterval, s.PaymentInterval, s.StuckInterval = 10*time.Millisecond, 10*time.Millisecond, 10*time.Millisecond
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
@@ -42,5 +44,8 @@ func TestRunStopsOnCancel(t *testing.T) {
 	}
 	if got := payments.n.Load(); got < 3 {
 		t.Errorf("saved cards were checked %d times, want at least 3", got)
+	}
+	if got := stuck.n.Load(); got < 3 {
+		t.Errorf("stuck bookings were checked %d times, want at least 3", got)
 	}
 }

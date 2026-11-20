@@ -17,6 +17,9 @@ const (
 	authorizeBatch = 50
 	// authorizeRetry is the wait after the provider could not be reached.
 	authorizeRetry = 10 * time.Minute
+	// PaymentTimeout is how long a pending booking waits for the client to
+	// pay before it is cancelled.
+	PaymentTimeout = 30 * time.Minute
 )
 
 // Payments keeps the money side of a booking in step with its status: hold
@@ -100,6 +103,10 @@ func (p *Payments) begin(ctx context.Context, b domain.Booking, kind domain.Paym
 	if err != nil {
 		return PaymentStart{}, err
 	}
+	// Cleared again when the payment or card setup goes through.
+	if err := p.setDue(ctx, b.ID); err != nil {
+		return PaymentStart{}, err
+	}
 	var intent domain.PaymentIntent
 	if kind == domain.PaymentKindSetup {
 		intent, err = p.provider.CreateSetup(ctx, req)
@@ -145,8 +152,7 @@ func (p *Payments) AuthorizeDue(ctx context.Context) error {
 func (p *Payments) authorizeSaved(ctx context.Context, b domain.Booking) error {
 	customer, err := p.store.PaymentCustomer(ctx, b.ClientID, p.provider.Name())
 	if errors.Is(err, domain.ErrNotFound) {
-		p.askToPay(b)
-		return nil
+		return p.askToPay(ctx, b)
 	}
 	if err != nil {
 		return err
@@ -171,15 +177,18 @@ func (p *Payments) authorizeSaved(ctx context.Context, b domain.Booking) error {
 				return err
 			}
 		}
-		p.askToPay(b)
-		return nil
+		return p.askToPay(ctx, b)
 	}
 	return p.applyImmediate(ctx, intent)
 }
 
 // askToPay tells the client their saved card didn't work. The booking stays
-// pending until they pay with POST /bookings/{id}/payment.
-func (p *Payments) askToPay(b domain.Booking) {
+// pending until they pay with POST /bookings/{id}/payment, for
+// PaymentTimeout like a new booking.
+func (p *Payments) askToPay(ctx context.Context, b domain.Booking) error {
+	if err := p.setDue(ctx, b.ID); err != nil {
+		return err
+	}
 	p.log.Info("saved card declined", "booking_id", b.ID)
 	p.events.BookingStatus(b, p.clock.now())
 	p.push.Notify(b.ClientID, domain.Notification{
@@ -187,6 +196,12 @@ func (p *Payments) askToPay(b domain.Booking) {
 		Body:  "We couldn't charge your card for booking " + b.Code + ". Open the app to pay.",
 		Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String(), "status": string(b.Status)},
 	})
+	return nil
+}
+
+func (p *Payments) setDue(ctx context.Context, bookingID uuid.UUID) error {
+	due := p.clock.now().Add(PaymentTimeout)
+	return p.store.SetPaymentDue(ctx, bookingID, &due)
 }
 
 func (p *Payments) chargeRequest(ctx context.Context, b domain.Booking) (domain.ChargeRequest, error) {

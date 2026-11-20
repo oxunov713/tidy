@@ -17,6 +17,13 @@ ALTER TABLE payments ADD COLUMN kind text NOT NULL DEFAULT 'payment' CHECK (kind
 ALTER TABLE bookings ADD COLUMN authorize_at timestamptz;
 CREATE INDEX bookings_authorize_idx ON bookings (authorize_at) WHERE authorize_at IS NOT NULL;
 
+-- A pending booking the client hasn't paid by then is cancelled. Empty
+-- while the client owes nothing, e.g. the card is saved and the scheduler
+-- charges it later.
+ALTER TABLE bookings ADD COLUMN payment_due_at timestamptz;
+UPDATE bookings SET payment_due_at = created_at + interval '30 minutes' WHERE status = 'pending';
+CREATE INDEX bookings_payment_due_idx ON bookings (payment_due_at) WHERE status = 'pending';
+
 -- The provider's customer for a user, so a card saved once can be used again.
 CREATE TABLE payment_customers (
     user_id      uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,

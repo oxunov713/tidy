@@ -296,6 +296,55 @@ func (s *Store) CancelBooking(ctx context.Context, id uuid.UUID, from domain.Boo
 	return b, withdrawn, err
 }
 
+// stuckBatch bounds one sweep; the next sweep picks up the rest.
+const stuckBatch = 100
+
+func (s *Store) CancelStuck(ctx context.Context, now, unassignedBy time.Time) (service.StuckBookings, error) {
+	var out service.StuckBookings
+	err := s.inTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		out.Unpaid, err = cancelWhere(ctx, tx, `status = 'pending' AND payment_due_at <= $1`, now)
+		if err != nil {
+			return err
+		}
+		out.Unassigned, err = cancelWhere(ctx, tx, `status = 'confirmed' AND cleaner_id IS NULL AND lower(period) <= $1`, unassignedBy)
+		return err
+	})
+	return out, err
+}
+
+// cancelWhere cancels bookings matching cond (with $1 as its argument) as
+// the system, without an actor.
+func cancelWhere(ctx context.Context, tx pgx.Tx, cond string, arg any) ([]service.CancelledBooking, error) {
+	rows, err := tx.Query(ctx, `
+		UPDATE bookings SET status = 'cancelled', updated_at = now()
+		WHERE id IN (SELECT id FROM bookings WHERE `+cond+` ORDER BY lower(period) LIMIT $2 FOR UPDATE SKIP LOCKED)
+		RETURNING id`, arg, stuckBatch)
+	if err != nil {
+		return nil, err
+	}
+	ids, err := pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+	if err != nil {
+		return nil, err
+	}
+	var out []service.CancelledBooking
+	for _, id := range ids {
+		if err := addEvent(ctx, tx, id, domain.StatusCancelled, nil); err != nil {
+			return nil, err
+		}
+		withdrawn, err := withdrawOffers(ctx, tx, id)
+		if err != nil {
+			return nil, err
+		}
+		b, err := getBooking(ctx, tx, id)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, service.CancelledBooking{Booking: b, Withdrawn: withdrawn})
+	}
+	return out, nil
+}
+
 func (s *Store) AssignCleaner(ctx context.Context, bookingID, cleanerID uuid.UUID, actor *uuid.UUID) (domain.Booking, []uuid.UUID, error) {
 	var b domain.Booking
 	var withdrawn []uuid.UUID

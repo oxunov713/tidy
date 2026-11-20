@@ -110,6 +110,9 @@ type BookingStore interface {
 	// SetBookingStatus moves the booking from one status to another. It fails
 	// with invalid_transition if the booking is no longer in from.
 	SetBookingStatus(ctx context.Context, id uuid.UUID, from, to domain.BookingStatus, actor *uuid.UUID) (domain.Booking, error)
+	// CancelStuck cancels pending bookings whose payment was due by now and
+	// confirmed bookings still without a cleaner that start by unassignedBy.
+	CancelStuck(ctx context.Context, now, unassignedBy time.Time) (StuckBookings, error)
 	// CancelBooking also withdraws open offers and returns whose they were.
 	CancelBooking(ctx context.Context, id uuid.UUID, from domain.BookingStatus, actor *uuid.UUID) (domain.Booking, []uuid.UUID, error)
 	// AssignCleaner sets the cleaner directly (admin). The database rejects
@@ -171,11 +174,19 @@ type PaymentStore interface {
 	// returns it.
 	SavePaymentCustomer(ctx context.Context, userID uuid.UUID, provider, ref string) (string, error)
 
+	// SetPaymentDue sets when an unpaid pending booking is cancelled; nil
+	// means the client owes nothing right now.
+	SetPaymentDue(ctx context.Context, bookingID uuid.UUID, at *time.Time) error
 	// ScheduleAuthorization sets when the saved card is charged; nil clears it.
 	ScheduleAuthorization(ctx context.Context, bookingID uuid.UUID, at *time.Time) error
 	// ClaimAuthorizations clears and returns pending bookings whose saved
 	// card is due to be charged, so two sweeps never charge one twice.
 	ClaimAuthorizations(ctx context.Context, now time.Time, limit int) ([]domain.Booking, error)
+}
+
+type StuckBookings struct {
+	Unpaid     []CancelledBooking
+	Unassigned []CancelledBooking
 }
 
 type AppliedPayment struct {

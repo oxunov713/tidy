@@ -68,6 +68,11 @@ func (s *Store) ScheduleAuthorization(ctx context.Context, bookingID uuid.UUID, 
 	return err
 }
 
+func (s *Store) SetPaymentDue(ctx context.Context, bookingID uuid.UUID, at *time.Time) error {
+	_, err := s.pool.Exec(ctx, `UPDATE bookings SET payment_due_at = $2 WHERE id = $1`, bookingID, at)
+	return err
+}
+
 func (s *Store) ClaimAuthorizations(ctx context.Context, now time.Time, limit int) ([]domain.Booking, error) {
 	var out []domain.Booking
 	err := s.inTx(ctx, func(tx pgx.Tx) error {
@@ -120,7 +125,7 @@ func (s *Store) ApplyPaymentEvent(ctx context.Context, provider string, ev domai
 					UPDATE payments SET status = 'saved'
 					WHERE provider = $1 AND provider_ref = $2 AND kind = 'setup' AND status IN ('requires_action', 'failed')
 					RETURNING booking_id)
-				UPDATE bookings b SET authorize_at = lower(b.period) - make_interval(secs => $3)
+				UPDATE bookings b SET authorize_at = lower(b.period) - make_interval(secs => $3), payment_due_at = NULL
 				FROM saved WHERE b.id = saved.booking_id AND b.status = 'pending'`,
 				provider, ev.Ref, domain.AuthorizeAhead.Seconds())
 			return err
@@ -146,7 +151,7 @@ func applyAuthorized(ctx context.Context, tx pgx.Tx, provider, ref string, out *
 		return err
 	}
 	tag, err := tx.Exec(ctx, `
-		UPDATE bookings SET status = 'confirmed', authorize_at = NULL, updated_at = now()
+		UPDATE bookings SET status = 'confirmed', authorize_at = NULL, payment_due_at = NULL, updated_at = now()
 		WHERE id = $1 AND status = 'pending'`, bookingID)
 	if err != nil || tag.RowsAffected() == 0 {
 		return err

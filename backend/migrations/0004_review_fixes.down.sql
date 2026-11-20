@@ -1,5 +1,7 @@
 ALTER TABLE refresh_tokens DROP COLUMN IF EXISTS replaced_by;
 DROP TABLE IF EXISTS payment_customers;
+DROP INDEX IF EXISTS bookings_payment_due_idx;
+ALTER TABLE bookings DROP COLUMN IF EXISTS payment_due_at;
 DROP INDEX IF EXISTS bookings_authorize_idx;
 ALTER TABLE bookings DROP COLUMN IF EXISTS authorize_at;
 ALTER TABLE payments DROP COLUMN IF EXISTS kind;
