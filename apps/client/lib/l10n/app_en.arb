@@ -1,9 +1,60 @@
 {
   "@@locale": "en",
   "appTitle": "Tidy",
-  "homePlaceholderTitle": "Coming soon",
-  "homePlaceholderBody": "The booking flow will appear here.",
-  "@homePlaceholderTitle": {
-    "description": "Heading of the placeholder home screen"
-  }
+  "back": "Back",
+  "retry": "Try again",
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
+  "errorTitle": "Something went wrong",
+  "errorNetwork": "No connection. Check your internet and try again.",
+  "errorSlotTaken": "That time was just booked by someone else.",
+  "errorTooManyRequests": "Too many attempts. Please wait a moment.",
+  "errorSessionExpired": "Your session has expired. Please sign in again.",
+  "errorServer": "Our servers are having trouble. Please try again soon.",
+  "errorGeneric": "Something unexpected happened. Please try again.",
+  "stepOf": "Step {step} of {total}",
+  "@stepOf": {
+    "description": "Wizard progress caption",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "Home",
+  "navBookings": "Bookings",
+  "navChat": "Chat",
+  "navProfile": "Profile",
+  "welcomeTitle": "A spotless home, booked in a minute.",
+  "welcomeSubtitle": "Vetted local cleaners, fixed prices, and live tracking from booking to done.",
+  "phoneNumber": "Phone number",
+  "phoneInvalid": "Enter a valid phone number",
+  "sendCode": "Send code",
+  "continueWithGoogle": "Continue with Google",
+  "googleSoon": "Google sign in is coming soon. Use your phone number for now.",
+  "termsNotice": "By continuing you agree to the Terms and Privacy Policy.",
+  "selectCountry": "Select country",
+  "otpTitle": "Enter the code",
+  "otpSubtitle": "We sent a 6-digit code to {phone}.",
+  "@otpSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "resendIn": "Resend code in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resendCode": "Resend code",
+  "codeSent": "A new code is on its way."
 }
