@@ -30,3 +30,27 @@ cleaner app and an admin panel, all in Flutter, on top of a Go backend.
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [API](docs/API.md)
+
+## Development
+
+The Flutter side is a Dart pub workspace. Run these from the repository root:
+
+```bash
+flutter pub get                         # resolves every package and app
+flutter analyze                         # whole workspace, strict lints
+cd packages/tidy_core && flutter test   # same for tidy_ui and each app
+```
+
+Generated files (`*.g.dart`, `*.freezed.dart`, and the `lib/l10n/` Dart files
+in each app) are committed, so the repository builds without running code
+generation. If you change a model, a provider or an `.arb` file, regenerate
+and commit the result:
+
+```bash
+cd packages/tidy_core && dart run build_runner build
+cd apps/client && flutter gen-l10n
+```
+
+Point an app at a backend with `--dart-define=API_URL=http://10.0.2.2:8080`
+(the default is `http://localhost:8080`). The widget gallery for `tidy_ui` is in
+`packages/tidy_ui/example`. See the package READMEs for details.
