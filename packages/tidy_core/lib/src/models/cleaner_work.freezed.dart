@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Offer {
 
- Booking get booking; DateTime get expiresAt;
+ Booking get booking; DateTime get expiresAt;/// From the cleaner's last known position to the address.
+ double get distanceKm; String get postcode; String get city;
 /// Create a copy of Offer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $OfferCopyWith<Offer> get copyWith => _$OfferCopyWithImpl<Offer>(this as Offer, 
 @override
 bool operator ==(Object other) {
   final _this = this as Offer;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Offer&&(identical(other.booking, _this.booking) || other.booking == _this.booking)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Offer&&(identical(other.booking, _this.booking) || other.booking == _this.booking)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt)&&(identical(other.distanceKm, _this.distanceKm) || other.distanceKm == _this.distanceKm)&&(identical(other.postcode, _this.postcode) || other.postcode == _this.postcode)&&(identical(other.city, _this.city) || other.city == _this.city));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Offer;
-  return Object.hash(runtimeType,_this.booking,_this.expiresAt);
+  return Object.hash(runtimeType,_this.booking,_this.expiresAt,_this.distanceKm,_this.postcode,_this.city);
 }
 
 @override
 String toString() {
   final _this = this as Offer;
-  return 'Offer(booking: ${_this.booking}, expiresAt: ${_this.expiresAt})';
+  return 'Offer(booking: ${_this.booking}, expiresAt: ${_this.expiresAt}, distanceKm: ${_this.distanceKm}, postcode: ${_this.postcode}, city: ${_this.city})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $OfferCopyWith<$Res>  {
   factory $OfferCopyWith(Offer value, $Res Function(Offer) _then) = _$OfferCopyWithImpl;
 @useResult
 $Res call({
- Booking booking, DateTime expiresAt
+ Booking booking, DateTime expiresAt, double distanceKm, String postcode, String city
 });
 
 
@@ -71,11 +72,14 @@ class _$OfferCopyWithImpl<$Res>
 
 /// Create a copy of Offer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? booking = null,Object? expiresAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? booking = null,Object? expiresAt = null,Object? distanceKm = null,Object? postcode = null,Object? city = null,}) {
   return _then(Offer(
 booking: null == booking ? _self.booking : booking // ignore: cast_nullable_to_non_nullable
 as Booking,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,distanceKm: null == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double,postcode: null == postcode ? _self.postcode : postcode // ignore: cast_nullable_to_non_nullable
+as String,city: null == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 /// Create a copy of Offer
@@ -169,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Booking booking,  DateTime expiresAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Booking booking,  DateTime expiresAt,  double distanceKm,  String postcode,  String city)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Offer() when $default != null:
-return $default(_that.booking,_that.expiresAt);case _:
+return $default(_that.booking,_that.expiresAt,_that.distanceKm,_that.postcode,_that.city);case _:
   return orElse();
 
 }
@@ -190,10 +194,10 @@ return $default(_that.booking,_that.expiresAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Booking booking,  DateTime expiresAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Booking booking,  DateTime expiresAt,  double distanceKm,  String postcode,  String city)  $default,) {final _that = this;
 switch (_that) {
 case _Offer():
-return $default(_that.booking,_that.expiresAt);case _:
+return $default(_that.booking,_that.expiresAt,_that.distanceKm,_that.postcode,_that.city);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +214,10 @@ return $default(_that.booking,_that.expiresAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Booking booking,  DateTime expiresAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Booking booking,  DateTime expiresAt,  double distanceKm,  String postcode,  String city)?  $default,) {final _that = this;
 switch (_that) {
 case _Offer() when $default != null:
-return $default(_that.booking,_that.expiresAt);case _:
+return $default(_that.booking,_that.expiresAt,_that.distanceKm,_that.postcode,_that.city);case _:
   return null;
 
 }
@@ -225,11 +229,15 @@ return $default(_that.booking,_that.expiresAt);case _:
 @JsonSerializable()
 
 class _Offer implements Offer {
-  const _Offer({required this.booking, required this.expiresAt});
+  const _Offer({required this.booking, required this.expiresAt, required this.distanceKm, required this.postcode, required this.city});
   factory _Offer.fromJson(Map<String, dynamic> json) => _$OfferFromJson(json);
 
 @override final  Booking booking;
 @override final  DateTime expiresAt;
+/// From the cleaner's last known position to the address.
+@override final  double distanceKm;
+@override final  String postcode;
+@override final  String city;
 
 /// Create a copy of Offer
 /// with the given fields replaced by the non-null parameter values.
@@ -244,18 +252,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Offer&&(identical(other.booking, booking) || other.booking == booking)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Offer&&(identical(other.booking, booking) || other.booking == booking)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.distanceKm, distanceKm) || other.distanceKm == distanceKm)&&(identical(other.postcode, postcode) || other.postcode == postcode)&&(identical(other.city, city) || other.city == city));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,booking,expiresAt);
+    return Object.hash(runtimeType,booking,expiresAt,distanceKm,postcode,city);
 }
 
 @override
 String toString() {
-    return 'Offer(booking: $booking, expiresAt: $expiresAt)';
+    return 'Offer(booking: $booking, expiresAt: $expiresAt, distanceKm: $distanceKm, postcode: $postcode, city: $city)';
 }
 
 
@@ -266,7 +274,7 @@ abstract mixin class _$OfferCopyWith<$Res> implements $OfferCopyWith<$Res> {
   factory _$OfferCopyWith(_Offer value, $Res Function(_Offer) _then) = __$OfferCopyWithImpl;
 @override @useResult
 $Res call({
- Booking booking, DateTime expiresAt
+ Booking booking, DateTime expiresAt, double distanceKm, String postcode, String city
 });
 
 
@@ -283,11 +291,14 @@ class __$OfferCopyWithImpl<$Res>
 
 /// Create a copy of Offer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? booking = null,Object? expiresAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? booking = null,Object? expiresAt = null,Object? distanceKm = null,Object? postcode = null,Object? city = null,}) {
   return _then(_Offer(
 booking: null == booking ? _self.booking : booking // ignore: cast_nullable_to_non_nullable
 as Booking,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,distanceKm: null == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double,postcode: null == postcode ? _self.postcode : postcode // ignore: cast_nullable_to_non_nullable
+as String,city: null == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -587,8 +598,8 @@ as String,
 /// @nodoc
 mixin _$EarningsDay {
 
-/// `yyyy-MM-dd`.
- String get date;/// Pence.
+/// `yyyy-MM-dd`, local day of the service.
+ String get date;/// Pence, tips included.
  int get amount;
 /// Create a copy of EarningsDay
 /// with the given fields replaced by the non-null parameter values.
@@ -792,9 +803,9 @@ class _EarningsDay implements EarningsDay {
   const _EarningsDay({required this.date, required this.amount});
   factory _EarningsDay.fromJson(Map<String, dynamic> json) => _$EarningsDayFromJson(json);
 
-/// `yyyy-MM-dd`.
+/// `yyyy-MM-dd`, local day of the service.
 @override final  String date;
-/// Pence.
+/// Pence, tips included.
 @override final  int amount;
 
 /// Create a copy of EarningsDay
@@ -864,7 +875,9 @@ as int,
 /// @nodoc
 mixin _$EarningsJob {
 
- String get bookingId; int get amount; String get code; String get serviceTitle; DateTime? get completedAt;
+ String get bookingId; String get code; String get serviceTitle; DateTime get start; int get minutes;/// Pence, without the tip.
+ int get amount;/// Pence.
+ int get tip;
 /// Create a copy of EarningsJob
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -878,20 +891,20 @@ $EarningsJobCopyWith<EarningsJob> get copyWith => _$EarningsJobCopyWithImpl<Earn
 @override
 bool operator ==(Object other) {
   final _this = this as EarningsJob;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EarningsJob&&(identical(other.bookingId, _this.bookingId) || other.bookingId == _this.bookingId)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.serviceTitle, _this.serviceTitle) || other.serviceTitle == _this.serviceTitle)&&(identical(other.completedAt, _this.completedAt) || other.completedAt == _this.completedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EarningsJob&&(identical(other.bookingId, _this.bookingId) || other.bookingId == _this.bookingId)&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.serviceTitle, _this.serviceTitle) || other.serviceTitle == _this.serviceTitle)&&(identical(other.start, _this.start) || other.start == _this.start)&&(identical(other.minutes, _this.minutes) || other.minutes == _this.minutes)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.tip, _this.tip) || other.tip == _this.tip));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as EarningsJob;
-  return Object.hash(runtimeType,_this.bookingId,_this.amount,_this.code,_this.serviceTitle,_this.completedAt);
+  return Object.hash(runtimeType,_this.bookingId,_this.code,_this.serviceTitle,_this.start,_this.minutes,_this.amount,_this.tip);
 }
 
 @override
 String toString() {
   final _this = this as EarningsJob;
-  return 'EarningsJob(bookingId: ${_this.bookingId}, amount: ${_this.amount}, code: ${_this.code}, serviceTitle: ${_this.serviceTitle}, completedAt: ${_this.completedAt})';
+  return 'EarningsJob(bookingId: ${_this.bookingId}, code: ${_this.code}, serviceTitle: ${_this.serviceTitle}, start: ${_this.start}, minutes: ${_this.minutes}, amount: ${_this.amount}, tip: ${_this.tip})';
 }
 
 
@@ -902,7 +915,7 @@ abstract mixin class $EarningsJobCopyWith<$Res>  {
   factory $EarningsJobCopyWith(EarningsJob value, $Res Function(EarningsJob) _then) = _$EarningsJobCopyWithImpl;
 @useResult
 $Res call({
- String bookingId, int amount, String code, String serviceTitle, DateTime? completedAt
+ String bookingId, String code, String serviceTitle, DateTime start, int minutes, int amount, int tip
 });
 
 
@@ -919,14 +932,16 @@ class _$EarningsJobCopyWithImpl<$Res>
 
 /// Create a copy of EarningsJob
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? bookingId = null,Object? amount = null,Object? code = null,Object? serviceTitle = null,Object? completedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? bookingId = null,Object? code = null,Object? serviceTitle = null,Object? start = null,Object? minutes = null,Object? amount = null,Object? tip = null,}) {
   return _then(EarningsJob(
 bookingId: null == bookingId ? _self.bookingId : bookingId // ignore: cast_nullable_to_non_nullable
-as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as int,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,serviceTitle: null == serviceTitle ? _self.serviceTitle : serviceTitle // ignore: cast_nullable_to_non_nullable
-as String,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as String,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as DateTime,minutes: null == minutes ? _self.minutes : minutes // ignore: cast_nullable_to_non_nullable
+as int,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as int,tip: null == tip ? _self.tip : tip // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -1011,10 +1026,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bookingId,  int amount,  String code,  String serviceTitle,  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bookingId,  String code,  String serviceTitle,  DateTime start,  int minutes,  int amount,  int tip)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EarningsJob() when $default != null:
-return $default(_that.bookingId,_that.amount,_that.code,_that.serviceTitle,_that.completedAt);case _:
+return $default(_that.bookingId,_that.code,_that.serviceTitle,_that.start,_that.minutes,_that.amount,_that.tip);case _:
   return orElse();
 
 }
@@ -1032,10 +1047,10 @@ return $default(_that.bookingId,_that.amount,_that.code,_that.serviceTitle,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bookingId,  int amount,  String code,  String serviceTitle,  DateTime? completedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bookingId,  String code,  String serviceTitle,  DateTime start,  int minutes,  int amount,  int tip)  $default,) {final _that = this;
 switch (_that) {
 case _EarningsJob():
-return $default(_that.bookingId,_that.amount,_that.code,_that.serviceTitle,_that.completedAt);case _:
+return $default(_that.bookingId,_that.code,_that.serviceTitle,_that.start,_that.minutes,_that.amount,_that.tip);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1052,10 +1067,10 @@ return $default(_that.bookingId,_that.amount,_that.code,_that.serviceTitle,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bookingId,  int amount,  String code,  String serviceTitle,  DateTime? completedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bookingId,  String code,  String serviceTitle,  DateTime start,  int minutes,  int amount,  int tip)?  $default,) {final _that = this;
 switch (_that) {
 case _EarningsJob() when $default != null:
-return $default(_that.bookingId,_that.amount,_that.code,_that.serviceTitle,_that.completedAt);case _:
+return $default(_that.bookingId,_that.code,_that.serviceTitle,_that.start,_that.minutes,_that.amount,_that.tip);case _:
   return null;
 
 }
@@ -1067,14 +1082,18 @@ return $default(_that.bookingId,_that.amount,_that.code,_that.serviceTitle,_that
 @JsonSerializable()
 
 class _EarningsJob implements EarningsJob {
-  const _EarningsJob({required this.bookingId, required this.amount, this.code = '', this.serviceTitle = '', this.completedAt});
+  const _EarningsJob({required this.bookingId, required this.code, required this.serviceTitle, required this.start, required this.minutes, required this.amount, required this.tip});
   factory _EarningsJob.fromJson(Map<String, dynamic> json) => _$EarningsJobFromJson(json);
 
 @override final  String bookingId;
+@override final  String code;
+@override final  String serviceTitle;
+@override final  DateTime start;
+@override final  int minutes;
+/// Pence, without the tip.
 @override final  int amount;
-@override@JsonKey() final  String code;
-@override@JsonKey() final  String serviceTitle;
-@override final  DateTime? completedAt;
+/// Pence.
+@override final  int tip;
 
 /// Create a copy of EarningsJob
 /// with the given fields replaced by the non-null parameter values.
@@ -1089,18 +1108,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EarningsJob&&(identical(other.bookingId, bookingId) || other.bookingId == bookingId)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.code, code) || other.code == code)&&(identical(other.serviceTitle, serviceTitle) || other.serviceTitle == serviceTitle)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EarningsJob&&(identical(other.bookingId, bookingId) || other.bookingId == bookingId)&&(identical(other.code, code) || other.code == code)&&(identical(other.serviceTitle, serviceTitle) || other.serviceTitle == serviceTitle)&&(identical(other.start, start) || other.start == start)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.tip, tip) || other.tip == tip));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,bookingId,amount,code,serviceTitle,completedAt);
+    return Object.hash(runtimeType,bookingId,code,serviceTitle,start,minutes,amount,tip);
 }
 
 @override
 String toString() {
-    return 'EarningsJob(bookingId: $bookingId, amount: $amount, code: $code, serviceTitle: $serviceTitle, completedAt: $completedAt)';
+    return 'EarningsJob(bookingId: $bookingId, code: $code, serviceTitle: $serviceTitle, start: $start, minutes: $minutes, amount: $amount, tip: $tip)';
 }
 
 
@@ -1111,7 +1130,7 @@ abstract mixin class _$EarningsJobCopyWith<$Res> implements $EarningsJobCopyWith
   factory _$EarningsJobCopyWith(_EarningsJob value, $Res Function(_EarningsJob) _then) = __$EarningsJobCopyWithImpl;
 @override @useResult
 $Res call({
- String bookingId, int amount, String code, String serviceTitle, DateTime? completedAt
+ String bookingId, String code, String serviceTitle, DateTime start, int minutes, int amount, int tip
 });
 
 
@@ -1128,14 +1147,16 @@ class __$EarningsJobCopyWithImpl<$Res>
 
 /// Create a copy of EarningsJob
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? bookingId = null,Object? amount = null,Object? code = null,Object? serviceTitle = null,Object? completedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? bookingId = null,Object? code = null,Object? serviceTitle = null,Object? start = null,Object? minutes = null,Object? amount = null,Object? tip = null,}) {
   return _then(_EarningsJob(
 bookingId: null == bookingId ? _self.bookingId : bookingId // ignore: cast_nullable_to_non_nullable
-as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as int,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,serviceTitle: null == serviceTitle ? _self.serviceTitle : serviceTitle // ignore: cast_nullable_to_non_nullable
-as String,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as String,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as DateTime,minutes: null == minutes ? _self.minutes : minutes // ignore: cast_nullable_to_non_nullable
+as int,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as int,tip: null == tip ? _self.tip : tip // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -1146,7 +1167,14 @@ as DateTime?,
 /// @nodoc
 mixin _$Earnings {
 
- int get total; int get jobs; int get tips; List<EarningsDay> get days; List<EarningsJob> get recent;
+/// `week` or `month`.
+ String get period;/// First and last day of the period, `yyyy-MM-dd`.
+ String get from; String get to;/// Sum of the job payouts, tips not included.
+ int get total;/// Tips from the same jobs.
+ int get tips; int get jobs;/// Time spent on the completed jobs.
+ int get minutes;/// One entry per day of the period.
+ List<EarningsDay> get days;/// The latest completed jobs, newest first.
+ List<EarningsJob> get recent;
 /// Create a copy of Earnings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1160,20 +1188,20 @@ $EarningsCopyWith<Earnings> get copyWith => _$EarningsCopyWithImpl<Earnings>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Earnings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Earnings&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.jobs, _this.jobs) || other.jobs == _this.jobs)&&(identical(other.tips, _this.tips) || other.tips == _this.tips)&&const DeepCollectionEquality().equals(other.days, _this.days)&&const DeepCollectionEquality().equals(other.recent, _this.recent));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Earnings&&(identical(other.period, _this.period) || other.period == _this.period)&&(identical(other.from, _this.from) || other.from == _this.from)&&(identical(other.to, _this.to) || other.to == _this.to)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.tips, _this.tips) || other.tips == _this.tips)&&(identical(other.jobs, _this.jobs) || other.jobs == _this.jobs)&&(identical(other.minutes, _this.minutes) || other.minutes == _this.minutes)&&const DeepCollectionEquality().equals(other.days, _this.days)&&const DeepCollectionEquality().equals(other.recent, _this.recent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Earnings;
-  return Object.hash(runtimeType,_this.total,_this.jobs,_this.tips,const DeepCollectionEquality().hash(_this.days),const DeepCollectionEquality().hash(_this.recent));
+  return Object.hash(runtimeType,_this.period,_this.from,_this.to,_this.total,_this.tips,_this.jobs,_this.minutes,const DeepCollectionEquality().hash(_this.days),const DeepCollectionEquality().hash(_this.recent));
 }
 
 @override
 String toString() {
   final _this = this as Earnings;
-  return 'Earnings(total: ${_this.total}, jobs: ${_this.jobs}, tips: ${_this.tips}, days: ${_this.days}, recent: ${_this.recent})';
+  return 'Earnings(period: ${_this.period}, from: ${_this.from}, to: ${_this.to}, total: ${_this.total}, tips: ${_this.tips}, jobs: ${_this.jobs}, minutes: ${_this.minutes}, days: ${_this.days}, recent: ${_this.recent})';
 }
 
 
@@ -1184,7 +1212,7 @@ abstract mixin class $EarningsCopyWith<$Res>  {
   factory $EarningsCopyWith(Earnings value, $Res Function(Earnings) _then) = _$EarningsCopyWithImpl;
 @useResult
 $Res call({
- int total, int jobs, int tips, List<EarningsDay> days, List<EarningsJob> recent
+ String period, String from, String to, int total, int tips, int jobs, int minutes, List<EarningsDay> days, List<EarningsJob> recent
 });
 
 
@@ -1201,11 +1229,15 @@ class _$EarningsCopyWithImpl<$Res>
 
 /// Create a copy of Earnings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? total = null,Object? jobs = null,Object? tips = null,Object? days = null,Object? recent = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? period = null,Object? from = null,Object? to = null,Object? total = null,Object? tips = null,Object? jobs = null,Object? minutes = null,Object? days = null,Object? recent = null,}) {
   return _then(Earnings(
-total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,jobs: null == jobs ? _self.jobs : jobs // ignore: cast_nullable_to_non_nullable
+period: null == period ? _self.period : period // ignore: cast_nullable_to_non_nullable
+as String,from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,tips: null == tips ? _self.tips : tips // ignore: cast_nullable_to_non_nullable
+as int,jobs: null == jobs ? _self.jobs : jobs // ignore: cast_nullable_to_non_nullable
+as int,minutes: null == minutes ? _self.minutes : minutes // ignore: cast_nullable_to_non_nullable
 as int,days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
 as List<EarningsDay>,recent: null == recent ? _self.recent : recent // ignore: cast_nullable_to_non_nullable
 as List<EarningsJob>,
@@ -1293,10 +1325,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int total,  int jobs,  int tips,  List<EarningsDay> days,  List<EarningsJob> recent)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String period,  String from,  String to,  int total,  int tips,  int jobs,  int minutes,  List<EarningsDay> days,  List<EarningsJob> recent)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Earnings() when $default != null:
-return $default(_that.total,_that.jobs,_that.tips,_that.days,_that.recent);case _:
+return $default(_that.period,_that.from,_that.to,_that.total,_that.tips,_that.jobs,_that.minutes,_that.days,_that.recent);case _:
   return orElse();
 
 }
@@ -1314,10 +1346,10 @@ return $default(_that.total,_that.jobs,_that.tips,_that.days,_that.recent);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int total,  int jobs,  int tips,  List<EarningsDay> days,  List<EarningsJob> recent)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String period,  String from,  String to,  int total,  int tips,  int jobs,  int minutes,  List<EarningsDay> days,  List<EarningsJob> recent)  $default,) {final _that = this;
 switch (_that) {
 case _Earnings():
-return $default(_that.total,_that.jobs,_that.tips,_that.days,_that.recent);case _:
+return $default(_that.period,_that.from,_that.to,_that.total,_that.tips,_that.jobs,_that.minutes,_that.days,_that.recent);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1334,10 +1366,10 @@ return $default(_that.total,_that.jobs,_that.tips,_that.days,_that.recent);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int total,  int jobs,  int tips,  List<EarningsDay> days,  List<EarningsJob> recent)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String period,  String from,  String to,  int total,  int tips,  int jobs,  int minutes,  List<EarningsDay> days,  List<EarningsJob> recent)?  $default,) {final _that = this;
 switch (_that) {
 case _Earnings() when $default != null:
-return $default(_that.total,_that.jobs,_that.tips,_that.days,_that.recent);case _:
+return $default(_that.period,_that.from,_that.to,_that.total,_that.tips,_that.jobs,_that.minutes,_that.days,_that.recent);case _:
   return null;
 
 }
@@ -1349,20 +1381,33 @@ return $default(_that.total,_that.jobs,_that.tips,_that.days,_that.recent);case 
 @JsonSerializable()
 
 class _Earnings implements Earnings {
-  const _Earnings({required this.total, this.jobs = 0, this.tips = 0,  List<EarningsDay> days = const <EarningsDay>[],  List<EarningsJob> recent = const <EarningsJob>[]}): _days = days,_recent = recent;
+  const _Earnings({required this.period, required this.from, required this.to, required this.total, required this.tips, required this.jobs, required this.minutes,  List<EarningsDay> days = const <EarningsDay>[],  List<EarningsJob> recent = const <EarningsJob>[]}): _days = days,_recent = recent;
   factory _Earnings.fromJson(Map<String, dynamic> json) => _$EarningsFromJson(json);
 
+/// `week` or `month`.
+@override final  String period;
+/// First and last day of the period, `yyyy-MM-dd`.
+@override final  String from;
+@override final  String to;
+/// Sum of the job payouts, tips not included.
 @override final  int total;
-@override@JsonKey() final  int jobs;
-@override@JsonKey() final  int tips;
+/// Tips from the same jobs.
+@override final  int tips;
+@override final  int jobs;
+/// Time spent on the completed jobs.
+@override final  int minutes;
+/// One entry per day of the period.
  final  List<EarningsDay> _days;
+/// One entry per day of the period.
 @override@JsonKey() List<EarningsDay> get days {
   if (_days is EqualUnmodifiableListView) return _days;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_days);
 }
 
+/// The latest completed jobs, newest first.
  final  List<EarningsJob> _recent;
+/// The latest completed jobs, newest first.
 @override@JsonKey() List<EarningsJob> get recent {
   if (_recent is EqualUnmodifiableListView) return _recent;
   // ignore: implicit_dynamic_type
@@ -1383,18 +1428,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Earnings&&(identical(other.total, total) || other.total == total)&&(identical(other.jobs, jobs) || other.jobs == jobs)&&(identical(other.tips, tips) || other.tips == tips)&&const DeepCollectionEquality().equals(other.days, _days)&&const DeepCollectionEquality().equals(other.recent, _recent));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Earnings&&(identical(other.period, period) || other.period == period)&&(identical(other.from, from) || other.from == from)&&(identical(other.to, to) || other.to == to)&&(identical(other.total, total) || other.total == total)&&(identical(other.tips, tips) || other.tips == tips)&&(identical(other.jobs, jobs) || other.jobs == jobs)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&const DeepCollectionEquality().equals(other.days, _days)&&const DeepCollectionEquality().equals(other.recent, _recent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,total,jobs,tips,const DeepCollectionEquality().hash(_days),const DeepCollectionEquality().hash(_recent));
+    return Object.hash(runtimeType,period,from,to,total,tips,jobs,minutes,const DeepCollectionEquality().hash(_days),const DeepCollectionEquality().hash(_recent));
 }
 
 @override
 String toString() {
-    return 'Earnings(total: $total, jobs: $jobs, tips: $tips, days: $days, recent: $recent)';
+    return 'Earnings(period: $period, from: $from, to: $to, total: $total, tips: $tips, jobs: $jobs, minutes: $minutes, days: $days, recent: $recent)';
 }
 
 
@@ -1405,7 +1450,7 @@ abstract mixin class _$EarningsCopyWith<$Res> implements $EarningsCopyWith<$Res>
   factory _$EarningsCopyWith(_Earnings value, $Res Function(_Earnings) _then) = __$EarningsCopyWithImpl;
 @override @useResult
 $Res call({
- int total, int jobs, int tips, List<EarningsDay> days, List<EarningsJob> recent
+ String period, String from, String to, int total, int tips, int jobs, int minutes, List<EarningsDay> days, List<EarningsJob> recent
 });
 
 
@@ -1422,11 +1467,15 @@ class __$EarningsCopyWithImpl<$Res>
 
 /// Create a copy of Earnings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? total = null,Object? jobs = null,Object? tips = null,Object? days = null,Object? recent = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? period = null,Object? from = null,Object? to = null,Object? total = null,Object? tips = null,Object? jobs = null,Object? minutes = null,Object? days = null,Object? recent = null,}) {
   return _then(_Earnings(
-total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,jobs: null == jobs ? _self.jobs : jobs // ignore: cast_nullable_to_non_nullable
+period: null == period ? _self.period : period // ignore: cast_nullable_to_non_nullable
+as String,from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,tips: null == tips ? _self.tips : tips // ignore: cast_nullable_to_non_nullable
+as int,jobs: null == jobs ? _self.jobs : jobs // ignore: cast_nullable_to_non_nullable
+as int,minutes: null == minutes ? _self.minutes : minutes // ignore: cast_nullable_to_non_nullable
 as int,days: null == days ? _self._days : days // ignore: cast_nullable_to_non_nullable
 as List<EarningsDay>,recent: null == recent ? _self._recent : recent // ignore: cast_nullable_to_non_nullable
 as List<EarningsJob>,

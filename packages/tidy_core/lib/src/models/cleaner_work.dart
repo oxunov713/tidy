@@ -4,12 +4,19 @@ import 'package:tidy_core/src/models/booking.dart';
 part 'cleaner_work.freezed.dart';
 part 'cleaner_work.g.dart';
 
-/// A job offered to a cleaner. Valid until [expiresAt] (60 seconds).
+/// An open offer from `GET /cleaner/offers`. Valid until [expiresAt] (60
+/// seconds after it was sent). The street address is only shared once the job
+/// is accepted, so the offer has just the area.
 @freezed
 abstract class Offer with _$Offer {
   const factory Offer({
     required Booking booking,
     required DateTime expiresAt,
+
+    /// From the cleaner's last known position to the address.
+    required double distanceKm,
+    required String postcode,
+    required String city,
   }) = _Offer;
 
   factory Offer.fromJson(Map<String, dynamic> json) => _$OfferFromJson(json);
@@ -34,10 +41,10 @@ abstract class AvailabilityWindow with _$AvailabilityWindow {
 @freezed
 abstract class EarningsDay with _$EarningsDay {
   const factory EarningsDay({
-    /// `yyyy-MM-dd`.
+    /// `yyyy-MM-dd`, local day of the service.
     required String date,
 
-    /// Pence.
+    /// Pence, tips included.
     required int amount,
   }) = _EarningsDay;
 
@@ -45,14 +52,21 @@ abstract class EarningsDay with _$EarningsDay {
       _$EarningsDayFromJson(json);
 }
 
+/// A completed job in the earnings list.
 @freezed
 abstract class EarningsJob with _$EarningsJob {
   const factory EarningsJob({
     required String bookingId,
+    required String code,
+    required String serviceTitle,
+    required DateTime start,
+    required int minutes,
+
+    /// Pence, without the tip.
     required int amount,
-    @Default('') String code,
-    @Default('') String serviceTitle,
-    DateTime? completedAt,
+
+    /// Pence.
+    required int tip,
   }) = _EarningsJob;
 
   factory EarningsJob.fromJson(Map<String, dynamic> json) =>
@@ -63,10 +77,27 @@ abstract class EarningsJob with _$EarningsJob {
 @freezed
 abstract class Earnings with _$Earnings {
   const factory Earnings({
+    /// `week` or `month`.
+    required String period,
+
+    /// First and last day of the period, `yyyy-MM-dd`.
+    required String from,
+    required String to,
+
+    /// Sum of the job payouts, tips not included.
     required int total,
-    @Default(0) int jobs,
-    @Default(0) int tips,
+
+    /// Tips from the same jobs.
+    required int tips,
+    required int jobs,
+
+    /// Time spent on the completed jobs.
+    required int minutes,
+
+    /// One entry per day of the period.
     @Default(<EarningsDay>[]) List<EarningsDay> days,
+
+    /// The latest completed jobs, newest first.
     @Default(<EarningsJob>[]) List<EarningsJob> recent,
   }) = _Earnings;
 

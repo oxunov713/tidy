@@ -12,8 +12,8 @@ abstract class Address with _$Address {
     required String postcode,
     required double lat,
     required double lng,
-    @Default('') String line2,
-    @Default('') String accessNotes,
+    required String line2,
+    required String accessNotes,
   }) = _Address;
 
   factory Address.fromJson(Map<String, dynamic> json) =>

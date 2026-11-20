@@ -13,8 +13,8 @@ _Address _$AddressFromJson(Map<String, dynamic> json) => _Address(
   postcode: json['postcode'] as String,
   lat: (json['lat'] as num).toDouble(),
   lng: (json['lng'] as num).toDouble(),
-  line2: json['line2'] as String? ?? '',
-  accessNotes: json['access_notes'] as String? ?? '',
+  line2: json['line2'] as String,
+  accessNotes: json['access_notes'] as String,
 );
 
 Map<String, dynamic> _$AddressToJson(_Address instance) => <String, dynamic>{

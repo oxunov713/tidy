@@ -9,11 +9,17 @@ part of 'cleaner_work.dart';
 _Offer _$OfferFromJson(Map<String, dynamic> json) => _Offer(
   booking: Booking.fromJson(json['booking'] as Map<String, dynamic>),
   expiresAt: DateTime.parse(json['expires_at'] as String),
+  distanceKm: (json['distance_km'] as num).toDouble(),
+  postcode: json['postcode'] as String,
+  city: json['city'] as String,
 );
 
 Map<String, dynamic> _$OfferToJson(_Offer instance) => <String, dynamic>{
   'booking': instance.booking.toJson(),
   'expires_at': instance.expiresAt.toIso8601String(),
+  'distance_km': instance.distanceKm,
+  'postcode': instance.postcode,
+  'city': instance.city,
 };
 
 _AvailabilityWindow _$AvailabilityWindowFromJson(Map<String, dynamic> json) =>
@@ -40,27 +46,33 @@ Map<String, dynamic> _$EarningsDayToJson(_EarningsDay instance) =>
 
 _EarningsJob _$EarningsJobFromJson(Map<String, dynamic> json) => _EarningsJob(
   bookingId: json['booking_id'] as String,
+  code: json['code'] as String,
+  serviceTitle: json['service_title'] as String,
+  start: DateTime.parse(json['start'] as String),
+  minutes: (json['minutes'] as num).toInt(),
   amount: (json['amount'] as num).toInt(),
-  code: json['code'] as String? ?? '',
-  serviceTitle: json['service_title'] as String? ?? '',
-  completedAt: json['completed_at'] == null
-      ? null
-      : DateTime.parse(json['completed_at'] as String),
+  tip: (json['tip'] as num).toInt(),
 );
 
 Map<String, dynamic> _$EarningsJobToJson(_EarningsJob instance) =>
     <String, dynamic>{
       'booking_id': instance.bookingId,
-      'amount': instance.amount,
       'code': instance.code,
       'service_title': instance.serviceTitle,
-      'completed_at': instance.completedAt?.toIso8601String(),
+      'start': instance.start.toIso8601String(),
+      'minutes': instance.minutes,
+      'amount': instance.amount,
+      'tip': instance.tip,
     };
 
 _Earnings _$EarningsFromJson(Map<String, dynamic> json) => _Earnings(
+  period: json['period'] as String,
+  from: json['from'] as String,
+  to: json['to'] as String,
   total: (json['total'] as num).toInt(),
-  jobs: (json['jobs'] as num?)?.toInt() ?? 0,
-  tips: (json['tips'] as num?)?.toInt() ?? 0,
+  tips: (json['tips'] as num).toInt(),
+  jobs: (json['jobs'] as num).toInt(),
+  minutes: (json['minutes'] as num).toInt(),
   days:
       (json['days'] as List<dynamic>?)
           ?.map((e) => EarningsDay.fromJson(e as Map<String, dynamic>))
@@ -74,9 +86,13 @@ _Earnings _$EarningsFromJson(Map<String, dynamic> json) => _Earnings(
 );
 
 Map<String, dynamic> _$EarningsToJson(_Earnings instance) => <String, dynamic>{
+  'period': instance.period,
+  'from': instance.from,
+  'to': instance.to,
   'total': instance.total,
-  'jobs': instance.jobs,
   'tips': instance.tips,
+  'jobs': instance.jobs,
+  'minutes': instance.minutes,
   'days': instance.days.map((e) => e.toJson()).toList(),
   'recent': instance.recent.map((e) => e.toJson()).toList(),
 };

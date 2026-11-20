@@ -13,11 +13,25 @@ class ApiTransport {
   Future<Json> getObject(String path, {Json? query}) =>
       _send<Json>('GET', path, query: query).then(_object);
 
-  Future<List<Json>> getList(String path, {Json? query}) =>
-      _send<List<dynamic>>('GET', path, query: query).then(_list);
+  Future<List<Json>> getList(
+    String path, {
+    Json? query,
+    bool skipAuth = false,
+  }) => _send<List<dynamic>>(
+    'GET',
+    path,
+    query: query,
+    skipAuth: skipAuth,
+  ).then(_list);
 
   Future<Json> postObject(String path, {Object? body}) =>
       _send<Json>('POST', path, body: body).then(_object);
+
+  Future<List<Json>> putList(String path, {Object? body}) =>
+      _send<List<dynamic>>('PUT', path, body: body).then(_list);
+
+  Future<Json> putObject(String path, {Object? body}) =>
+      _send<Json>('PUT', path, body: body).then(_object);
 
   /// For endpoints documented as `204` or whose body the app does not need.
   Future<void> postVoid(String path, {Object? body, bool skipAuth = false}) =>
@@ -25,12 +39,6 @@ class ApiTransport {
 
   Future<Json> patchObject(String path, {Object? body}) =>
       _send<Json>('PATCH', path, body: body).then(_object);
-
-  Future<void> patchVoid(String path, {Object? body}) =>
-      _send<Object>('PATCH', path, body: body);
-
-  Future<void> putVoid(String path, {Object? body}) =>
-      _send<Object>('PUT', path, body: body);
 
   Future<void> deleteVoid(String path) => _send<Object>('DELETE', path);
 

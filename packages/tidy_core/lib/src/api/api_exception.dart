@@ -108,7 +108,9 @@ sealed class ApiException implements Exception {
   /// The `code` from the error envelope, when there was one.
   final String? code;
   final int? statusCode;
-  final Object? details;
+
+  /// Field name to problem, for `invalid_request`.
+  final Map<String, String>? details;
 
   @override
   String toString() => 'ApiException($code, $statusCode): $message';

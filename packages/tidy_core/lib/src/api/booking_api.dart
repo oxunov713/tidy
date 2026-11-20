@@ -2,19 +2,19 @@ import 'package:tidy_core/src/api/api_transport.dart';
 import 'package:tidy_core/src/models/models.dart';
 
 /// Client-side booking endpoints.
-///
-/// Calls that change state (`cancel`, `review`) return nothing; fetch the
-/// booking again with [get] or wait for the `booking.status` WebSocket event.
 class BookingApi {
   BookingApi(this._http);
 
   final ApiTransport _http;
 
-  /// `POST /quotes`. Prices always come from the server.
-  Future<Quote> quote(QuoteRequest request) async =>
-      Quote.fromJson(await _http.postObject('/quotes', body: request.toJson()));
+  /// `POST /quotes`. Prices always come from the server. Works without being
+  /// signed in, so no token is sent.
+  Future<Quote> quote(QuoteRequest request) async => Quote.fromJson(
+    await _http.postObjectPublic('/quotes', body: request.toJson()),
+  );
 
-  /// `GET /slots`. [date] is only used for its year, month and day.
+  /// `GET /slots`. [date] is only used for its year, month and day. Pass
+  /// [cleanerId] to check one cleaner only ("book Sarah again").
   ///
   /// `extra_ids` is sent comma-separated, e.g. `extra_ids=a,b`.
   Future<SlotsResponse> slots({
@@ -47,25 +47,39 @@ class BookingApi {
     return BookingCreated.fromJson(json);
   }
 
+  /// One page of the client's bookings, 20 by default (at most 50). Pass the
+  /// previous page's `nextCursor` to get the next one.
   Future<BookingPage> list({
     BookingScope scope = BookingScope.upcoming,
     String? cursor,
+    int? limit,
   }) async {
     final json = await _http.getObject(
       '/bookings',
-      query: {'scope': scope.name, 'cursor': ?cursor},
+      query: {
+        'scope': scope.name,
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+        'limit': ?limit,
+      },
     );
     return BookingPage.fromJson(json);
   }
 
-  Future<Booking> get(String id) async =>
-      Booking.fromJson(await _http.getObject('/bookings/$id'));
+  /// Includes the address, the cleaner, the last location, the history and
+  /// the review.
+  Future<BookingDetails> get(String id) async =>
+      BookingDetails.fromJson(await _http.getObject('/bookings/$id'));
 
-  /// Free until 24 hours before the start.
-  Future<void> cancel(String id) => _http.postVoid('/bookings/$id/cancel');
+  /// Free until 24 hours before the start; later the full price is charged
+  /// (`refunded` is false).
+  Future<Cancellation> cancel(String id) async =>
+      Cancellation.fromJson(await _http.postObject('/bookings/$id/cancel'));
 
-  Future<void> review(String id, ReviewRequest review) =>
-      _http.postVoid('/bookings/$id/review', body: review.toJson());
+  /// Only after the booking is `completed`.
+  Future<Review> review(String id, ReviewRequest review) async =>
+      Review.fromJson(
+        await _http.postObject('/bookings/$id/review', body: review.toJson()),
+      );
 
   Future<List<Message>> messages(String id) async {
     final list = await _http.getList('/bookings/$id/messages');
