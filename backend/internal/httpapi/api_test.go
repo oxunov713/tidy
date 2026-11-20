@@ -150,6 +150,10 @@ func newEnv(t *testing.T) *testEnv {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Admin tests switch services off; every test starts with the full catalogue.
+	if _, err = store.Pool().Exec(ctx, `UPDATE services SET is_active = true`); err != nil {
+		t.Fatal(err)
+	}
 
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	e := &testEnv{t: t, store: store, codes: &codeBook{codes: map[string]string{}}, payments: &recordingProvider{}}
