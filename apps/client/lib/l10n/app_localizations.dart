@@ -405,6 +405,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete this address?'**
   String get deleteAddressTitle;
+
+  /// No description provided for @homeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi {name}, what needs a clean today?'**
+  String homeGreeting(String name);
+
+  /// No description provided for @homeGreetingAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, what needs a clean today?'**
+  String get homeGreetingAnonymous;
+
+  /// No description provided for @cleaningAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning at'**
+  String get cleaningAt;
+
+  /// No description provided for @addYourAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your address'**
+  String get addYourAddress;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up.'**
+  String get noNotifications;
+
+  /// No description provided for @promoBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'20% OFF'**
+  String get promoBadge;
+
+  /// No description provided for @promoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first deep clean'**
+  String get promoTitle;
+
+  /// No description provided for @promoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code TIDY20 at checkout'**
+  String get promoCode;
+
+  /// No description provided for @servicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get servicesTitle;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
+
+  /// No description provided for @noServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No services available'**
+  String get noServicesTitle;
+
+  /// No description provided for @noServicesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back soon, we are adding more.'**
+  String get noServicesBody;
+
+  /// No description provided for @badgeMostBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'MOST BOOKED'**
+  String get badgeMostBooked;
+
+  /// No description provided for @badgePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'PREMIUM'**
+  String get badgePremium;
+
+  /// No description provided for @hoursUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} h'**
+  String hoursUnit(String value);
+
+  /// No description provided for @fromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'FROM'**
+  String get fromLabel;
+
+  /// No description provided for @serviceCardSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}, from {price}'**
+  String serviceCardSemantics(String title, String price);
+
+  /// No description provided for @cleanerOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is on the way'**
+  String cleanerOnTheWay(String name);
+
+  /// No description provided for @cleanerCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is cleaning'**
+  String cleanerCleaning(String name);
+
+  /// No description provided for @cleanerBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is booked for you'**
+  String cleanerBooked(String name);
+
+  /// No description provided for @yourCleanerOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cleaner is on the way'**
+  String get yourCleanerOnTheWay;
+
+  /// No description provided for @yourCleanerCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cleaner is cleaning'**
+  String get yourCleanerCleaning;
+
+  /// No description provided for @yourCleanerBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'A cleaner is booked for you'**
+  String get yourCleanerBooked;
+
+  /// No description provided for @cardDetailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Check this field'**
+  String get cardDetailInvalid;
+
+  /// No description provided for @payAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String payAmount(String amount);
+
+  /// No description provided for @testMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Test mode'**
+  String get testMode;
+
+  /// No description provided for @testModeNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'No real payment is made. Use any card details.'**
+  String get testModeNotice;
+
+  /// No description provided for @cardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Card number'**
+  String get cardNumber;
+
+  /// No description provided for @cardExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'MM/YY'**
+  String get cardExpiry;
+
+  /// No description provided for @cardCvc.
+  ///
+  /// In en, this message translates to:
+  /// **'CVC'**
+  String get cardCvc;
 }
 
 class _AppLocalizationsDelegate

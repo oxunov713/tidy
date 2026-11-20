@@ -75,5 +75,88 @@
   "noAddressesBody": "Add the place you want cleaned and drop a pin so cleaners can find it.",
   "addAddress": "Add address",
   "deleteAddress": "Delete",
-  "deleteAddressTitle": "Delete this address?"
+  "deleteAddressTitle": "Delete this address?",
+  "homeGreeting": "Hi {name}, what needs a clean today?",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingAnonymous": "Hi, what needs a clean today?",
+  "cleaningAt": "Cleaning at",
+  "addYourAddress": "Add your address",
+  "notifications": "Notifications",
+  "noNotifications": "You're all caught up.",
+  "promoBadge": "20% OFF",
+  "promoTitle": "Your first deep clean",
+  "promoCode": "Code TIDY20 at checkout",
+  "servicesTitle": "Services",
+  "seeAll": "See all",
+  "noServicesTitle": "No services available",
+  "noServicesBody": "Check back soon, we are adding more.",
+  "badgeMostBooked": "MOST BOOKED",
+  "badgePremium": "PREMIUM",
+  "hoursUnit": "{value} h",
+  "@hoursUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fromLabel": "FROM",
+  "serviceCardSemantics": "{title}, from {price}",
+  "@serviceCardSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerOnTheWay": "{name} is on the way",
+  "@cleanerOnTheWay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerCleaning": "{name} is cleaning",
+  "@cleanerCleaning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerBooked": "{name} is booked for you",
+  "@cleanerBooked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "yourCleanerOnTheWay": "Your cleaner is on the way",
+  "yourCleanerCleaning": "Your cleaner is cleaning",
+  "yourCleanerBooked": "A cleaner is booked for you",
+  "cardDetailInvalid": "Check this field",
+  "payAmount": "Pay {amount}",
+  "@payAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "testMode": "Test mode",
+  "testModeNotice": "No real payment is made. Use any card details.",
+  "cardNumber": "Card number",
+  "cardExpiry": "MM/YY",
+  "cardCvc": "CVC"
 }

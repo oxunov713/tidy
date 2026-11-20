@@ -174,4 +174,113 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get deleteAddressTitle => 'Bu manzil o‘chirilsinmi?';
+
+  @override
+  String homeGreeting(String name) {
+    return 'Salom, $name! Bugun nimani tozalaymiz?';
+  }
+
+  @override
+  String get homeGreetingAnonymous => 'Salom! Bugun nimani tozalaymiz?';
+
+  @override
+  String get cleaningAt => 'Tozalash manzili';
+
+  @override
+  String get addYourAddress => 'Manzilingizni qo‘shing';
+
+  @override
+  String get notifications => 'Bildirishnomalar';
+
+  @override
+  String get noNotifications => 'Yangi bildirishnomalar yo‘q.';
+
+  @override
+  String get promoBadge => '20% CHEGIRMA';
+
+  @override
+  String get promoTitle => 'Birinchi chuqur tozalashingiz';
+
+  @override
+  String get promoCode => 'To‘lovda TIDY20 kodidan foydalaning';
+
+  @override
+  String get servicesTitle => 'Xizmatlar';
+
+  @override
+  String get seeAll => 'Barchasi';
+
+  @override
+  String get noServicesTitle => 'Xizmatlar mavjud emas';
+
+  @override
+  String get noServicesBody =>
+      'Yaqinda qaytib keling, yangilarini qo‘shyapmiz.';
+
+  @override
+  String get badgeMostBooked => 'ENG KO‘P BUYURTMA';
+
+  @override
+  String get badgePremium => 'PREMIUM';
+
+  @override
+  String hoursUnit(String value) {
+    return '$value soat';
+  }
+
+  @override
+  String get fromLabel => 'DAN';
+
+  @override
+  String serviceCardSemantics(String title, String price) {
+    return '$title, $price dan';
+  }
+
+  @override
+  String cleanerOnTheWay(String name) {
+    return '$name yo‘lda';
+  }
+
+  @override
+  String cleanerCleaning(String name) {
+    return '$name tozalayapti';
+  }
+
+  @override
+  String cleanerBooked(String name) {
+    return '$name buyurtmangizga tayinlandi';
+  }
+
+  @override
+  String get yourCleanerOnTheWay => 'Tozalovchingiz yo‘lda';
+
+  @override
+  String get yourCleanerCleaning => 'Tozalovchingiz tozalayapti';
+
+  @override
+  String get yourCleanerBooked => 'Buyurtmangizga tozalovchi tayinlandi';
+
+  @override
+  String get cardDetailInvalid => 'Maydonni tekshiring';
+
+  @override
+  String payAmount(String amount) {
+    return '$amount to‘lash';
+  }
+
+  @override
+  String get testMode => 'Test rejimi';
+
+  @override
+  String get testModeNotice =>
+      'Haqiqiy to‘lov amalga oshirilmaydi. Istalgan karta ma’lumotlarini kiriting.';
+
+  @override
+  String get cardNumber => 'Karta raqami';
+
+  @override
+  String get cardExpiry => 'OO/YY';
+
+  @override
+  String get cardCvc => 'CVC';
 }

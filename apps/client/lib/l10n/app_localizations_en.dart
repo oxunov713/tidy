@@ -174,4 +174,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAddressTitle => 'Delete this address?';
+
+  @override
+  String homeGreeting(String name) {
+    return 'Hi $name, what needs a clean today?';
+  }
+
+  @override
+  String get homeGreetingAnonymous => 'Hi, what needs a clean today?';
+
+  @override
+  String get cleaningAt => 'Cleaning at';
+
+  @override
+  String get addYourAddress => 'Add your address';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get noNotifications => 'You\'re all caught up.';
+
+  @override
+  String get promoBadge => '20% OFF';
+
+  @override
+  String get promoTitle => 'Your first deep clean';
+
+  @override
+  String get promoCode => 'Code TIDY20 at checkout';
+
+  @override
+  String get servicesTitle => 'Services';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get noServicesTitle => 'No services available';
+
+  @override
+  String get noServicesBody => 'Check back soon, we are adding more.';
+
+  @override
+  String get badgeMostBooked => 'MOST BOOKED';
+
+  @override
+  String get badgePremium => 'PREMIUM';
+
+  @override
+  String hoursUnit(String value) {
+    return '$value h';
+  }
+
+  @override
+  String get fromLabel => 'FROM';
+
+  @override
+  String serviceCardSemantics(String title, String price) {
+    return '$title, from $price';
+  }
+
+  @override
+  String cleanerOnTheWay(String name) {
+    return '$name is on the way';
+  }
+
+  @override
+  String cleanerCleaning(String name) {
+    return '$name is cleaning';
+  }
+
+  @override
+  String cleanerBooked(String name) {
+    return '$name is booked for you';
+  }
+
+  @override
+  String get yourCleanerOnTheWay => 'Your cleaner is on the way';
+
+  @override
+  String get yourCleanerCleaning => 'Your cleaner is cleaning';
+
+  @override
+  String get yourCleanerBooked => 'A cleaner is booked for you';
+
+  @override
+  String get cardDetailInvalid => 'Check this field';
+
+  @override
+  String payAmount(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get testMode => 'Test mode';
+
+  @override
+  String get testModeNotice => 'No real payment is made. Use any card details.';
+
+  @override
+  String get cardNumber => 'Card number';
+
+  @override
+  String get cardExpiry => 'MM/YY';
+
+  @override
+  String get cardCvc => 'CVC';
 }

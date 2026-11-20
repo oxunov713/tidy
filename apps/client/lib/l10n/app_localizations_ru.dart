@@ -173,4 +173,112 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get deleteAddressTitle => 'Удалить этот адрес?';
+
+  @override
+  String homeGreeting(String name) {
+    return 'Привет, $name! Что нужно убрать сегодня?';
+  }
+
+  @override
+  String get homeGreetingAnonymous => 'Привет! Что нужно убрать сегодня?';
+
+  @override
+  String get cleaningAt => 'Уборка по адресу';
+
+  @override
+  String get addYourAddress => 'Добавьте адрес';
+
+  @override
+  String get notifications => 'Уведомления';
+
+  @override
+  String get noNotifications => 'Новых уведомлений нет.';
+
+  @override
+  String get promoBadge => 'СКИДКА 20%';
+
+  @override
+  String get promoTitle => 'Ваша первая генеральная уборка';
+
+  @override
+  String get promoCode => 'Промокод TIDY20 при оплате';
+
+  @override
+  String get servicesTitle => 'Услуги';
+
+  @override
+  String get seeAll => 'Все';
+
+  @override
+  String get noServicesTitle => 'Услуг пока нет';
+
+  @override
+  String get noServicesBody => 'Загляните позже, мы добавляем новые.';
+
+  @override
+  String get badgeMostBooked => 'ПОПУЛЯРНОЕ';
+
+  @override
+  String get badgePremium => 'ПРЕМИУМ';
+
+  @override
+  String hoursUnit(String value) {
+    return '$value ч';
+  }
+
+  @override
+  String get fromLabel => 'ОТ';
+
+  @override
+  String serviceCardSemantics(String title, String price) {
+    return '$title, от $price';
+  }
+
+  @override
+  String cleanerOnTheWay(String name) {
+    return '$name уже в пути';
+  }
+
+  @override
+  String cleanerCleaning(String name) {
+    return '$name убирает';
+  }
+
+  @override
+  String cleanerBooked(String name) {
+    return '$name назначен на ваш заказ';
+  }
+
+  @override
+  String get yourCleanerOnTheWay => 'Ваш клинер в пути';
+
+  @override
+  String get yourCleanerCleaning => 'Ваш клинер убирает';
+
+  @override
+  String get yourCleanerBooked => 'Клинер назначен на ваш заказ';
+
+  @override
+  String get cardDetailInvalid => 'Проверьте поле';
+
+  @override
+  String payAmount(String amount) {
+    return 'Оплатить $amount';
+  }
+
+  @override
+  String get testMode => 'Тестовый режим';
+
+  @override
+  String get testModeNotice =>
+      'Реальная оплата не выполняется. Подойдут любые данные карты.';
+
+  @override
+  String get cardNumber => 'Номер карты';
+
+  @override
+  String get cardExpiry => 'ММ/ГГ';
+
+  @override
+  String get cardCvc => 'CVC';
 }
