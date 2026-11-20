@@ -1,0 +1,17 @@
+include: ../../analysis_options.yaml
+
+analyzer:
+  errors:
+    # one_member_abstracts is deprecated in the linter but still on in
+    # very_good_analysis; turning it off below trips this warning.
+    deprecated_lint: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+
+linter:
+  rules:
+    # Small interfaces (OfferAlerts, MapsLauncher, ...) exist so tests can
+    # swap them; a bare function type would hide the intent.
+    one_member_abstracts: false
