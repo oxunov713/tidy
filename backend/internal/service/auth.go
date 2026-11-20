@@ -226,7 +226,7 @@ func (a *Auth) accessToken(user domain.User) (string, error) {
 // easy to brute force from a leaked plain hash.
 func (a *Auth) hashCode(phone, code string) string {
 	mac := hmac.New(sha256.New, a.cfg.Secret)
-	fmt.Fprintf(mac, "otp:%s:%s", phone, code)
+	mac.Write([]byte("otp:" + phone + ":" + code))
 	return hex.EncodeToString(mac.Sum(nil))
 }
 

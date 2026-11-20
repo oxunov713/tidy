@@ -74,11 +74,11 @@ func (f *FCM) Send(ctx context.Context, token string, n domain.Notification) err
 	}
 	defer resp.Body.Close()
 
-	switch {
-	case resp.StatusCode == http.StatusOK:
+	switch resp.StatusCode {
+	case http.StatusOK:
 		return nil
 	// FCM answers 404 UNREGISTERED once the app is uninstalled.
-	case resp.StatusCode == http.StatusNotFound:
+	case http.StatusNotFound:
 		return domain.ErrDeviceTokenGone
 	default:
 		detail, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))

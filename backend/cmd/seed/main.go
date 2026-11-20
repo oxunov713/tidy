@@ -40,10 +40,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "DATABASE_URL is required")
 		os.Exit(2)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	if err := seed(ctx, url); err != nil {
+	if err := run(url); err != nil {
 		fmt.Fprintln(os.Stderr, "seed:", err)
 		os.Exit(1)
 	}
@@ -53,6 +50,12 @@ func main() {
 		fmt.Printf("  cleaner %s (%s)\n", c.phone, c.name)
 	}
 	fmt.Println("log in with POST /api/v1/auth/otp; in development the code is printed in the api log")
+}
+
+func run(url string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	return seed(ctx, url)
 }
 
 func seed(ctx context.Context, url string) error {
