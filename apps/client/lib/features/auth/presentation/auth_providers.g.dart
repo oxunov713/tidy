@@ -8,47 +8,57 @@ part of 'auth_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Sign-in for the client app: only client accounts get in.
 
-@ProviderFor(authRepository)
-final authRepositoryProvider = AuthRepositoryProvider._();
+@ProviderFor(sessionRepository)
+final sessionRepositoryProvider = SessionRepositoryProvider._();
 
-final class AuthRepositoryProvider
-    extends $FunctionalProvider<AuthRepository, AuthRepository, AuthRepository>
-    with $Provider<AuthRepository> {
-  AuthRepositoryProvider._()
+/// Sign-in for the client app: only client accounts get in.
+
+final class SessionRepositoryProvider
+    extends
+        $FunctionalProvider<
+          SessionRepository,
+          SessionRepository,
+          SessionRepository
+        >
+    with $Provider<SessionRepository> {
+  /// Sign-in for the client app: only client accounts get in.
+  SessionRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authRepositoryProvider',
+        name: r'sessionRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authRepositoryHash();
+  String debugGetCreateSourceHash() => _$sessionRepositoryHash();
 
   @$internal
   @override
-  $ProviderElement<AuthRepository> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<SessionRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  AuthRepository create(Ref ref) {
-    return authRepository(ref);
+  SessionRepository create(Ref ref) {
+    return sessionRepository(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AuthRepository value) {
+  Override overrideWithValue(SessionRepository value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AuthRepository>(value),
+      providerOverride: $SyncValueProvider<SessionRepository>(value),
     );
   }
 }
 
-String _$authRepositoryHash() => r'e352512a9454ae417ee1312296627c443ace290e';
+String _$sessionRepositoryHash() => r'd2064c9dee065bcd7e5ef994d04dae6d8a74b517';
 
 /// The signed-in user, or null when signed out. The router redirects on it.
 
@@ -78,7 +88,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'46047962986bbca7bde077a982d6938cf68f943a';
+String _$authControllerHash() => r'7c99b6a2c262ed2627631511a9cc67a8dc1ff0c7';
 
 /// The signed-in user, or null when signed out. The router redirects on it.
 

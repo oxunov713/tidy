@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/features/auth/presentation/login_page.dart';
+import 'package:tidy_core/testing.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 import '../../helpers/fakes.dart';
@@ -9,7 +10,7 @@ import '../../helpers/pump_app.dart';
 void main() {
   setUpAll(setUpFonts);
 
-  Future<void> signIn(WidgetTester tester, FakeAuthRepository repo) async {
+  Future<void> signIn(WidgetTester tester, FakeSessionRepository repo) async {
     await pumpApp(
       tester,
       const LoginPage(),
@@ -28,7 +29,11 @@ void main() {
   }
 
   testWidgets('a non-admin account sees the no-access message', (tester) async {
-    final repo = FakeAuthRepository(signInAs: cleanerUser('1', 'Sarah'));
+    final repo = fakeAdminSession()
+      ..verifyError = const WrongRoleException(
+        expected: UserRole.admin,
+        actual: UserRole.cleaner,
+      );
     await signIn(tester, repo);
 
     expect(find.text('This account has no admin access.'), findsOneWidget);
@@ -38,7 +43,7 @@ void main() {
   testWidgets('a bad phone number is flagged before anything is sent', (
     tester,
   ) async {
-    final repo = FakeAuthRepository();
+    final repo = fakeAdminSession();
     await pumpApp(
       tester,
       const LoginPage(),
@@ -49,14 +54,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('international format'), findsOneWidget);
-    expect(repo.otpRequests, isEmpty);
+    expect(repo.requestedPhones, isEmpty);
   });
 
   testWidgets('API errors from the code request are shown inline', (
     tester,
   ) async {
-    final repo = FakeAuthRepository()
-      ..otpError = const TooManyRequestsException(message: 'slow');
+    final repo = fakeAdminSession()
+      ..requestOtpError = const TooManyRequestsException(message: 'slow');
     await pumpApp(
       tester,
       const LoginPage(),

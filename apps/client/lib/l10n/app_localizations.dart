@@ -166,6 +166,12 @@ abstract class AppLocalizations {
   /// **'Too many attempts. Please wait a moment.'**
   String get errorTooManyRequests;
 
+  /// No description provided for @errorWrongRole.
+  ///
+  /// In en, this message translates to:
+  /// **'This number belongs to a cleaner account. Use the Tidy Pro app instead.'**
+  String get errorWrongRole;
+
   /// No description provided for @errorSessionExpired.
   ///
   /// In en, this message translates to:

@@ -57,46 +57,60 @@ final class CurrentAdminIdProvider
 
 String _$currentAdminIdHash() => r'cb326627353fe76d6d098d3e753e6d6c579dd831';
 
-@ProviderFor(authRepository)
-final authRepositoryProvider = AuthRepositoryProvider._();
+/// Sign-in for the admin panel. The server never creates an admin account, so
+/// a phone that is not one is refused with a 403.
 
-final class AuthRepositoryProvider
-    extends $FunctionalProvider<AuthRepository, AuthRepository, AuthRepository>
-    with $Provider<AuthRepository> {
-  AuthRepositoryProvider._()
+@ProviderFor(sessionRepository)
+final sessionRepositoryProvider = SessionRepositoryProvider._();
+
+/// Sign-in for the admin panel. The server never creates an admin account, so
+/// a phone that is not one is refused with a 403.
+
+final class SessionRepositoryProvider
+    extends
+        $FunctionalProvider<
+          SessionRepository,
+          SessionRepository,
+          SessionRepository
+        >
+    with $Provider<SessionRepository> {
+  /// Sign-in for the admin panel. The server never creates an admin account, so
+  /// a phone that is not one is refused with a 403.
+  SessionRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authRepositoryProvider',
+        name: r'sessionRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authRepositoryHash();
+  String debugGetCreateSourceHash() => _$sessionRepositoryHash();
 
   @$internal
   @override
-  $ProviderElement<AuthRepository> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<SessionRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  AuthRepository create(Ref ref) {
-    return authRepository(ref);
+  SessionRepository create(Ref ref) {
+    return sessionRepository(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AuthRepository value) {
+  Override overrideWithValue(SessionRepository value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AuthRepository>(value),
+      providerOverride: $SyncValueProvider<SessionRepository>(value),
     );
   }
 }
 
-String _$authRepositoryHash() => r'5f16cd58049f9839d7998eb41eb38748d3bebe17';
+String _$sessionRepositoryHash() => r'76481ff629efc188291f99a88ed1fe573e7b0483';
 
 /// The signed-in admin, or null. The router listens to this.
 
@@ -126,7 +140,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'ceccbe48eb68039d2850b55a4b328290de6feab6';
+String _$authControllerHash() => r'0c3422c5f910182522b8a382c3c3317b6824495a';
 
 /// The signed-in admin, or null. The router listens to this.
 

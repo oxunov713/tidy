@@ -55,6 +55,11 @@ enum BookingStatus {
   /// Statuses an admin or the client may cancel from. Once the cleaner is on
   /// the way the visit can no longer be cancelled.
   bool get canCancel => this == pending || canReassign;
+
+  /// A cleaner has been assigned and the visit is not over: the client can
+  /// follow it on the map.
+  bool get isTrackable =>
+      this == assigned || this == onTheWay || this == inProgress;
 }
 
 enum Frequency {

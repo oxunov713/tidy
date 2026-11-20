@@ -22,6 +22,13 @@ void main() {
       expect(go(const AsyncLoading(), Routes.splash), isNull);
     });
 
+    test('a failed session check stays on the splash, not on sign-in', () {
+      const offline = AsyncError<User?>(NetworkException(), StackTrace.empty);
+      expect(go(offline, '/jobs'), Routes.splash);
+      expect(go(offline, Routes.signIn), Routes.splash);
+      expect(go(offline, Routes.splash), isNull);
+    });
+
     test('signed out users go to sign-in', () {
       expect(go(const AsyncData(null), '/jobs'), Routes.signIn);
       expect(go(const AsyncData(null), Routes.signIn), isNull);

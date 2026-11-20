@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/core/api_errors.dart';
 import 'package:tidy_admin/core/widgets/error_view.dart';
-import 'package:tidy_admin/features/auth/domain/auth_repository.dart';
 import 'package:tidy_admin/features/auth/presentation/login_controller.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -116,7 +116,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       if (error != null) ...[
                         const SizedBox(height: TidySpacing.lg),
                         ErrorBanner(
-                          message: error is NoAdminAccessException
+                          message: error is WrongRoleException
                               ? l10n.loginNoAdminAccess
                               : describeError(error, l10n),
                         ),

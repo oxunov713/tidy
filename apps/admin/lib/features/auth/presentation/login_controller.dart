@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_admin/features/auth/domain/auth_repository.dart';
 import 'package:tidy_admin/features/auth/presentation/auth_providers.dart';
 
 part 'login_controller.g.dart';
@@ -18,7 +17,8 @@ class LoginState {
   final String phone;
   final bool busy;
 
-  /// An `ApiException` or [NoAdminAccessException]; the page words it.
+  /// An `ApiException` (a 403 carries the server's reason) or a
+  /// `WrongRoleException`; the page words it.
   final Object? error;
 
   LoginState copyWith({
@@ -53,7 +53,7 @@ class LoginController extends _$LoginController {
     if (phone == null) return false;
     state = state.copyWith(busy: true, clearError: true);
     try {
-      await ref.read(authRepositoryProvider).requestOtp(phone);
+      await ref.read(sessionRepositoryProvider).requestOtp(phone);
       state = LoginState(step: LoginStep.code, phone: phone);
       return true;
     } on Exception catch (e) {
@@ -66,7 +66,7 @@ class LoginController extends _$LoginController {
     state = state.copyWith(busy: true, clearError: true);
     try {
       final user = await ref
-          .read(authRepositoryProvider)
+          .read(sessionRepositoryProvider)
           .verify(phone: state.phone, code: code.trim());
       ref.read(authControllerProvider.notifier).signedIn(user);
     } on Exception catch (e) {

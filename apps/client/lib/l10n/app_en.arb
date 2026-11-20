@@ -11,6 +11,7 @@
   "errorNetwork": "No connection. Check your internet and try again.",
   "errorSlotTaken": "That time was just booked by someone else.",
   "errorTooManyRequests": "Too many attempts. Please wait a moment.",
+  "errorWrongRole": "This number belongs to a cleaner account. Use the Tidy Pro app instead.",
   "errorSessionExpired": "Your session has expired. Please sign in again.",
   "errorServer": "Our servers are having trouble. Please try again soon.",
   "errorGeneric": "Something unexpected happened. Please try again.",

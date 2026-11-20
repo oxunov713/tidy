@@ -44,6 +44,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Слишком много попыток. Подождите немного.';
 
   @override
+  String get errorWrongRole =>
+      'Этот номер привязан к аккаунту клинера. Используйте приложение Tidy Pro.';
+
+  @override
   String get errorSessionExpired => 'Сессия истекла. Войдите снова.';
 
   @override

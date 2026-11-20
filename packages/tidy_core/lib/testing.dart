@@ -3,3 +3,4 @@
 library;
 
 export 'src/testing/fake_realtime_client.dart';
+export 'src/testing/fake_session_repository.dart';

@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_admin/features/auth/data/api_auth_repository.dart';
-import 'package:tidy_admin/features/auth/domain/auth_repository.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 part 'auth_providers.g.dart';
@@ -12,12 +10,14 @@ part 'auth_providers.g.dart';
 @Riverpod(keepAlive: true)
 String? currentAdminId(Ref ref) => ref.watch(authControllerProvider).value?.id;
 
+/// Sign-in for the admin panel. The server never creates an admin account, so
+/// a phone that is not one is refused with a 403.
 @Riverpod(keepAlive: true)
-AuthRepository authRepository(Ref ref) => ApiAuthRepository(
-  auth: ref.watch(authApiProvider),
-  me: ref.watch(meApiProvider),
+SessionRepository sessionRepository(Ref ref) => SessionRepository(
+  expectedRole: UserRole.admin,
+  api: ref.watch(apiClientProvider),
   storage: ref.watch(tokenStorageProvider),
-  sessionExpired: ref.watch(apiClientProvider).sessionExpired,
+  push: ref.watch(pushServiceProvider),
 );
 
 /// The signed-in admin, or null. The router listens to this.
@@ -25,19 +25,18 @@ AuthRepository authRepository(Ref ref) => ApiAuthRepository(
 class AuthController extends _$AuthController {
   @override
   Future<User?> build() async {
-    final repo = ref.watch(authRepositoryProvider);
-    final expired = repo.sessionExpired.listen(
-      (_) => state = const AsyncData(null),
-    );
-    ref.onDispose(expired.cancel);
-    return repo.restore();
+    // A rejected refresh token means the session is over.
+    ref.listen(sessionExpiredProvider, (_, next) {
+      if (next.hasValue) state = const AsyncData(null);
+    });
+    return ref.watch(sessionRepositoryProvider).restore();
   }
 
   void signedIn(User user) => state = AsyncData(user);
 
   Future<void> signOut() async {
     try {
-      await ref.read(authRepositoryProvider).logout();
+      await ref.read(sessionRepositoryProvider).logout();
     } finally {
       state = const AsyncData(null);
     }

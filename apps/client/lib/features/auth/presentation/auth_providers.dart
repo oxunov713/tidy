@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_client/features/auth/data/auth_repository_impl.dart';
-import 'package:tidy_client/features/auth/domain/auth_repository.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 part 'auth_providers.g.dart';
 
+/// Sign-in for the client app: only client accounts get in.
 @Riverpod(keepAlive: true)
-AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
-  auth: ref.watch(authApiProvider),
-  me: ref.watch(meApiProvider),
+SessionRepository sessionRepository(Ref ref) => SessionRepository(
+  expectedRole: UserRole.client,
+  api: ref.watch(apiClientProvider),
   storage: ref.watch(tokenStorageProvider),
+  push: ref.watch(pushServiceProvider),
 );
 
 /// The signed-in user, or null when signed out. The router redirects on it.
@@ -23,17 +23,17 @@ class AuthController extends _$AuthController {
     ref.listen(sessionExpiredProvider, (_, next) {
       if (next.hasValue) unawaited(_endSession());
     });
-    final user = await ref.watch(authRepositoryProvider).restoreSession();
+    final user = await ref.watch(sessionRepositoryProvider).restore();
     if (user != null) unawaited(_connectLive());
     return user;
   }
 
   Future<void> requestOtp(String phone) =>
-      ref.read(authRepositoryProvider).requestOtp(phone);
+      ref.read(sessionRepositoryProvider).requestOtp(phone);
 
   Future<void> verify({required String phone, required String code}) async {
     final user = await ref
-        .read(authRepositoryProvider)
+        .read(sessionRepositoryProvider)
         .verify(phone: phone, code: code);
     state = AsyncData(user);
     unawaited(_connectLive());
@@ -41,14 +41,14 @@ class AuthController extends _$AuthController {
 
   Future<void> updateProfile({String? fullName, String? email}) async {
     final user = await ref
-        .read(authRepositoryProvider)
+        .read(sessionRepositoryProvider)
         .updateProfile(fullName: fullName, email: email);
     state = AsyncData(user);
   }
 
   Future<void> logout() async {
     try {
-      await ref.read(authRepositoryProvider).logout();
+      await ref.read(sessionRepositoryProvider).logout();
     } on ApiException {
       // Tokens are cleared locally either way.
     }

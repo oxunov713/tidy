@@ -8,15 +8,82 @@ part of 'session_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Sign-in for the cleaner app: only cleaner accounts get in, and signing out
+/// takes the cleaner offline first.
+
+@ProviderFor(sessionRepository)
+final sessionRepositoryProvider = SessionRepositoryProvider._();
+
+/// Sign-in for the cleaner app: only cleaner accounts get in, and signing out
+/// takes the cleaner offline first.
+
+final class SessionRepositoryProvider
+    extends
+        $FunctionalProvider<
+          SessionRepository,
+          SessionRepository,
+          SessionRepository
+        >
+    with $Provider<SessionRepository> {
+  /// Sign-in for the cleaner app: only cleaner accounts get in, and signing out
+  /// takes the cleaner offline first.
+  SessionRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sessionRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sessionRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<SessionRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SessionRepository create(Ref ref) {
+    return sessionRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SessionRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SessionRepository>(value),
+    );
+  }
+}
+
+String _$sessionRepositoryHash() => r'9e660a373464a2f2cc1db15f8066742dc0f4ca0d';
+
 /// The signed-in cleaner, or null. The router redirects on this.
+///
+/// While the start-up check is running, or when it failed because the network
+/// is down (the state is then an error), the router keeps the splash screen
+/// with a retry button instead of sending the user to sign-in.
 
 @ProviderFor(SessionController)
 final sessionControllerProvider = SessionControllerProvider._();
 
 /// The signed-in cleaner, or null. The router redirects on this.
+///
+/// While the start-up check is running, or when it failed because the network
+/// is down (the state is then an error), the router keeps the splash screen
+/// with a retry button instead of sending the user to sign-in.
 final class SessionControllerProvider
     extends $AsyncNotifierProvider<SessionController, User?> {
   /// The signed-in cleaner, or null. The router redirects on this.
+  ///
+  /// While the start-up check is running, or when it failed because the network
+  /// is down (the state is then an error), the router keeps the splash screen
+  /// with a retry button instead of sending the user to sign-in.
   SessionControllerProvider._()
     : super(
         from: null,
@@ -36,9 +103,13 @@ final class SessionControllerProvider
   SessionController create() => SessionController();
 }
 
-String _$sessionControllerHash() => r'7fbbfc664691fcb9e233382b88624fcd1efa234a';
+String _$sessionControllerHash() => r'1fb0f76d567c8c2463dc0319c6282fda3255a8f8';
 
 /// The signed-in cleaner, or null. The router redirects on this.
+///
+/// While the start-up check is running, or when it failed because the network
+/// is down (the state is then an error), the router keeps the splash screen
+/// with a retry button instead of sending the user to sign-in.
 
 abstract class _$SessionController extends $AsyncNotifier<User?> {
   FutureOr<User?> build();

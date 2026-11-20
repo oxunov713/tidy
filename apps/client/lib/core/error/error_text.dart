@@ -9,6 +9,7 @@ import 'package:tidy_core/tidy_core.dart';
 String errorMessage(BuildContext context, Object error) {
   final l10n = AppLocalizations.of(context);
   return switch (error) {
+    WrongRoleException() => l10n.errorWrongRole,
     NetworkException() => l10n.errorNetwork,
     SlotTakenException() => l10n.errorSlotTaken,
     TooManyRequestsException() => l10n.errorTooManyRequests,

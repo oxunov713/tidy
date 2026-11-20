@@ -45,6 +45,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get errorTooManyRequests => 'Urinishlar juda ko‘p. Biroz kuting.';
 
   @override
+  String get errorWrongRole =>
+      'Bu raqam tozalovchi hisobiga tegishli. Tidy Pro ilovasidan foydalaning.';
+
+  @override
   String get errorSessionExpired => 'Seans tugadi. Qaytadan kiring.';
 
   @override

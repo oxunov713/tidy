@@ -1,4 +1,3 @@
-import 'package:tidy_cleaner/features/auth/domain/auth_repository.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
 

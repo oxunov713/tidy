@@ -44,6 +44,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorTooManyRequests => 'Too many attempts. Please wait a moment.';
 
   @override
+  String get errorWrongRole =>
+      'This number belongs to a cleaner account. Use the Tidy Pro app instead.';
+
+  @override
   String get errorSessionExpired =>
       'Your session has expired. Please sign in again.';
 

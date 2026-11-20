@@ -2,19 +2,22 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'push_service.g.dart';
 
-/// Push notifications behind an interface. The app ships with
-/// [NoopPushService]; see the README for plugging in `firebase_messaging`.
+/// Push notifications behind a small interface, so the apps build without any
+/// Firebase config. To turn pushes on, implement this with
+/// `firebase_messaging` and override [pushServiceProvider].
 abstract interface class PushService {
-  /// Asks for notification permission and starts listening.
+  /// Asks for notification permission and starts listening. Called after
+  /// sign in.
   Future<void> initialize();
 
   /// The device token to send to `POST /me/devices`, if there is one.
   Future<String?> token();
 
-  /// Fires when the token is rotated.
+  /// Fires when the token is rotated, so it can be registered again.
   Stream<String> get tokenRefreshes;
 }
 
+/// Does nothing. The default until a real implementation is plugged in.
 class NoopPushService implements PushService {
   const NoopPushService();
 

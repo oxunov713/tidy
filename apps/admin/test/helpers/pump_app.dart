@@ -8,6 +8,7 @@ import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dar
 import 'package:tidy_admin/features/cleaners/presentation/cleaners_providers.dart';
 import 'package:tidy_admin/features/services/presentation/services_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
+import 'package:tidy_core/testing.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 import 'fakes.dart';
@@ -25,13 +26,13 @@ List<Override> fakeRepositories({
   FakeBookingsRepository? bookings,
   FakeCleanersRepository? cleaners,
   FakeServicesRepository? services,
-  FakeAuthRepository? auth,
+  FakeSessionRepository? auth,
   Duration? statsInterval,
 }) => [
   if (bookings != null) bookingsRepositoryProvider.overrideWithValue(bookings),
   if (cleaners != null) cleanersRepositoryProvider.overrideWithValue(cleaners),
   if (services != null) servicesRepositoryProvider.overrideWithValue(services),
-  if (auth != null) authRepositoryProvider.overrideWithValue(auth),
+  if (auth != null) sessionRepositoryProvider.overrideWithValue(auth),
   if (statsInterval != null)
     statsRefreshIntervalProvider.overrideWithValue(statsInterval),
 ];
