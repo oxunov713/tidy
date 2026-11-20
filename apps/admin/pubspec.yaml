@@ -16,15 +16,18 @@ dependencies:
   go_router: ^18.1.4
   intl: ^0.20.3
   material_ui: ^1.11.1
+  riverpod_annotation: ^4.0.8
   tidy_core:
     path: ../../packages/tidy_core
   tidy_ui:
     path: ../../packages/tidy_ui
 
 dev_dependencies:
+  build_runner: ^2.17.1
   flutter_test:
     sdk: flutter
   google_fonts: ^9.0.0
+  riverpod_generator: ^4.0.10
 
 flutter:
   uses-material-design: true
