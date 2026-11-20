@@ -12,6 +12,8 @@ export 'src/api/catalog_api.dart';
 export 'src/api/cleaner_api.dart';
 export 'src/api/me_api.dart';
 export 'src/auth/token_storage.dart';
+export 'src/errors/describe_error.dart';
+export 'src/errors/status_labels.dart';
 export 'src/map/geo.dart';
 export 'src/map/map_provider.dart';
 export 'src/map/yandex_map_provider.dart';

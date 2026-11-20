@@ -284,7 +284,7 @@ class _Actions extends ConsumerWidget {
             onPressed: () => bookAgain(context, ref, booking),
           ),
         ],
-        if (status.isCancellable) ...[
+        if (status.canCancel) ...[
           const SizedBox(height: 10),
           TidyButton(
             label: l10n.cancelBooking,

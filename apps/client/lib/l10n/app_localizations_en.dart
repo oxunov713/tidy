@@ -48,6 +48,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'This number belongs to a cleaner account. Use the Tidy Pro app instead.';
 
   @override
+  String get errorForbidden => 'You do not have permission to do that.';
+
+  @override
+  String get errorNotFound => 'We could not find that.';
+
+  @override
+  String get errorInvalidTransition =>
+      'That is not possible for this booking any more.';
+
+  @override
   String get errorSessionExpired =>
       'Your session has expired. Please sign in again.';
 

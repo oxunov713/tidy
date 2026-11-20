@@ -248,8 +248,11 @@ class _DetailBody extends ConsumerWidget {
           title: l10n.sectionTimeline,
           children: [_Timeline(events: details.events)],
         ),
-        if (booking.status.isActive) ...[
+        // The server refuses a reassign or a cancel in any other status with
+        // 409 invalid_transition, so those buttons only show where it works.
+        if (booking.status.canReassign || booking.status.canCancel)
           const SizedBox(height: TidySpacing.sm),
+        if (booking.status.canReassign)
           TidyButton(
             label: booking.cleanerId == null
                 ? l10n.assignCleaner
@@ -262,7 +265,9 @@ class _DetailBody extends ConsumerWidget {
               currentCleanerId: booking.cleanerId,
             ),
           ),
+        if (booking.status.canReassign && booking.status.canCancel)
           const SizedBox(height: TidySpacing.sm),
+        if (booking.status.canCancel)
           TidyButton(
             label: l10n.cancelBooking,
             icon: Icons.event_busy_outlined,
@@ -273,7 +278,6 @@ class _DetailBody extends ConsumerWidget {
               code: booking.code,
             ),
           ),
-        ],
       ],
     );
   }

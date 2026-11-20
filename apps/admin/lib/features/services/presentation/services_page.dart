@@ -33,7 +33,7 @@ class ServicesPage extends ConsumerWidget {
         ..showSnackBar(
           SnackBar(
             content: Text(
-              '${l10n.serviceUpdateFailed} ${describeError(e, l10n)}',
+              '${l10n.serviceUpdateFailed} ${errorText(l10n, e)}',
             ),
           ),
         );
@@ -162,7 +162,7 @@ class _EditServiceDialogState extends ConsumerState<EditServiceDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (error != null) ...[
-                ErrorBanner(message: describeError(error, l10n)),
+                ErrorBanner(message: errorText(l10n, error)),
                 const SizedBox(height: TidySpacing.lg),
               ],
               ServiceForm(

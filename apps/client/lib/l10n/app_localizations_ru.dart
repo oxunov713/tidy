@@ -48,6 +48,15 @@ class AppLocalizationsRu extends AppLocalizations {
       'Этот номер привязан к аккаунту клинера. Используйте приложение Tidy Pro.';
 
   @override
+  String get errorForbidden => 'У вас нет прав на это действие.';
+
+  @override
+  String get errorNotFound => 'Не удалось найти.';
+
+  @override
+  String get errorInvalidTransition => 'Это уже невозможно для этой брони.';
+
+  @override
   String get errorSessionExpired => 'Сессия истекла. Войдите снова.';
 
   @override

@@ -172,6 +172,24 @@ abstract class AppLocalizations {
   /// **'This number belongs to a cleaner account. Use the Tidy Pro app instead.'**
   String get errorWrongRole;
 
+  /// No description provided for @errorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to do that.'**
+  String get errorForbidden;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find that.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorInvalidTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not possible for this booking any more.'**
+  String get errorInvalidTransition;
+
   /// No description provided for @errorSessionExpired.
   ///
   /// In en, this message translates to:

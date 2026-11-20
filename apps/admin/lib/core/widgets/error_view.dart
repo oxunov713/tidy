@@ -16,7 +16,7 @@ class ErrorView extends StatelessWidget {
     return EmptyState(
       icon: Icons.cloud_off_outlined,
       title: l10n.errorTitle,
-      message: describeError(error, l10n),
+      message: errorText(l10n, error),
       actionLabel: l10n.retry,
       onAction: onRetry,
     );

@@ -49,6 +49,15 @@ class AppLocalizationsUz extends AppLocalizations {
       'Bu raqam tozalovchi hisobiga tegishli. Tidy Pro ilovasidan foydalaning.';
 
   @override
+  String get errorForbidden => 'Buning uchun ruxsatingiz yo‘q.';
+
+  @override
+  String get errorNotFound => 'Topilmadi.';
+
+  @override
+  String get errorInvalidTransition => 'Bu bron uchun endi bu mumkin emas.';
+
+  @override
   String get errorSessionExpired => 'Seans tugadi. Qaytadan kiring.';
 
   @override

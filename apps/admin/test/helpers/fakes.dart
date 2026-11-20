@@ -127,6 +127,7 @@ class FakeBookingsRepository implements BookingsRepository {
   /// Set to make the next `list` call fail.
   Exception? failNextList;
   Exception? reassignError;
+  Exception? cancelError;
   BookingDetails? detailsValue;
   final reassigned = <(String, String)>[];
   final cancelled = <String>[];
@@ -204,6 +205,8 @@ class FakeBookingsRepository implements BookingsRepository {
 
   @override
   Future<Booking> cancel(String id) async {
+    final error = cancelError;
+    if (error != null) throw error;
     cancelled.add(id);
     return booking(id: id, status: BookingStatus.cancelled);
   }

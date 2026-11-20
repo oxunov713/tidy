@@ -44,7 +44,7 @@ class _CleanersPageState extends ConsumerState<CleanersPage> {
         ..showSnackBar(
           SnackBar(
             content: Text(
-              '${l10n.cleanerUpdateFailed} ${describeError(e, l10n)}',
+              '${l10n.cleanerUpdateFailed} ${errorText(l10n, e)}',
             ),
           ),
         );

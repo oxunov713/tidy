@@ -199,7 +199,7 @@ class _ReassignDialogState extends ConsumerState<ReassignDialog> {
               list,
               if (_error != null) ...[
                 const SizedBox(height: TidySpacing.sm),
-                ErrorBanner(message: describeError(_error!, l10n)),
+                ErrorBanner(message: errorText(l10n, _error!)),
               ],
             ],
           ),
@@ -277,7 +277,7 @@ class _CancelBookingDialogState extends ConsumerState<CancelBookingDialog> {
             Text(l10n.cancelBookingBody),
             if (_error != null) ...[
               const SizedBox(height: TidySpacing.lg),
-              ErrorBanner(message: describeError(_error!, l10n)),
+              ErrorBanner(message: errorText(l10n, _error!)),
             ],
           ],
         ),

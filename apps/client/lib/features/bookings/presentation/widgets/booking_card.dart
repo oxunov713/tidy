@@ -44,7 +44,7 @@ class BookingCard extends ConsumerWidget {
         ? cleaner.fullName
         : booking.cleanerId != null
         ? '…'
-        : (booking.status.isCancellable ? l10n.findingCleaner : l10n.noCleaner);
+        : (booking.status.canCancel ? l10n.findingCleaner : l10n.noCleaner);
 
     final when = isSameDay(booking.start, now)
         ? l10n.todayAt(formatClock(booking.start))
@@ -62,7 +62,7 @@ class BookingCard extends ConsumerWidget {
       ),
     };
     final showBookAgain = booking.status == BookingStatus.completed;
-    final showCancel = booking.status.isCancellable;
+    final showCancel = booking.status.canCancel;
 
     return TidyCard(
       onTap: onOpen,

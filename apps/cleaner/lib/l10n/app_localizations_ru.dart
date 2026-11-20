@@ -31,6 +31,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorTooManyRequests => 'Слишком много попыток. Подождите минуту.';
 
   @override
+  String get errorSlotTaken => 'У вас уже есть заказ на это время.';
+
+  @override
+  String get errorNotFound => 'Не удалось найти.';
+
+  @override
+  String get errorInvalidTransition => 'Это уже невозможно для этого заказа.';
+
+  @override
   String get errorSessionExpired => 'Сессия истекла. Войдите снова.';
 
   @override

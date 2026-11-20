@@ -310,7 +310,7 @@ class _LoadMoreFooter extends StatelessWidget {
       child: Column(
         children: [
           if (error != null) ...[
-            ErrorBanner(message: describeError(error, l10n)),
+            ErrorBanner(message: errorText(l10n, error)),
             const SizedBox(height: TidySpacing.sm),
           ],
           if (state.loadingMore)
