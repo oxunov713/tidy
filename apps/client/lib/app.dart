@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:tidy_client/core/providers/locale_controller.dart';
+import 'package:tidy_client/core/router/app_router.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
-import 'package:tidy_client/router.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 class TidyClientApp extends ConsumerWidget {
@@ -13,7 +14,8 @@ class TidyClientApp extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: TidyTheme.light(),
-      routerConfig: ref.watch(routerProvider),
+      locale: ref.watch(localeControllerProvider),
+      routerConfig: ref.watch(appRouterProvider),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,

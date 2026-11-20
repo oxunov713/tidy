@@ -1,9 +1,439 @@
 {
   "@@locale": "en",
   "appTitle": "Tidy",
-  "homePlaceholderTitle": "Coming soon",
-  "homePlaceholderBody": "The booking flow will appear here.",
-  "@homePlaceholderTitle": {
-    "description": "Heading of the placeholder home screen"
-  }
+  "back": "Back",
+  "retry": "Try again",
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
+  "errorTitle": "Something went wrong",
+  "errorNetwork": "No connection. Check your internet and try again.",
+  "errorSlotTaken": "That time was just booked by someone else.",
+  "errorTooManyRequests": "Too many attempts. Please wait a moment.",
+  "errorSessionExpired": "Your session has expired. Please sign in again.",
+  "errorServer": "Our servers are having trouble. Please try again soon.",
+  "errorGeneric": "Something unexpected happened. Please try again.",
+  "stepOf": "Step {step} of {total}",
+  "@stepOf": {
+    "description": "Wizard progress caption",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "Home",
+  "navBookings": "Bookings",
+  "navChat": "Chat",
+  "navProfile": "Profile",
+  "welcomeTitle": "A spotless home, booked in a minute.",
+  "welcomeSubtitle": "Vetted local cleaners, fixed prices, and live tracking from booking to done.",
+  "phoneNumber": "Phone number",
+  "phoneInvalid": "Enter a valid phone number",
+  "sendCode": "Send code",
+  "continueWithGoogle": "Continue with Google",
+  "googleSoon": "Google sign in is coming soon. Use your phone number for now.",
+  "termsNotice": "By continuing you agree to the Terms and Privacy Policy.",
+  "selectCountry": "Select country",
+  "otpTitle": "Enter the code",
+  "otpSubtitle": "We sent a 6-digit code to {phone}.",
+  "@otpSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "resendIn": "Resend code in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resendCode": "Resend code",
+  "codeSent": "A new code is on its way.",
+  "fieldRequired": "Required",
+  "dropPinFirst": "Tap the map to drop a pin on your home first.",
+  "pinDropped": "Pin placed. Tap to move it.",
+  "tapToDropPin": "Tap the map to drop a pin",
+  "addAddressTitle": "Where should we clean?",
+  "addressLine1": "Address line 1",
+  "addressLine2": "Flat, floor (optional)",
+  "city": "City",
+  "postcode": "Postcode",
+  "accessNotes": "Access notes for the cleaner",
+  "accessNotesHint": "Key in the lockbox, ring the top bell...",
+  "saveAddress": "Save address",
+  "chooseAddress": "Choose address",
+  "myAddresses": "My addresses",
+  "noAddressesTitle": "No addresses yet",
+  "noAddressesBody": "Add the place you want cleaned and drop a pin so cleaners can find it.",
+  "addAddress": "Add address",
+  "deleteAddress": "Delete",
+  "deleteAddressTitle": "Delete this address?",
+  "homeGreeting": "Hi {name}, what needs a clean today?",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingAnonymous": "Hi, what needs a clean today?",
+  "cleaningAt": "Cleaning at",
+  "addYourAddress": "Add your address",
+  "notifications": "Notifications",
+  "noNotifications": "You're all caught up.",
+  "promoBadge": "20% OFF",
+  "promoTitle": "Your first deep clean",
+  "promoCode": "Code TIDY20 at checkout",
+  "servicesTitle": "Services",
+  "seeAll": "See all",
+  "noServicesTitle": "No services available",
+  "noServicesBody": "Check back soon, we are adding more.",
+  "badgeMostBooked": "MOST BOOKED",
+  "badgePremium": "PREMIUM",
+  "hoursUnit": "{value} h",
+  "@hoursUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fromLabel": "FROM",
+  "serviceCardSemantics": "{title}, from {price}",
+  "@serviceCardSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerOnTheWay": "{name} is on the way",
+  "@cleanerOnTheWay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerCleaning": "{name} is cleaning",
+  "@cleanerCleaning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cleanerBooked": "{name} is booked for you",
+  "@cleanerBooked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "yourCleanerOnTheWay": "Your cleaner is on the way",
+  "yourCleanerCleaning": "Your cleaner is cleaning",
+  "yourCleanerBooked": "A cleaner is booked for you",
+  "cardDetailInvalid": "Check this field",
+  "payAmount": "Pay {amount}",
+  "@payAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "testMode": "Test mode",
+  "testModeNotice": "No real payment is made. Use any card details.",
+  "cardNumber": "Card number",
+  "cardExpiry": "MM/YY",
+  "cardCvc": "CVC",
+  "chooseServiceFirst": "Pick a service to start a booking.",
+  "sizeOfHome": "Size of your home",
+  "bedrooms": "Bedrooms",
+  "bedroomsHint": "Living room included",
+  "bathrooms": "Bathrooms",
+  "bathroomsHint": "Toilet, shower or bath",
+  "addBedroom": "Add bedroom",
+  "removeBedroom": "Remove bedroom",
+  "addBathroom": "Add bathroom",
+  "removeBathroom": "Remove bathroom",
+  "extras": "Extras",
+  "howOften": "How often?",
+  "frequencyOnce": "One-off",
+  "frequencyOnceNote": "No discount",
+  "frequencyWeekly": "Weekly",
+  "frequencyWeeklyNote": "15% off",
+  "frequencyFortnightly": "Fortnightly",
+  "frequencyFortnightlyNote": "10% off",
+  "chooseTime": "Choose time",
+  "total": "Total",
+  "totalWithHours": "Total · {hours} h",
+  "@totalWithHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "whenShouldWeCome": "When should we come?",
+  "nextSevenDays": "Next 7 days",
+  "startTime": "Start time",
+  "takenTimesNote": "Greyed-out times are already booked by all nearby cleaners.",
+  "noTimesThatDay": "No times left on this day. Try another day.",
+  "cleaner": "Cleaner",
+  "anyCleaner": "Any available cleaner",
+  "anyCleanerNote": "We will match you with the best available cleaner nearby.",
+  "yourLastCleaner": "{name} · your last cleaner",
+  "@yourLastCleaner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ratingAndReviews": "{rating} rating · {count} reviews",
+  "@ratingAndReviews": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "continueToPayment": "Continue to payment",
+  "pickATime": "Pick a day and a start time",
+  "scheduleSummary": "{day} · {time} start · about {hours} h",
+  "@scheduleSummary": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleSummaryShort": "{day} · {time} start",
+  "@scheduleSummaryShort": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmAndPay": "Confirm and pay",
+  "change": "Change",
+  "summary": "Summary",
+  "payment": "Payment",
+  "payByCard": "Pay by card",
+  "securePaymentStripe": "Secure payment with Stripe",
+  "chargedAfterClean": "Card is charged only after the clean is finished.",
+  "book": "Book",
+  "bookFor": "Book for {price}",
+  "@bookFor": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "slotTakenSnack": "That time was just taken. Here are the times still free.",
+  "paymentFailed": "The payment did not go through. Please try again.",
+  "paymentCancelled": "Payment was not completed. Your booking is waiting for payment.",
+  "statusPending": "Awaiting payment",
+  "statusConfirmed": "Confirmed",
+  "statusAssigned": "Cleaner assigned",
+  "statusOnTheWay": "On the way",
+  "statusInProgress": "In progress",
+  "statusCompleted": "Done",
+  "statusCancelled": "Cancelled",
+  "cancelBookingTitle": "Cancel this booking?",
+  "cancelFreeBody": "Cancelling now is free. You will be refunded in full.",
+  "cancelLateBody": "The visit starts in less than 24 hours, so cancelling now means you are charged the full price ({price}).",
+  "@cancelLateBody": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "keepBooking": "Keep booking",
+  "cancelBooking": "Cancel booking",
+  "cancelledRefunded": "Booking cancelled. {price} will be refunded.",
+  "@cancelledRefunded": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelledCharged": "Booking cancelled. {price} was charged because it was less than 24 hours before the start.",
+  "@cancelledCharged": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceUnavailable": "This service is no longer available.",
+  "findingCleaner": "Finding your cleaner",
+  "noCleaner": "No cleaner",
+  "todayAt": "Today · {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "track": "Track",
+  "rate": "Rate",
+  "bookAgain": "Book again",
+  "details": "Details",
+  "upcoming": "Upcoming",
+  "past": "Past",
+  "noUpcomingTitle": "Nothing booked yet",
+  "noUpcomingBody": "Book your first clean in about a minute.",
+  "bookAClean": "Book a clean",
+  "noPastTitle": "No past cleans",
+  "noPastBody": "Finished and cancelled bookings will show up here.",
+  "couldNotLoadMore": "Could not load more. Tap to retry.",
+  "bookingDetails": "Booking details",
+  "bookingNumber": "Booking #{code}",
+  "@bookingNumber": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "roomsSummary": "{bedrooms} bed, {bathrooms} bath",
+  "@roomsSummary": {
+    "placeholders": {
+      "bedrooms": {
+        "type": "int"
+      },
+      "bathrooms": {
+        "type": "int"
+      }
+    }
+  },
+  "messageCleaner": "Message {name}",
+  "@messageCleaner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "discount": "Discount",
+  "trackCleaner": "Track your cleaner",
+  "rateYourClean": "Rate your clean",
+  "yourReview": "Your review",
+  "tipAmount": "Tip {amount}",
+  "@tipAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "timeline": "Timeline",
+  "stepConfirmed": "Confirmed",
+  "stepOnTheWay": "On the way",
+  "stepCleaning": "Cleaning",
+  "stepDone": "Done",
+  "arrivingIn": "Arriving in",
+  "minutesShort": "{minutes} min",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onTheWayHeadline": "On the way",
+  "startsAt": "Starts at",
+  "rightNow": "Right now",
+  "cleaningHeadline": "Cleaning",
+  "finished": "Finished",
+  "allDone": "All done",
+  "bookingLabel": "Booking",
+  "needToChange": "Need to change something?",
+  "callCleaner": "Call {name}",
+  "@callCleaner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callUnavailable": "Calling is not available yet. Send a message instead.",
+  "howWasYourClean": "How was your clean?",
+  "starsLabel": "{count} star",
+  "@starsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingNotGreat": "Not great",
+  "ratingCouldBeBetter": "Could be better",
+  "ratingOkay": "Okay",
+  "ratingGood": "Good",
+  "ratingExcellent": "Excellent",
+  "tagSpotless": "Spotless",
+  "tagPunctual": "On time",
+  "tagFriendly": "Friendly",
+  "tagDetail": "Great attention to detail",
+  "tagEco": "Used my products",
+  "anythingElse": "Anything else? (optional)",
+  "commentHint": "Tell {name} what they did well",
+  "@commentHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addTip": "Add a tip",
+  "submitReview": "Submit review",
+  "reviewThanks": "Thanks for your review!",
+  "alreadyReviewed": "You have already reviewed this clean.",
+  "noMessagesTitle": "No messages yet",
+  "noMessagesBody": "Say hello to your cleaner.",
+  "messageHint": "Message",
+  "send": "Send",
+  "noChatsTitle": "No conversations yet",
+  "noChatsBody": "Once a cleaner accepts your booking you can chat here.",
+  "addYourName": "Add your name",
+  "editProfile": "Edit profile",
+  "fullName": "Full name",
+  "email": "Email (optional)",
+  "emailInvalid": "Enter a valid email",
+  "language": "Language",
+  "systemDefault": "System default",
+  "logout": "Log out",
+  "logoutTitle": "Log out of Tidy?"
 }
