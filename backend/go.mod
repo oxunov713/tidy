@@ -1,6 +1,6 @@
 module github.com/oxunov713/tidy/backend
 
-go 1.24.0
+go 1.26.0
 
 require (
 	github.com/coder/websocket v1.8.15
@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/stripe/stripe-go/v83 v83.2.1
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/oauth2 v0.38.0
 )
 
 require (
