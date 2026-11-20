@@ -439,4 +439,142 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paymentCancelled => 'Оплата не завершена. Заказ ожидает оплаты.';
+
+  @override
+  String get statusPending => 'Ожидает оплаты';
+
+  @override
+  String get statusConfirmed => 'Подтверждён';
+
+  @override
+  String get statusAssigned => 'Клинер назначен';
+
+  @override
+  String get statusOnTheWay => 'В пути';
+
+  @override
+  String get statusInProgress => 'Идёт уборка';
+
+  @override
+  String get statusCompleted => 'Завершён';
+
+  @override
+  String get statusCancelled => 'Отменён';
+
+  @override
+  String get cancelBookingTitle => 'Отменить заказ?';
+
+  @override
+  String get cancelFreeBody =>
+      'Сейчас отмена бесплатна. Деньги вернутся полностью.';
+
+  @override
+  String cancelLateBody(String price) {
+    return 'До уборки меньше 24 часов, поэтому при отмене будет списана полная стоимость ($price).';
+  }
+
+  @override
+  String get keepBooking => 'Оставить заказ';
+
+  @override
+  String get cancelBooking => 'Отменить заказ';
+
+  @override
+  String cancelledRefunded(String price) {
+    return 'Заказ отменён. Вернём $price.';
+  }
+
+  @override
+  String cancelledCharged(String price) {
+    return 'Заказ отменён. Списано $price: до начала оставалось меньше 24 часов.';
+  }
+
+  @override
+  String get serviceUnavailable => 'Эта услуга больше недоступна.';
+
+  @override
+  String get findingCleaner => 'Подбираем клинера';
+
+  @override
+  String get noCleaner => 'Клинер не назначен';
+
+  @override
+  String todayAt(String time) {
+    return 'Сегодня · $time';
+  }
+
+  @override
+  String get track => 'Следить';
+
+  @override
+  String get rate => 'Оценить';
+
+  @override
+  String get bookAgain => 'Заказать снова';
+
+  @override
+  String get details => 'Детали';
+
+  @override
+  String get upcoming => 'Предстоящие';
+
+  @override
+  String get past => 'Прошедшие';
+
+  @override
+  String get noUpcomingTitle => 'Пока ничего не заказано';
+
+  @override
+  String get noUpcomingBody => 'Закажите первую уборку за минуту.';
+
+  @override
+  String get bookAClean => 'Заказать уборку';
+
+  @override
+  String get noPastTitle => 'Прошедших уборок нет';
+
+  @override
+  String get noPastBody => 'Здесь появятся завершённые и отменённые заказы.';
+
+  @override
+  String get couldNotLoadMore =>
+      'Не удалось загрузить ещё. Нажмите, чтобы повторить.';
+
+  @override
+  String get bookingDetails => 'Детали заказа';
+
+  @override
+  String bookingNumber(String code) {
+    return 'Заказ №$code';
+  }
+
+  @override
+  String roomsSummary(int bedrooms, int bathrooms) {
+    return 'Спален: $bedrooms, ванных: $bathrooms';
+  }
+
+  @override
+  String messageCleaner(String name) {
+    return 'Написать: $name';
+  }
+
+  @override
+  String get discount => 'Скидка';
+
+  @override
+  String get trackCleaner => 'Следить за клинером';
+
+  @override
+  String get rateYourClean => 'Оценить уборку';
+
+  @override
+  String get yourReview => 'Ваш отзыв';
+
+  @override
+  String tipAmount(String amount) {
+    return 'Чаевые $amount';
+  }
+
+  @override
+  String get timeline => 'История';
 }

@@ -873,6 +873,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment was not completed. Your booking is waiting for payment.'**
   String get paymentCancelled;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting payment'**
+  String get statusPending;
+
+  /// No description provided for @statusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get statusConfirmed;
+
+  /// No description provided for @statusAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaner assigned'**
+  String get statusAssigned;
+
+  /// No description provided for @statusOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get statusOnTheWay;
+
+  /// No description provided for @statusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get statusInProgress;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get statusCompleted;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @cancelBookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this booking?'**
+  String get cancelBookingTitle;
+
+  /// No description provided for @cancelFreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling now is free. You will be refunded in full.'**
+  String get cancelFreeBody;
+
+  /// No description provided for @cancelLateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The visit starts in less than 24 hours, so cancelling now means you are charged the full price ({price}).'**
+  String cancelLateBody(String price);
+
+  /// No description provided for @keepBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep booking'**
+  String get keepBooking;
+
+  /// No description provided for @cancelBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get cancelBooking;
+
+  /// No description provided for @cancelledRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled. {price} will be refunded.'**
+  String cancelledRefunded(String price);
+
+  /// No description provided for @cancelledCharged.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled. {price} was charged because it was less than 24 hours before the start.'**
+  String cancelledCharged(String price);
+
+  /// No description provided for @serviceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This service is no longer available.'**
+  String get serviceUnavailable;
+
+  /// No description provided for @findingCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your cleaner'**
+  String get findingCleaner;
+
+  /// No description provided for @noCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'No cleaner'**
+  String get noCleaner;
+
+  /// No description provided for @todayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Today · {time}'**
+  String todayAt(String time);
+
+  /// No description provided for @track.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get track;
+
+  /// No description provided for @rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get rate;
+
+  /// No description provided for @bookAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Book again'**
+  String get bookAgain;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcoming;
+
+  /// No description provided for @past.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get past;
+
+  /// No description provided for @noUpcomingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing booked yet'**
+  String get noUpcomingTitle;
+
+  /// No description provided for @noUpcomingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Book your first clean in about a minute.'**
+  String get noUpcomingBody;
+
+  /// No description provided for @bookAClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a clean'**
+  String get bookAClean;
+
+  /// No description provided for @noPastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No past cleans'**
+  String get noPastTitle;
+
+  /// No description provided for @noPastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished and cancelled bookings will show up here.'**
+  String get noPastBody;
+
+  /// No description provided for @couldNotLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load more. Tap to retry.'**
+  String get couldNotLoadMore;
+
+  /// No description provided for @bookingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking details'**
+  String get bookingDetails;
+
+  /// No description provided for @bookingNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking #{code}'**
+  String bookingNumber(String code);
+
+  /// No description provided for @roomsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{bedrooms} bed, {bathrooms} bath'**
+  String roomsSummary(int bedrooms, int bathrooms);
+
+  /// No description provided for @messageCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Message {name}'**
+  String messageCleaner(String name);
+
+  /// No description provided for @discount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discount;
+
+  /// No description provided for @trackCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your cleaner'**
+  String get trackCleaner;
+
+  /// No description provided for @rateYourClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your clean'**
+  String get rateYourClean;
+
+  /// No description provided for @yourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review'**
+  String get yourReview;
+
+  /// No description provided for @tipAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip {amount}'**
+  String tipAmount(String amount);
+
+  /// No description provided for @timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get timeline;
 }
 
 class _AppLocalizationsDelegate

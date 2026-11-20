@@ -441,4 +441,144 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get paymentCancelled =>
       'To‘lov yakunlanmadi. Buyurtma to‘lovni kutmoqda.';
+
+  @override
+  String get statusPending => 'To‘lov kutilmoqda';
+
+  @override
+  String get statusConfirmed => 'Tasdiqlangan';
+
+  @override
+  String get statusAssigned => 'Tozalovchi tayinlandi';
+
+  @override
+  String get statusOnTheWay => 'Yo‘lda';
+
+  @override
+  String get statusInProgress => 'Jarayonda';
+
+  @override
+  String get statusCompleted => 'Bajarildi';
+
+  @override
+  String get statusCancelled => 'Bekor qilindi';
+
+  @override
+  String get cancelBookingTitle => 'Buyurtma bekor qilinsinmi?';
+
+  @override
+  String get cancelFreeBody =>
+      'Hozir bekor qilish bepul. Pul to‘liq qaytariladi.';
+
+  @override
+  String cancelLateBody(String price) {
+    return 'Tozalashga 24 soatdan kam qoldi, shuning uchun bekor qilsangiz to‘liq narx ($price) yechiladi.';
+  }
+
+  @override
+  String get keepBooking => 'Buyurtmani qoldirish';
+
+  @override
+  String get cancelBooking => 'Buyurtmani bekor qilish';
+
+  @override
+  String cancelledRefunded(String price) {
+    return 'Buyurtma bekor qilindi. $price qaytariladi.';
+  }
+
+  @override
+  String cancelledCharged(String price) {
+    return 'Buyurtma bekor qilindi. Boshlanishiga 24 soatdan kam qolgani uchun $price yechildi.';
+  }
+
+  @override
+  String get serviceUnavailable => 'Bu xizmat endi mavjud emas.';
+
+  @override
+  String get findingCleaner => 'Tozalovchi qidirilmoqda';
+
+  @override
+  String get noCleaner => 'Tozalovchi yo‘q';
+
+  @override
+  String todayAt(String time) {
+    return 'Bugun · $time';
+  }
+
+  @override
+  String get track => 'Kuzatish';
+
+  @override
+  String get rate => 'Baholash';
+
+  @override
+  String get bookAgain => 'Qayta buyurtma';
+
+  @override
+  String get details => 'Tafsilotlar';
+
+  @override
+  String get upcoming => 'Kutilayotgan';
+
+  @override
+  String get past => 'O‘tgan';
+
+  @override
+  String get noUpcomingTitle => 'Hozircha buyurtma yo‘q';
+
+  @override
+  String get noUpcomingBody =>
+      'Birinchi tozalashni bir daqiqada buyurtma qiling.';
+
+  @override
+  String get bookAClean => 'Tozalash buyurtma qilish';
+
+  @override
+  String get noPastTitle => 'O‘tgan tozalashlar yo‘q';
+
+  @override
+  String get noPastBody =>
+      'Bajarilgan va bekor qilingan buyurtmalar shu yerda ko‘rinadi.';
+
+  @override
+  String get couldNotLoadMore =>
+      'Yana yuklab bo‘lmadi. Qayta urinish uchun bosing.';
+
+  @override
+  String get bookingDetails => 'Buyurtma tafsilotlari';
+
+  @override
+  String bookingNumber(String code) {
+    return 'Buyurtma №$code';
+  }
+
+  @override
+  String roomsSummary(int bedrooms, int bathrooms) {
+    return '$bedrooms yotoq xona, $bathrooms hammom';
+  }
+
+  @override
+  String messageCleaner(String name) {
+    return '$name ga yozish';
+  }
+
+  @override
+  String get discount => 'Chegirma';
+
+  @override
+  String get trackCleaner => 'Tozalovchini kuzatish';
+
+  @override
+  String get rateYourClean => 'Tozalashni baholash';
+
+  @override
+  String get yourReview => 'Sizning sharhingiz';
+
+  @override
+  String tipAmount(String amount) {
+    return 'Choychaqa $amount';
+  }
+
+  @override
+  String get timeline => 'Tarix';
 }

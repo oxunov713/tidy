@@ -259,5 +259,104 @@
   },
   "slotTakenSnack": "That time was just taken. Here are the times still free.",
   "paymentFailed": "The payment did not go through. Please try again.",
-  "paymentCancelled": "Payment was not completed. Your booking is waiting for payment."
+  "paymentCancelled": "Payment was not completed. Your booking is waiting for payment.",
+  "statusPending": "Awaiting payment",
+  "statusConfirmed": "Confirmed",
+  "statusAssigned": "Cleaner assigned",
+  "statusOnTheWay": "On the way",
+  "statusInProgress": "In progress",
+  "statusCompleted": "Done",
+  "statusCancelled": "Cancelled",
+  "cancelBookingTitle": "Cancel this booking?",
+  "cancelFreeBody": "Cancelling now is free. You will be refunded in full.",
+  "cancelLateBody": "The visit starts in less than 24 hours, so cancelling now means you are charged the full price ({price}).",
+  "@cancelLateBody": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "keepBooking": "Keep booking",
+  "cancelBooking": "Cancel booking",
+  "cancelledRefunded": "Booking cancelled. {price} will be refunded.",
+  "@cancelledRefunded": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelledCharged": "Booking cancelled. {price} was charged because it was less than 24 hours before the start.",
+  "@cancelledCharged": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceUnavailable": "This service is no longer available.",
+  "findingCleaner": "Finding your cleaner",
+  "noCleaner": "No cleaner",
+  "todayAt": "Today · {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "track": "Track",
+  "rate": "Rate",
+  "bookAgain": "Book again",
+  "details": "Details",
+  "upcoming": "Upcoming",
+  "past": "Past",
+  "noUpcomingTitle": "Nothing booked yet",
+  "noUpcomingBody": "Book your first clean in about a minute.",
+  "bookAClean": "Book a clean",
+  "noPastTitle": "No past cleans",
+  "noPastBody": "Finished and cancelled bookings will show up here.",
+  "couldNotLoadMore": "Could not load more. Tap to retry.",
+  "bookingDetails": "Booking details",
+  "bookingNumber": "Booking #{code}",
+  "@bookingNumber": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "roomsSummary": "{bedrooms} bed, {bathrooms} bath",
+  "@roomsSummary": {
+    "placeholders": {
+      "bedrooms": {
+        "type": "int"
+      },
+      "bathrooms": {
+        "type": "int"
+      }
+    }
+  },
+  "messageCleaner": "Message {name}",
+  "@messageCleaner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "discount": "Discount",
+  "trackCleaner": "Track your cleaner",
+  "rateYourClean": "Rate your clean",
+  "yourReview": "Your review",
+  "tipAmount": "Tip {amount}",
+  "@tipAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "timeline": "Timeline"
 }

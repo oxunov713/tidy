@@ -12,6 +12,8 @@ import 'package:tidy_client/features/auth/presentation/welcome_screen.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/checkout_screen.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/configure_screen.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/schedule_screen.dart';
+import 'package:tidy_client/features/bookings/presentation/booking_details_screen.dart';
+import 'package:tidy_client/features/bookings/presentation/bookings_screen.dart';
 import 'package:tidy_client/features/home/presentation/home_screen.dart';
 
 part 'app_router.g.dart';
@@ -88,6 +90,11 @@ GoRouter appRouter(Ref ref) {
         path: Routes.checkout,
         builder: (context, state) => const CheckoutScreen(),
       ),
+      GoRoute(
+        path: '/booking/:id',
+        builder: (context, state) =>
+            BookingDetailsScreen(bookingId: state.pathParameters['id']!),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => MainShell(shell: shell),
         branches: [
@@ -103,7 +110,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.bookings,
-                builder: (context, state) => const SizedBox.shrink(),
+                builder: (context, state) => const BookingsScreen(),
               ),
             ],
           ),

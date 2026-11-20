@@ -440,4 +440,141 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paymentCancelled =>
       'Payment was not completed. Your booking is waiting for payment.';
+
+  @override
+  String get statusPending => 'Awaiting payment';
+
+  @override
+  String get statusConfirmed => 'Confirmed';
+
+  @override
+  String get statusAssigned => 'Cleaner assigned';
+
+  @override
+  String get statusOnTheWay => 'On the way';
+
+  @override
+  String get statusInProgress => 'In progress';
+
+  @override
+  String get statusCompleted => 'Done';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get cancelBookingTitle => 'Cancel this booking?';
+
+  @override
+  String get cancelFreeBody =>
+      'Cancelling now is free. You will be refunded in full.';
+
+  @override
+  String cancelLateBody(String price) {
+    return 'The visit starts in less than 24 hours, so cancelling now means you are charged the full price ($price).';
+  }
+
+  @override
+  String get keepBooking => 'Keep booking';
+
+  @override
+  String get cancelBooking => 'Cancel booking';
+
+  @override
+  String cancelledRefunded(String price) {
+    return 'Booking cancelled. $price will be refunded.';
+  }
+
+  @override
+  String cancelledCharged(String price) {
+    return 'Booking cancelled. $price was charged because it was less than 24 hours before the start.';
+  }
+
+  @override
+  String get serviceUnavailable => 'This service is no longer available.';
+
+  @override
+  String get findingCleaner => 'Finding your cleaner';
+
+  @override
+  String get noCleaner => 'No cleaner';
+
+  @override
+  String todayAt(String time) {
+    return 'Today · $time';
+  }
+
+  @override
+  String get track => 'Track';
+
+  @override
+  String get rate => 'Rate';
+
+  @override
+  String get bookAgain => 'Book again';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get upcoming => 'Upcoming';
+
+  @override
+  String get past => 'Past';
+
+  @override
+  String get noUpcomingTitle => 'Nothing booked yet';
+
+  @override
+  String get noUpcomingBody => 'Book your first clean in about a minute.';
+
+  @override
+  String get bookAClean => 'Book a clean';
+
+  @override
+  String get noPastTitle => 'No past cleans';
+
+  @override
+  String get noPastBody => 'Finished and cancelled bookings will show up here.';
+
+  @override
+  String get couldNotLoadMore => 'Could not load more. Tap to retry.';
+
+  @override
+  String get bookingDetails => 'Booking details';
+
+  @override
+  String bookingNumber(String code) {
+    return 'Booking #$code';
+  }
+
+  @override
+  String roomsSummary(int bedrooms, int bathrooms) {
+    return '$bedrooms bed, $bathrooms bath';
+  }
+
+  @override
+  String messageCleaner(String name) {
+    return 'Message $name';
+  }
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get trackCleaner => 'Track your cleaner';
+
+  @override
+  String get rateYourClean => 'Rate your clean';
+
+  @override
+  String get yourReview => 'Your review';
+
+  @override
+  String tipAmount(String amount) {
+    return 'Tip $amount';
+  }
+
+  @override
+  String get timeline => 'Timeline';
 }
