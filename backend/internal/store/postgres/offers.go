@@ -55,11 +55,13 @@ func (s *Store) AcceptOffer(ctx context.Context, bookingID, cleanerID uuid.UUID,
 	var b domain.Booking
 	var withdrawn []uuid.UUID
 	err := s.inTx(ctx, func(tx pgx.Tx) error {
+		// No FOR UPDATE here: the winner withdraws the other offers, and a
+		// loser holding a lock on its own offer would deadlock with it.
 		var status domain.OfferStatus
 		var expires time.Time
 		err := tx.QueryRow(ctx, `
 			SELECT status, expires_at FROM booking_offers
-			WHERE booking_id = $1 AND cleaner_id = $2 FOR UPDATE`, bookingID, cleanerID).Scan(&status, &expires)
+			WHERE booking_id = $1 AND cleaner_id = $2`, bookingID, cleanerID).Scan(&status, &expires)
 		if isNoRows(err) {
 			return domain.NotFound("Offer")
 		}
@@ -71,7 +73,7 @@ func (s *Store) AcceptOffer(ctx context.Context, bookingID, cleanerID uuid.UUID,
 		}
 
 		// The whole race is settled here. A second cleaner waits for the
-		// first one's row lock and then finds status <> 'confirmed'. A cleaner
+		// first one's row lock and then finds status <> 'confirmed'; a cleaner
 		// who is busy at that time hits bookings_no_overlap.
 		tag, err := tx.Exec(ctx, `
 			UPDATE bookings SET cleaner_id = $2, status = 'assigned', updated_at = now()
