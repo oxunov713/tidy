@@ -8,9 +8,10 @@ part of 'user.dart';
 
 _User _$UserFromJson(Map<String, dynamic> json) => _User(
   id: json['id'] as String,
+  phone: json['phone'] as String,
+  fullName: json['full_name'] as String,
   role: $enumDecode(_$UserRoleEnumMap, json['role']),
-  phone: json['phone'] as String? ?? '',
-  fullName: json['full_name'] as String? ?? '',
+  createdAt: DateTime.parse(json['created_at'] as String),
   email: json['email'] as String?,
   avatarUrl: json['avatar_url'] as String?,
   cleaner: json['cleaner'] == null
@@ -20,9 +21,10 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'id': instance.id,
-  'role': _$UserRoleEnumMap[instance.role]!,
   'phone': instance.phone,
   'full_name': instance.fullName,
+  'role': _$UserRoleEnumMap[instance.role]!,
+  'created_at': instance.createdAt.toIso8601String(),
   'email': instance.email,
   'avatar_url': instance.avatarUrl,
   'cleaner': instance.cleaner?.toJson(),
@@ -35,29 +37,29 @@ const _$UserRoleEnumMap = {
 };
 
 _Cleaner _$CleanerFromJson(Map<String, dynamic> json) => _Cleaner(
-  id: json['id'] as String,
-  fullName: json['full_name'] as String? ?? '',
-  phone: json['phone'] as String?,
-  avatarUrl: json['avatar_url'] as String?,
-  status:
-      $enumDecodeNullable(_$CleanerStatusEnumMap, json['status']) ??
-      CleanerStatus.approved,
-  bio: json['bio'] as String? ?? '',
-  rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-  ratingCount: (json['rating_count'] as num?)?.toInt() ?? 0,
-  online: json['online'] as bool? ?? false,
+  userId: json['user_id'] as String,
+  status: $enumDecode(_$CleanerStatusEnumMap, json['status']),
+  bio: json['bio'] as String,
+  rating: (json['rating'] as num).toDouble(),
+  ratingCount: (json['rating_count'] as num).toInt(),
+  isOnline: json['is_online'] as bool,
+  lastLat: (json['last_lat'] as num?)?.toDouble(),
+  lastLng: (json['last_lng'] as num?)?.toDouble(),
+  lastSeenAt: json['last_seen_at'] == null
+      ? null
+      : DateTime.parse(json['last_seen_at'] as String),
 );
 
 Map<String, dynamic> _$CleanerToJson(_Cleaner instance) => <String, dynamic>{
-  'id': instance.id,
-  'full_name': instance.fullName,
-  'phone': instance.phone,
-  'avatar_url': instance.avatarUrl,
+  'user_id': instance.userId,
   'status': _$CleanerStatusEnumMap[instance.status]!,
   'bio': instance.bio,
   'rating': instance.rating,
   'rating_count': instance.ratingCount,
-  'online': instance.online,
+  'is_online': instance.isOnline,
+  'last_lat': instance.lastLat,
+  'last_lng': instance.lastLng,
+  'last_seen_at': instance.lastSeenAt?.toIso8601String(),
 };
 
 const _$CleanerStatusEnumMap = {
@@ -65,19 +67,3 @@ const _$CleanerStatusEnumMap = {
   CleanerStatus.approved: 'approved',
   CleanerStatus.suspended: 'suspended',
 };
-
-_ClientSummary _$ClientSummaryFromJson(Map<String, dynamic> json) =>
-    _ClientSummary(
-      id: json['id'] as String,
-      fullName: json['full_name'] as String? ?? '',
-      phone: json['phone'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-    );
-
-Map<String, dynamic> _$ClientSummaryToJson(_ClientSummary instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'full_name': instance.fullName,
-      'phone': instance.phone,
-      'avatar_url': instance.avatarUrl,
-    };

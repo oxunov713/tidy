@@ -16,9 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ApiError {
 
- String get code; String get message;/// Field-level validation info for `invalid_request`. API.md does not fix
-/// the shape, so it is kept as decoded JSON.
- Object? get details;
+ String get code; String get message;/// Field name to problem, for `invalid_request`.
+ Map<String, String>? get details;
 /// Create a copy of ApiError
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -56,7 +55,7 @@ abstract mixin class $ApiErrorCopyWith<$Res>  {
   factory $ApiErrorCopyWith(ApiError value, $Res Function(ApiError) _then) = _$ApiErrorCopyWithImpl;
 @useResult
 $Res call({
- String code, String message, Object? details
+ String code, String message, Map<String, String>? details
 });
 
 
@@ -77,7 +76,8 @@ class _$ApiErrorCopyWithImpl<$Res>
   return _then(ApiError(
 code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,details: freezed == details ? _self.details : details ,
+as String,details: freezed == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
+as Map<String, String>?,
   ));
 }
 
@@ -162,7 +162,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String code,  String message,  Object? details)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String code,  String message,  Map<String, String>? details)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ApiError() when $default != null:
 return $default(_that.code,_that.message,_that.details);case _:
@@ -183,7 +183,7 @@ return $default(_that.code,_that.message,_that.details);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String code,  String message,  Object? details)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String code,  String message,  Map<String, String>? details)  $default,) {final _that = this;
 switch (_that) {
 case _ApiError():
 return $default(_that.code,_that.message,_that.details);case _:
@@ -203,7 +203,7 @@ return $default(_that.code,_that.message,_that.details);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String code,  String message,  Object? details)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String code,  String message,  Map<String, String>? details)?  $default,) {final _that = this;
 switch (_that) {
 case _ApiError() when $default != null:
 return $default(_that.code,_that.message,_that.details);case _:
@@ -218,14 +218,22 @@ return $default(_that.code,_that.message,_that.details);case _:
 @JsonSerializable()
 
 class _ApiError implements ApiError {
-  const _ApiError({required this.code, required this.message, this.details});
+  const _ApiError({required this.code, required this.message,  Map<String, String>? details}): _details = details;
   factory _ApiError.fromJson(Map<String, dynamic> json) => _$ApiErrorFromJson(json);
 
 @override final  String code;
 @override final  String message;
-/// Field-level validation info for `invalid_request`. API.md does not fix
-/// the shape, so it is kept as decoded JSON.
-@override final  Object? details;
+/// Field name to problem, for `invalid_request`.
+ final  Map<String, String>? _details;
+/// Field name to problem, for `invalid_request`.
+@override Map<String, String>? get details {
+  final value = _details;
+  if (value == null) return null;
+  if (_details is EqualUnmodifiableMapView) return _details;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of ApiError
 /// with the given fields replaced by the non-null parameter values.
@@ -240,13 +248,13 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ApiError&&(identical(other.code, code) || other.code == code)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.details, details));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ApiError&&(identical(other.code, code) || other.code == code)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.details, _details));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,code,message,const DeepCollectionEquality().hash(details));
+    return Object.hash(runtimeType,code,message,const DeepCollectionEquality().hash(_details));
 }
 
 @override
@@ -262,7 +270,7 @@ abstract mixin class _$ApiErrorCopyWith<$Res> implements $ApiErrorCopyWith<$Res>
   factory _$ApiErrorCopyWith(_ApiError value, $Res Function(_ApiError) _then) = __$ApiErrorCopyWithImpl;
 @override @useResult
 $Res call({
- String code, String message, Object? details
+ String code, String message, Map<String, String>? details
 });
 
 
@@ -283,7 +291,8 @@ class __$ApiErrorCopyWithImpl<$Res>
   return _then(_ApiError(
 code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,details: freezed == details ? _self.details : details ,
+as String,details: freezed == details ? _self._details : details // ignore: cast_nullable_to_non_nullable
+as Map<String, String>?,
   ));
 }
 

@@ -37,12 +37,8 @@ sealed class RealtimeEvent {
           etaMinutes: (json['eta_minutes'] as num?)?.toInt(),
         ),
         'offer.new' => OfferReceived(
-          Offer(
-            booking: Booking.fromJson(
-              json['booking'] as Map<String, dynamic>,
-            ),
-            expiresAt: DateTime.parse(json['expires_at'] as String),
-          ),
+          booking: Booking.fromJson(json['booking'] as Map<String, dynamic>),
+          expiresAt: DateTime.parse(json['expires_at'] as String),
         ),
         'offer.gone' => OfferWithdrawn(json['booking_id'] as String),
         'message.new' => MessageReceived(
@@ -50,6 +46,12 @@ sealed class RealtimeEvent {
           message: Message.fromJson(
             json['message'] as Map<String, dynamic>,
           ),
+        ),
+        'subscribed' => RoomSubscribed(json['room'] as String),
+        'unsubscribed' => RoomUnsubscribed(json['room'] as String),
+        'error' => RealtimeError(
+          code: json['code'] as String,
+          message: json['message'] as String,
         ),
         _ => UnknownRealtimeEvent(type, json),
       };
@@ -89,11 +91,14 @@ final class CleanerLocationUpdated extends RealtimeEvent {
   final int? etaMinutes;
 }
 
-/// `offer.new`, cleaners only.
+/// `offer.new`, cleaners only, in the `cleaner:offers` room. The street
+/// address is not part of it; call `GET /cleaner/offers` for distance and
+/// area.
 final class OfferReceived extends RealtimeEvent {
-  const OfferReceived(this.offer);
+  const OfferReceived({required this.booking, required this.expiresAt});
 
-  final Offer offer;
+  final Booking booking;
+  final DateTime expiresAt;
 }
 
 /// `offer.gone`: the offer was taken by someone else or expired.
@@ -109,6 +114,33 @@ final class MessageReceived extends RealtimeEvent {
 
   final String bookingId;
   final Message message;
+}
+
+/// `subscribed`: the server accepted a `subscribe` for [room].
+final class RoomSubscribed extends RealtimeEvent {
+  const RoomSubscribed(this.room);
+
+  final String room;
+}
+
+/// `unsubscribed`: answer to `unsubscribe`, sent even if the room was not
+/// joined.
+final class RoomUnsubscribed extends RealtimeEvent {
+  const RoomUnsubscribed(this.room);
+
+  final String room;
+}
+
+/// `error`: the server refused a message, for example a `subscribe` to
+/// someone else's booking (`forbidden`) or a `location` while the booking is
+/// neither assigned nor on the way (`invalid_transition`). The socket stays
+/// open.
+final class RealtimeError extends RealtimeEvent {
+  const RealtimeError({required this.code, required this.message});
+
+  /// Same codes as the REST errors, e.g. `forbidden`, `invalid_request`.
+  final String code;
+  final String message;
 }
 
 final class UnknownRealtimeEvent extends RealtimeEvent {

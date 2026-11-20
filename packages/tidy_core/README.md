@@ -32,14 +32,54 @@ final quote = await api.bookings.quote(
 );
 ```
 
+`role` only matters the first time a phone number signs in. Existing accounts
+keep their role, and admins sign in without one (the server rejects `admin`).
+The catalogue and `quote` need no sign in and send no token.
+
 Areas: `auth`, `me`, `catalog`, `bookings`, `cleaner`, `admin`. Every method
 returns a typed model or throws an `ApiException`. It is a sealed class, so a
 `switch` can cover `SlotTakenException`, `InvalidTransitionException`,
 `UnauthorizedException`, `NetworkException` and the rest.
 
-Calls that only change state (`cancel`, `review`, `acceptOffer`, `setJobStatus`
-...) return `Future<void>`. Refetch the booking, or listen to `booking.status`
-on the socket.
+Money is an integer in pence and times are UTC. Calls return what the server
+returns: `cancel` gives a `Cancellation` (`booking` and `refunded`), `review` the
+`Review`, `acceptOffer` and `setJobStatus` the updated `Booking`. Calls the
+server answers with `204` (`setOnline`, `declineOffer`, `approveCleaner`,
+`suspendCleaner`, `requestOtp`, `logout`) return `Future<void>`.
+
+Different screens get different shapes of a booking, as on the wire:
+
+| Call | Returns |
+|---|---|
+| `bookings.list` | `BookingPage` of `Booking` |
+| `bookings.get` | `BookingDetails`: `booking`, `address`, `cleaner`, `lastLocation`, `events`, `review` |
+| `cleaner.offers` | `Offer`: `booking`, `expiresAt`, `distanceKm`, `postcode`, `city` |
+| `cleaner.jobs` | `Job`: `booking`, `address`, `clientName` |
+| `admin.bookings` | `AdminBookingPage` of `AdminBooking`: `booking`, `clientName`, `clientPhone`, `cleanerName` |
+
+### Pagination
+
+`bookings.list` and `admin.bookings` take `cursor` and `limit` (20 by default,
+50 at most) and return a page with `items` and `nextCursor`. `nextCursor` is an
+empty string on the last page; use `page.hasMore`.
+
+```dart
+var page = await api.bookings.list(scope: BookingScope.past);
+while (page.hasMore) {
+  page = await api.bookings.list(
+    scope: BookingScope.past,
+    cursor: page.nextCursor,
+  );
+}
+```
+
+### Errors
+
+`ApiException` subtypes follow the error codes of the API: `InvalidRequest`
+(`details` maps field to problem), `Unauthorized`, `Forbidden`, `NotFound`,
+`SlotTaken`, `InvalidTransition`, `OfferGone`, `TooManyRequests`,
+`ServerException` (5xx and `internal`) and `NetworkException`. A cleaner setting
+`on_the_way` more than 3 hours before the start gets `InvalidTransitionException`.
 
 The base URL comes from `--dart-define`:
 
@@ -61,13 +101,24 @@ rejected the tokens are cleared and `apiClient.sessionExpired` fires.
 ```dart
 final rt = ref.read(realtimeClientProvider);
 await rt.connect();
-rt.subscribe(Rooms.booking(bookingId));
+rt.subscribe(Rooms.booking(bookingId)); // clients and the assigned cleaner
+rt.subscribe(Rooms.cleanerOffers);      // cleaners, for new offers
 rt.events.listen((event) => switch (event) {
   BookingStatusChanged(:final status) => ...,
   CleanerLocationUpdated(:final lat, :final lng) => ...,
+  OfferReceived(:final booking, :final expiresAt) => ...,
   _ => null,
 });
 ```
+
+Events: `BookingStatusChanged`, `CleanerLocationUpdated`, `OfferReceived`,
+`OfferWithdrawn`, `MessageReceived`, and the replies to the client's own
+messages: `RoomSubscribed`, `RoomUnsubscribed` and `RealtimeError` (for example
+`forbidden` when joining someone else's booking; the socket stays open). A
+cleaner shares the position with `sendLocation`, which the server accepts only
+while the booking is assigned or on the way (`RealtimeError` with
+`invalid_transition` otherwise). `OfferReceived` has no distance or area; fetch
+`cleaner.offers()` for those.
 
 The client reconnects with exponential backoff (0.5 s up to 30 s, with jitter)
 and joins the same rooms again. If a connection attempt fails it calls
@@ -103,21 +154,14 @@ Setup in each mobile app (`apps/client`, `apps/cleaner`):
 The key is not in the repository. Keep it in a local, untracked file or inject
 it in CI. The plugin's README has the exact snippets.
 
-## Where the API contract was ambiguous
+## Wire format
 
-`docs/API.md` does not spell out every shape, so these are guesses to check
-against the backend:
-
-- Paginated lists (`/bookings`, `/admin/bookings`) are read as
-  `{ "items": [...], "next_cursor": "..." | null }`.
-- `extra_ids` in `GET /slots` is sent comma-separated.
-- The WebSocket lives at `/api/v1/ws` (same prefix as REST).
-- Fields on `Booking`, `Cleaner`, `Earnings`, `ClientSummary` beyond what the
-  docs mention (for example `code`, `service_title`, `cleaner_location`,
-  per-day earnings as `days`) follow the database columns. Most of them have
-  defaults or are nullable so a missing field does not break decoding.
-- Body of `PUT /admin/services/{id}` uses the `services` table columns, and
-  `PATCH /admin/bookings/{id}` takes `cleaner_id` and/or `status`.
+The models mirror `backend/internal/httpapi` and the DTOs it uses field for
+field: `snake_case` keys, RFC 3339 timestamps (read as UTC, sent as UTC), a
+nullable Dart field only where the Go field is a pointer. `BookingDetails`,
+`Job` and `AdminBooking` wrap a `Booking` because the server flattens the
+booking and the extra fields into one object. `GET /admin/cleaners` returns
+users with a `cleaner` profile, so it gives `List<User>`.
 
 ## Generated code
 
@@ -134,5 +178,39 @@ dart run build_runner build
 flutter test
 ```
 
-Covers JSON round-trips, error mapping, the single-flight refresh, WebSocket
-event parsing and reconnect behaviour.
+Covers JSON decoding with payloads copied from the backend, error mapping, the
+single-flight refresh, WebSocket event parsing and reconnect behaviour.
+
+### Against a running backend
+
+`test/integration/api_flow_test.dart` uses the real `ApiClient` and
+`RealtimeClient` against a local API and walks through a whole booking: OTP
+sign in as client, cleaner and admin, quote, slots, booking, offer over the
+socket, accept, `on_the_way` / `in_progress` / `completed` with the client
+receiving `booking.status` and `cleaner.location`, review, earnings, cancel,
+pagination and the admin screens. It is tagged `integration` and skipped unless
+`TIDY_API_URL` is set.
+
+```bash
+cd backend
+export DATABASE_URL=postgres://postgres@localhost:5433/tidy_dev?sslmode=disable \
+       JWT_SECRET=local-dev-secret-at-least-32-characters-long PAYMENT_PROVIDER=mock
+make migrate seed
+go run ./cmd/api > /tmp/tidy-api.log 2>&1 &
+
+cd ../packages/tidy_core
+TIDY_API_URL=http://localhost:8080 \
+TIDY_API_LOG=/tmp/tidy-api.log \
+TIDY_DATABASE_URL=$DATABASE_URL \
+flutter test test/integration
+```
+
+`TIDY_API_LOG` is where the API writes its log: in development the one-time
+codes are printed there. The test signs up a fresh client and a fresh cleaner
+each run, so reruns do not collide; `TIDY_CLEANER_PHONE=+447700900101` uses a
+seeded cleaner instead (it then keeps the slot of every run).
+`TIDY_DATABASE_URL` is optional and needs `psql`: it lets the test approve the
+new cleaner by hand if `POST /admin/cleaners/{id}/approve` fails, and move the booking to two hours from now when the first free slot
+is more than 3 hours away (the server refuses `on_the_way` before that). The
+API limits login codes to 3 per phone per 10 minutes and 30 auth requests per
+minute per IP, so wait a minute between runs.

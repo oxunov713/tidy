@@ -17,11 +17,16 @@ class AuthApi {
       _http.postVoid('/auth/otp', body: {'phone': phone}, skipAuth: true);
 
   /// `POST /auth/verify`.
+  ///
+  /// [role] is only used when the phone number is new; pass `client` or
+  /// `cleaner` from the matching app. Existing accounts keep their role, and
+  /// admins sign in without one (the server rejects `admin`).
   Future<AuthSession> verify({
     required String phone,
     required String code,
-    required UserRole role,
+    UserRole? role,
   }) async {
+    assert(role != UserRole.admin, 'Admins sign in without a role');
     final json = await _http.postObjectPublic(
       '/auth/verify',
       body: VerifyRequest(phone: phone, code: code, role: role).toJson(),

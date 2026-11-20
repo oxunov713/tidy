@@ -579,7 +579,8 @@ as int,
 /// @nodoc
 mixin _$Quote {
 
- int get subtotal; int get discount; int get total; int get minutes; List<QuoteLine> get lines;
+ int get subtotal; int get discount; int get total;/// Visit length, extras included.
+ int get minutes; List<QuoteLine> get lines;
 /// Create a copy of Quote
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -788,6 +789,7 @@ class _Quote implements Quote {
 @override final  int subtotal;
 @override final  int discount;
 @override final  int total;
+/// Visit length, extras included.
 @override final  int minutes;
  final  List<QuoteLine> _lines;
 @override@JsonKey() List<QuoteLine> get lines {

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 import 'support/fake_channel.dart';
+import 'support/fixtures.dart';
 
 String _frame(Map<String, Object?> json) => jsonEncode(json);
 
@@ -58,16 +59,15 @@ void main() {
       final offer = RealtimeEvent.parse(
         _frame({
           'type': 'offer.new',
-          'booking': {
-            'id': 'b1',
-            'status': 'confirmed',
-            'start': '2026-12-03T08:00:00Z',
-          },
+          'booking': bookingJson(status: 'confirmed'),
           'expires_at': '2026-12-03T07:01:00Z',
         }),
       );
       expect(offer, isA<OfferReceived>());
-      expect((offer! as OfferReceived).offer.booking.id, 'b1');
+      final received = offer! as OfferReceived;
+      expect(received.booking.code, 'TD-1000');
+      expect(received.booking.status, BookingStatus.confirmed);
+      expect(received.expiresAt, DateTime.utc(2026, 12, 3, 7, 1));
 
       expect(
         RealtimeEvent.parse(_frame({'type': 'offer.gone', 'booking_id': 'b1'})),
@@ -90,6 +90,35 @@ void main() {
               )!
               as MessageReceived;
       expect(message.message.body, 'On my way');
+    });
+
+    test('subscribed, unsubscribed and error', () {
+      final subscribed =
+          RealtimeEvent.parse(
+                _frame({'type': 'subscribed', 'room': 'booking:b1'}),
+              )!
+              as RoomSubscribed;
+      expect(subscribed.room, 'booking:b1');
+
+      final unsubscribed =
+          RealtimeEvent.parse(
+                _frame({'type': 'unsubscribed', 'room': 'booking:b1'}),
+              )!
+              as RoomUnsubscribed;
+      expect(unsubscribed.room, 'booking:b1');
+
+      final error =
+          RealtimeEvent.parse(
+                _frame({
+                  'type': 'error',
+                  'code': 'forbidden',
+                  'message':
+                      'Only the client and the assigned cleaner can '
+                      'follow this booking.',
+                }),
+              )!
+              as RealtimeError;
+      expect(error.code, 'forbidden');
     });
 
     test('unknown types are kept, garbage is dropped', () {

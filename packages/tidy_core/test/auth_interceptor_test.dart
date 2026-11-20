@@ -4,16 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 import 'support/fake_adapter.dart';
+import 'support/fixtures.dart';
 
 const _old = TokenPair(accessToken: 'old-access', refreshToken: 'old-refresh');
 
-Map<String, Object> _servicesJson() => {
-  'id': 's1',
-  'slug': 'standard',
-  'title': 'Standard clean',
-  'from_price': 4500,
-  'minutes': 120,
-};
+Map<String, Object?> _servicesJson() => addressJson();
 
 void main() {
   late InMemoryTokenStorage storage;
@@ -28,10 +23,35 @@ void main() {
 
   test('sends the bearer token', () async {
     final adapter = FakeAdapter((_) => const FakeResponse(200, <Object>[]));
-    await clientFor(adapter).catalog.services();
+    await clientFor(adapter).me.addresses();
     expect(
       adapter.requests.single.headers['Authorization'],
       'Bearer old-access',
+    );
+  });
+
+  test('public catalogue calls carry no token', () async {
+    final adapter = FakeAdapter(
+      (o) => o.path == '/quotes'
+          ? const FakeResponse(200, {
+              'subtotal': 4500,
+              'discount': 0,
+              'total': 4500,
+              'minutes': 120,
+              'lines': <Object>[],
+            })
+          : const FakeResponse(200, <Object>[]),
+    );
+    final client = clientFor(adapter);
+    await client.catalog.services();
+    await client.catalog.extras();
+    await client.bookings.quote(
+      const QuoteRequest(serviceId: 's1', bedrooms: 1, bathrooms: 1),
+    );
+    expect(adapter.requests, hasLength(3));
+    expect(
+      adapter.requests.map((r) => r.headers['Authorization']),
+      everyElement(isNull),
     );
   });
 
@@ -51,11 +71,11 @@ void main() {
     });
     final client = clientFor(adapter);
 
-    final services = await client.catalog.services();
+    final services = await client.me.addresses();
 
     expect(services, hasLength(1));
     expect(adapter.count('/auth/refresh'), 1);
-    expect(adapter.count('/services'), 2);
+    expect(adapter.count('/me/addresses'), 2);
     final stored = await storage.read();
     expect(stored?.accessToken, 'new-access');
     expect(stored?.refreshToken, 'new-refresh');
@@ -80,7 +100,7 @@ void main() {
     });
     final client = clientFor(adapter);
 
-    final calls = [for (var i = 0; i < 5; i++) client.catalog.services()];
+    final calls = [for (var i = 0; i < 5; i++) client.me.addresses()];
     // Let all five reach their 401 before the refresh may finish.
     await Future<void>.delayed(const Duration(milliseconds: 50));
     expect(adapter.count('/auth/refresh'), 1);
@@ -89,7 +109,7 @@ void main() {
 
     expect(results, everyElement(hasLength(1)));
     expect(adapter.count('/auth/refresh'), 1);
-    expect(adapter.count('/services'), 10);
+    expect(adapter.count('/me/addresses'), 10);
   });
 
   test('a late 401 from the old token does not refresh again', () async {
@@ -118,8 +138,8 @@ void main() {
     });
     final client = clientFor(adapter);
 
-    final first = client.catalog.services();
-    final second = client.catalog.services();
+    final first = client.me.addresses();
+    final second = client.me.addresses();
     await first;
     slow.complete();
     await second;
@@ -143,14 +163,14 @@ void main() {
       client.sessionExpired.listen((_) => expired++);
 
       await expectLater(
-        client.catalog.services(),
+        client.me.addresses(),
         throwsA(isA<UnauthorizedException>()),
       );
       await Future<void>.delayed(Duration.zero);
 
       expect(await storage.read(), isNull);
       expect(expired, 1);
-      expect(adapter.count('/services'), 1);
+      expect(adapter.count('/me/addresses'), 1);
     },
   );
 
@@ -171,10 +191,10 @@ void main() {
       final client = clientFor(adapter);
 
       await expectLater(
-        client.catalog.services(),
+        client.me.addresses(),
         throwsA(isA<UnauthorizedException>()),
       );
-      expect(adapter.count('/services'), 2);
+      expect(adapter.count('/me/addresses'), 2);
       expect(adapter.count('/auth/refresh'), 1);
     },
   );
@@ -205,10 +225,10 @@ void main() {
   test('verify stores the returned tokens', () async {
     storage = InMemoryTokenStorage();
     final adapter = FakeAdapter(
-      (_) => const FakeResponse(200, {
+      (_) => FakeResponse(200, {
         'access_token': 'a',
         'refresh_token': 'r',
-        'user': {'id': 'u1', 'role': 'client'},
+        'user': userJson(),
       }),
     );
     final session = await clientFor(adapter).auth.verify(
@@ -216,7 +236,32 @@ void main() {
       code: '123456',
       role: UserRole.client,
     );
-    expect(session.user.id, 'u1');
+    expect(session.user.id, clientId);
     expect((await storage.read())?.refreshToken, 'r');
+    expect(adapter.requests.single.data, {
+      'phone': '+447700900123',
+      'code': '123456',
+      'role': 'client',
+    });
+  });
+
+  test('verify without a role (existing accounts, admin) omits it', () async {
+    storage = InMemoryTokenStorage();
+    final adapter = FakeAdapter(
+      (_) => FakeResponse(200, {
+        'access_token': 'a',
+        'refresh_token': 'r',
+        'user': userJson(role: 'admin'),
+      }),
+    );
+    final session = await clientFor(adapter).auth.verify(
+      phone: '+447700900001',
+      code: '123456',
+    );
+    expect(session.user.role, UserRole.admin);
+    expect(adapter.requests.single.data, {
+      'phone': '+447700900001',
+      'code': '123456',
+    });
   });
 }

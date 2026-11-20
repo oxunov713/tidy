@@ -222,7 +222,7 @@ return $default(_that.id,_that.line1,_that.city,_that.postcode,_that.lat,_that.l
 @JsonSerializable()
 
 class _Address implements Address {
-  const _Address({required this.id, required this.line1, required this.city, required this.postcode, required this.lat, required this.lng, this.line2 = '', this.accessNotes = ''});
+  const _Address({required this.id, required this.line1, required this.city, required this.postcode, required this.lat, required this.lng, required this.line2, required this.accessNotes});
   factory _Address.fromJson(Map<String, dynamic> json) => _$AddressFromJson(json);
 
 @override final  String id;
@@ -231,8 +231,8 @@ class _Address implements Address {
 @override final  String postcode;
 @override final  double lat;
 @override final  double lng;
-@override@JsonKey() final  String line2;
-@override@JsonKey() final  String accessNotes;
+@override final  String line2;
+@override final  String accessNotes;
 
 /// Create a copy of Address
 /// with the given fields replaced by the non-null parameter values.

@@ -10,12 +10,14 @@ _BookingEvent _$BookingEventFromJson(Map<String, dynamic> json) =>
     _BookingEvent(
       status: $enumDecode(_$BookingStatusEnumMap, json['status']),
       at: DateTime.parse(json['at'] as String),
+      actorId: json['actor_id'] as String?,
     );
 
 Map<String, dynamic> _$BookingEventToJson(_BookingEvent instance) =>
     <String, dynamic>{
       'status': _$BookingStatusEnumMap[instance.status]!,
       'at': instance.at.toIso8601String(),
+      'actor_id': instance.actorId,
     };
 
 const _$BookingStatusEnumMap = {
@@ -32,82 +34,82 @@ _CleanerLocation _$CleanerLocationFromJson(Map<String, dynamic> json) =>
     _CleanerLocation(
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lng'] as num).toDouble(),
-      etaMinutes: (json['eta_minutes'] as num?)?.toInt(),
-      at: json['at'] == null ? null : DateTime.parse(json['at'] as String),
+      at: DateTime.parse(json['at'] as String),
     );
 
 Map<String, dynamic> _$CleanerLocationToJson(_CleanerLocation instance) =>
     <String, dynamic>{
       'lat': instance.lat,
       'lng': instance.lng,
-      'eta_minutes': instance.etaMinutes,
-      'at': instance.at?.toIso8601String(),
+      'at': instance.at.toIso8601String(),
+    };
+
+_BookingExtra _$BookingExtraFromJson(Map<String, dynamic> json) =>
+    _BookingExtra(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      price: (json['price'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$BookingExtraToJson(_BookingExtra instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'price': instance.price,
     };
 
 _Booking _$BookingFromJson(Map<String, dynamic> json) => _Booking(
   id: json['id'] as String,
-  status: $enumDecode(_$BookingStatusEnumMap, json['status']),
+  code: json['code'] as String,
+  clientId: json['client_id'] as String,
+  serviceId: json['service_id'] as String,
+  serviceTitle: json['service_title'] as String,
+  addressId: json['address_id'] as String,
+  bedrooms: (json['bedrooms'] as num).toInt(),
+  bathrooms: (json['bathrooms'] as num).toInt(),
+  frequency: $enumDecode(_$FrequencyEnumMap, json['frequency']),
   start: DateTime.parse(json['start'] as String),
-  code: json['code'] as String? ?? '',
-  serviceId: json['service_id'] as String? ?? '',
-  serviceTitle: json['service_title'] as String? ?? '',
-  bedrooms: (json['bedrooms'] as num?)?.toInt() ?? 1,
-  bathrooms: (json['bathrooms'] as num?)?.toInt() ?? 1,
-  frequency:
-      $enumDecodeNullable(_$FrequencyEnumMap, json['frequency']) ??
-      Frequency.once,
-  end: json['end'] == null ? null : DateTime.parse(json['end'] as String),
-  minutes: (json['minutes'] as num?)?.toInt() ?? 0,
-  subtotal: (json['subtotal'] as num?)?.toInt() ?? 0,
-  discount: (json['discount'] as num?)?.toInt() ?? 0,
-  total: (json['total'] as num?)?.toInt() ?? 0,
+  end: DateTime.parse(json['end'] as String),
+  status: $enumDecode(_$BookingStatusEnumMap, json['status']),
+  subtotal: (json['subtotal'] as num).toInt(),
+  discount: (json['discount'] as num).toInt(),
+  total: (json['total'] as num).toInt(),
+  cleanerPayout: (json['cleaner_payout'] as num).toInt(),
+  createdAt: DateTime.parse(json['created_at'] as String),
+  updatedAt: DateTime.parse(json['updated_at'] as String),
+  cleanerId: json['cleaner_id'] as String?,
+  requestedCleanerId: json['requested_cleaner_id'] as String?,
+  planId: json['plan_id'] as String?,
   extras:
       (json['extras'] as List<dynamic>?)
-          ?.map((e) => Extra.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => BookingExtra.fromJson(e as Map<String, dynamic>))
           .toList() ??
-      const <Extra>[],
-  address: json['address'] == null
-      ? null
-      : Address.fromJson(json['address'] as Map<String, dynamic>),
-  cleaner: json['cleaner'] == null
-      ? null
-      : Cleaner.fromJson(json['cleaner'] as Map<String, dynamic>),
-  client: json['client'] == null
-      ? null
-      : ClientSummary.fromJson(json['client'] as Map<String, dynamic>),
-  cleanerLocation: json['cleaner_location'] == null
-      ? null
-      : CleanerLocation.fromJson(
-          json['cleaner_location'] as Map<String, dynamic>,
-        ),
-  events:
-      (json['events'] as List<dynamic>?)
-          ?.map((e) => BookingEvent.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const <BookingEvent>[],
+      const <BookingExtra>[],
 );
 
 Map<String, dynamic> _$BookingToJson(_Booking instance) => <String, dynamic>{
   'id': instance.id,
-  'status': _$BookingStatusEnumMap[instance.status]!,
-  'start': instance.start.toIso8601String(),
   'code': instance.code,
+  'client_id': instance.clientId,
   'service_id': instance.serviceId,
   'service_title': instance.serviceTitle,
+  'address_id': instance.addressId,
   'bedrooms': instance.bedrooms,
   'bathrooms': instance.bathrooms,
   'frequency': _$FrequencyEnumMap[instance.frequency]!,
-  'end': instance.end?.toIso8601String(),
-  'minutes': instance.minutes,
+  'start': instance.start.toIso8601String(),
+  'end': instance.end.toIso8601String(),
+  'status': _$BookingStatusEnumMap[instance.status]!,
   'subtotal': instance.subtotal,
   'discount': instance.discount,
   'total': instance.total,
+  'cleaner_payout': instance.cleanerPayout,
+  'created_at': instance.createdAt.toIso8601String(),
+  'updated_at': instance.updatedAt.toIso8601String(),
+  'cleaner_id': instance.cleanerId,
+  'requested_cleaner_id': instance.requestedCleanerId,
+  'plan_id': instance.planId,
   'extras': instance.extras.map((e) => e.toJson()).toList(),
-  'address': instance.address?.toJson(),
-  'cleaner': instance.cleaner?.toJson(),
-  'client': instance.client?.toJson(),
-  'cleaner_location': instance.cleanerLocation?.toJson(),
-  'events': instance.events.map((e) => e.toJson()).toList(),
 };
 
 const _$FrequencyEnumMap = {
@@ -116,13 +118,52 @@ const _$FrequencyEnumMap = {
   Frequency.fortnightly: 'fortnightly',
 };
 
+_CleanerCard _$CleanerCardFromJson(Map<String, dynamic> json) => _CleanerCard(
+  id: json['id'] as String,
+  fullName: json['full_name'] as String,
+  rating: (json['rating'] as num).toDouble(),
+  ratingCount: (json['rating_count'] as num).toInt(),
+  avatarUrl: json['avatar_url'] as String?,
+);
+
+Map<String, dynamic> _$CleanerCardToJson(_CleanerCard instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'full_name': instance.fullName,
+      'rating': instance.rating,
+      'rating_count': instance.ratingCount,
+      'avatar_url': instance.avatarUrl,
+    };
+
+_Review _$ReviewFromJson(Map<String, dynamic> json) => _Review(
+  bookingId: json['booking_id'] as String,
+  cleanerId: json['cleaner_id'] as String,
+  rating: (json['rating'] as num).toInt(),
+  comment: json['comment'] as String,
+  tip: (json['tip'] as num).toInt(),
+  createdAt: DateTime.parse(json['created_at'] as String),
+  tags:
+      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const <String>[],
+);
+
+Map<String, dynamic> _$ReviewToJson(_Review instance) => <String, dynamic>{
+  'booking_id': instance.bookingId,
+  'cleaner_id': instance.cleanerId,
+  'rating': instance.rating,
+  'comment': instance.comment,
+  'tip': instance.tip,
+  'created_at': instance.createdAt.toIso8601String(),
+  'tags': instance.tags,
+};
+
 _BookingPage _$BookingPageFromJson(Map<String, dynamic> json) => _BookingPage(
   items:
       (json['items'] as List<dynamic>?)
           ?.map((e) => Booking.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const <Booking>[],
-  nextCursor: json['next_cursor'] as String?,
+  nextCursor: json['next_cursor'] as String? ?? '',
 );
 
 Map<String, dynamic> _$BookingPageToJson(_BookingPage instance) =>
@@ -155,10 +196,10 @@ Map<String, dynamic> _$CreateBookingRequestToJson(
   'bedrooms': instance.bedrooms,
   'bathrooms': instance.bathrooms,
   'address_id': instance.addressId,
-  'start': instance.start.toIso8601String(),
+  'start': _utc(instance.start),
   'extra_ids': instance.extraIds,
   'frequency': _$FrequencyEnumMap[instance.frequency]!,
-  'cleaner_id': instance.cleanerId,
+  'cleaner_id': ?instance.cleanerId,
 };
 
 _PaymentIntentInfo _$PaymentIntentInfoFromJson(Map<String, dynamic> json) =>
@@ -179,6 +220,18 @@ Map<String, dynamic> _$BookingCreatedToJson(_BookingCreated instance) =>
     <String, dynamic>{
       'booking': instance.booking.toJson(),
       'payment': instance.payment.toJson(),
+    };
+
+_Cancellation _$CancellationFromJson(Map<String, dynamic> json) =>
+    _Cancellation(
+      booking: Booking.fromJson(json['booking'] as Map<String, dynamic>),
+      refunded: json['refunded'] as bool,
+    );
+
+Map<String, dynamic> _$CancellationToJson(_Cancellation instance) =>
+    <String, dynamic>{
+      'booking': instance.booking.toJson(),
+      'refunded': instance.refunded,
     };
 
 _ReviewRequest _$ReviewRequestFromJson(Map<String, dynamic> json) =>
@@ -207,6 +260,6 @@ _AdminBookingPatch _$AdminBookingPatchFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AdminBookingPatchToJson(_AdminBookingPatch instance) =>
     <String, dynamic>{
-      'cleaner_id': instance.cleanerId,
-      'status': _$BookingStatusEnumMap[instance.status],
+      'cleaner_id': ?instance.cleanerId,
+      'status': ?_$BookingStatusEnumMap[instance.status],
     };

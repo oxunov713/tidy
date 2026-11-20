@@ -1,0 +1,5 @@
+tags:
+  integration:
+    # Talks to a running backend; see test/integration/README or the package
+    # README. Skipped unless TIDY_API_URL is set.
+    timeout: 3x

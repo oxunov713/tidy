@@ -43,9 +43,16 @@ void main() {
       isA<NotFoundException>(),
     );
     expect(
+      await failWith(FakeResponse(409, _error('offer_gone'))),
+      isA<OfferGoneException>(),
+    );
+    expect(
       await failWith(FakeResponse(429, _error('too_many_requests'))),
       isA<TooManyRequestsException>(),
     );
+    final internal = await failWith(FakeResponse(500, _error('internal')));
+    expect(internal, isA<ServerException>());
+    expect((internal! as ServerException).code, 'internal');
   });
 
   test('keeps message and details for invalid_request', () async {

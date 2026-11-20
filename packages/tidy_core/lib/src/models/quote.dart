@@ -39,6 +39,8 @@ abstract class Quote with _$Quote {
     required int subtotal,
     required int discount,
     required int total,
+
+    /// Visit length, extras included.
     required int minutes,
     @Default(<QuoteLine>[]) List<QuoteLine> lines,
   }) = _Quote;

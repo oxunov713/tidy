@@ -583,7 +583,7 @@ as String,
 /// @nodoc
 mixin _$VerifyRequest {
 
- String get phone; String get code; UserRole get role;
+ String get phone; String get code; UserRole? get role;
 /// Create a copy of VerifyRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -621,7 +621,7 @@ abstract mixin class $VerifyRequestCopyWith<$Res>  {
   factory $VerifyRequestCopyWith(VerifyRequest value, $Res Function(VerifyRequest) _then) = _$VerifyRequestCopyWithImpl;
 @useResult
 $Res call({
- String phone, String code, UserRole role
+ String phone, String code, UserRole? role
 });
 
 
@@ -638,12 +638,12 @@ class _$VerifyRequestCopyWithImpl<$Res>
 
 /// Create a copy of VerifyRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? phone = null,Object? code = null,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? phone = null,Object? code = null,Object? role = freezed,}) {
   return _then(VerifyRequest(
 phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
-as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,
+as String,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as UserRole?,
   ));
 }
 
@@ -728,7 +728,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String phone,  String code,  UserRole role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String phone,  String code,  UserRole? role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VerifyRequest() when $default != null:
 return $default(_that.phone,_that.code,_that.role);case _:
@@ -749,7 +749,7 @@ return $default(_that.phone,_that.code,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String phone,  String code,  UserRole role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String phone,  String code,  UserRole? role)  $default,) {final _that = this;
 switch (_that) {
 case _VerifyRequest():
 return $default(_that.phone,_that.code,_that.role);case _:
@@ -769,7 +769,7 @@ return $default(_that.phone,_that.code,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String phone,  String code,  UserRole role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String phone,  String code,  UserRole? role)?  $default,) {final _that = this;
 switch (_that) {
 case _VerifyRequest() when $default != null:
 return $default(_that.phone,_that.code,_that.role);case _:
@@ -781,15 +781,15 @@ return $default(_that.phone,_that.code,_that.role);case _:
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(includeIfNull: false)
 class _VerifyRequest implements VerifyRequest {
-  const _VerifyRequest({required this.phone, required this.code, required this.role});
+  const _VerifyRequest({required this.phone, required this.code, this.role});
   factory _VerifyRequest.fromJson(Map<String, dynamic> json) => _$VerifyRequestFromJson(json);
 
 @override final  String phone;
 @override final  String code;
-@override final  UserRole role;
+@override final  UserRole? role;
 
 /// Create a copy of VerifyRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -826,7 +826,7 @@ abstract mixin class _$VerifyRequestCopyWith<$Res> implements $VerifyRequestCopy
   factory _$VerifyRequestCopyWith(_VerifyRequest value, $Res Function(_VerifyRequest) _then) = __$VerifyRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String phone, String code, UserRole role
+ String phone, String code, UserRole? role
 });
 
 
@@ -843,12 +843,12 @@ class __$VerifyRequestCopyWithImpl<$Res>
 
 /// Create a copy of VerifyRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? phone = null,Object? code = null,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? phone = null,Object? code = null,Object? role = freezed,}) {
   return _then(_VerifyRequest(
 phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
-as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,
+as String,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as UserRole?,
   ));
 }
 

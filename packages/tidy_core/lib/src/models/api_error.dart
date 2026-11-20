@@ -11,9 +11,8 @@ abstract class ApiError with _$ApiError {
     required String code,
     required String message,
 
-    /// Field-level validation info for `invalid_request`. API.md does not fix
-    /// the shape, so it is kept as decoded JSON.
-    Object? details,
+    /// Field name to problem, for `invalid_request`.
+    Map<String, String>? details,
   }) = _ApiError;
 
   factory ApiError.fromJson(Map<String, dynamic> json) =>

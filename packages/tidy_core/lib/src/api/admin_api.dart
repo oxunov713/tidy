@@ -10,32 +10,40 @@ class AdminApi {
   Future<AdminStats> statsToday() async =>
       AdminStats.fromJson(await _http.getObject('/admin/stats/today'));
 
-  Future<BookingPage> bookings({
+  /// [query] searches the booking table (`q`). Pass the previous page's
+  /// `nextCursor` as [cursor]; [limit] is 20 by default, 50 at most.
+  Future<AdminBookingPage> bookings({
     BookingStatus? status,
     String? query,
     String? cursor,
+    int? limit,
   }) async {
     final json = await _http.getObject(
       '/admin/bookings',
       query: {
         if (status != null) 'status': status.wireName,
         if (query != null && query.isNotEmpty) 'q': query,
-        'cursor': ?cursor,
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+        'limit': ?limit,
       },
     );
-    return BookingPage.fromJson(json);
+    return AdminBookingPage.fromJson(json);
   }
 
-  /// Reassign a cleaner or cancel (`status: cancelled`).
-  Future<void> patchBooking(String id, AdminBookingPatch patch) =>
-      _http.patchVoid('/admin/bookings/$id', body: patch.toJson());
+  /// Reassigns the cleaner or cancels (`status: cancelled`); returns the
+  /// updated booking.
+  Future<Booking> patchBooking(String id, AdminBookingPatch patch) async =>
+      Booking.fromJson(
+        await _http.patchObject('/admin/bookings/$id', body: patch.toJson()),
+      );
 
-  Future<List<Cleaner>> cleaners({CleanerStatus? status}) async {
+  /// Every cleaner as a [User] with its `cleaner` profile filled in.
+  Future<List<User>> cleaners({CleanerStatus? status}) async {
     final list = await _http.getList(
       '/admin/cleaners',
       query: {if (status != null) 'status': status.name},
     );
-    return list.map(Cleaner.fromJson).toList();
+    return list.map(User.fromJson).toList();
   }
 
   Future<void> approveCleaner(String id) =>
@@ -44,6 +52,14 @@ class AdminApi {
   Future<void> suspendCleaner(String id) =>
       _http.postVoid('/admin/cleaners/$id/suspend');
 
-  Future<void> updateService(String id, ServiceUpdate update) =>
-      _http.putVoid('/admin/services/$id', body: update.toJson());
+  /// Every service with all price fields, inactive ones too.
+  Future<List<AdminService>> services() async {
+    final list = await _http.getList('/admin/services');
+    return list.map(AdminService.fromJson).toList();
+  }
+
+  Future<AdminService> updateService(String id, ServiceUpdate update) async =>
+      AdminService.fromJson(
+        await _http.putObject('/admin/services/$id', body: update.toJson()),
+      );
 }

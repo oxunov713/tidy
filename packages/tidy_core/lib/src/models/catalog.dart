@@ -13,7 +13,8 @@ abstract class Service with _$Service {
     /// Starting price in pence.
     required int fromPrice,
 
-    /// Shortest visit length in minutes.
+    /// Visit length in minutes for one bedroom and one bathroom, extras not
+    /// included.
     required int minutes,
   }) = _Service;
 
@@ -35,16 +36,43 @@ abstract class Extra with _$Extra {
   factory Extra.fromJson(Map<String, dynamic> json) => _$ExtraFromJson(json);
 }
 
-/// Body of `PUT /admin/services/{id}`. Column names follow the `services`
-/// table, since API.md only says "prices and duration".
+/// A service with every price field, from `GET /admin/services`. Inactive
+/// services are included.
+@freezed
+abstract class AdminService with _$AdminService {
+  const factory AdminService({
+    required String id,
+    required String slug,
+    required String title,
+
+    /// Price in pence for one bedroom and one bathroom.
+    required int basePrice,
+    required int perBedroom,
+    required int perBathroom,
+
+    /// Minutes for one bedroom and one bathroom.
+    required int baseMinutes,
+    required int minutesPerRoom,
+    required bool isActive,
+    required int sortOrder,
+  }) = _AdminService;
+
+  factory AdminService.fromJson(Map<String, dynamic> json) =>
+      _$AdminServiceFromJson(json);
+}
+
+/// Body of `PUT /admin/services/{id}`. The server replaces every field, so
+/// send the whole thing. A missing `is_active` means active.
 @freezed
 abstract class ServiceUpdate with _$ServiceUpdate {
   const factory ServiceUpdate({
+    required String title,
     required int basePrice,
     required int perBedroom,
     required int perBathroom,
     required int baseMinutes,
     required int minutesPerRoom,
+    @Default(true) bool isActive,
   }) = _ServiceUpdate;
 
   factory ServiceUpdate.fromJson(Map<String, dynamic> json) =>

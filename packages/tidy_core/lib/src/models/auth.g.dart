@@ -34,14 +34,14 @@ _VerifyRequest _$VerifyRequestFromJson(Map<String, dynamic> json) =>
     _VerifyRequest(
       phone: json['phone'] as String,
       code: json['code'] as String,
-      role: $enumDecode(_$UserRoleEnumMap, json['role']),
+      role: $enumDecodeNullable(_$UserRoleEnumMap, json['role']),
     );
 
 Map<String, dynamic> _$VerifyRequestToJson(_VerifyRequest instance) =>
     <String, dynamic>{
       'phone': instance.phone,
       'code': instance.code,
-      'role': _$UserRoleEnumMap[instance.role]!,
+      'role': ?_$UserRoleEnumMap[instance.role],
     };
 
 const _$UserRoleEnumMap = {
