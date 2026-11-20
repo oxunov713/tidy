@@ -351,3 +351,38 @@ func TestErrorShape(t *testing.T) {
 	e.expect(e.do("GET", "/bookings/"+uuid.NewString(), c.AccessToken, nil), http.StatusNotFound)
 	e.expect(e.do("GET", "/admin/stats/today", c.AccessToken, nil), http.StatusForbidden)
 }
+
+func TestWebhookIsIdempotent(t *testing.T) {
+	e := newEnv(t)
+	e.payments.hold = true
+	cl := e.cleaner("+447700900661", 51.5200, -0.1550, true)
+	c := e.client("+447700900771")
+
+	b := e.book(c, tomorrowAt(12))
+	if b.Status != domain.StatusPending {
+		t.Fatalf("booking is %s before the webhook, want pending", b.Status)
+	}
+	_, ref := e.paymentStatus(b.ID)
+	event := map[string]string{"id": "evt_1", "ref": ref}
+
+	e.expect(e.doWithHeaders("POST", "/webhooks/stripe", "", event, map[string]string{"Stripe-Signature": "forged"}), http.StatusBadRequest)
+	for i := 0; i < 2; i++ {
+		e.expect(e.doWithHeaders("POST", "/webhooks/stripe", "", event, map[string]string{"Stripe-Signature": "valid"}), http.StatusOK)
+	}
+
+	if status, _ := e.bookingStatus(b.ID); status != domain.StatusConfirmed {
+		t.Fatalf("booking is %s after the webhook, want confirmed", status)
+	}
+	if got, _ := e.paymentStatus(b.ID); got != domain.PaymentAuthorized {
+		t.Errorf("payment = %s, want authorized", got)
+	}
+	var confirmations int
+	err := e.store.Pool().QueryRow(t.Context(),
+		`SELECT count(*) FROM booking_events WHERE booking_id = $1 AND status = 'confirmed'`, b.ID).Scan(&confirmations)
+	if err != nil || confirmations != 1 {
+		t.Errorf("confirmed events = %d (%v), want 1", confirmations, err)
+	}
+	if offered := e.openOfferFor(b.ID); offered == nil || *offered != cl.ID {
+		t.Errorf("confirmed booking offered to %v, want %s", offered, cl.ID)
+	}
+}

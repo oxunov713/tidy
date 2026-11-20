@@ -67,12 +67,31 @@ func (c *codeBook) last(phone string) string {
 	return c.codes[phone]
 }
 
-// recordingProvider is the mock provider that remembers what it was asked to do.
+// recordingProvider is the mock provider that remembers what it was asked
+// to do. With hold set it behaves like Stripe: payments stay pending until a
+// webhook arrives. Its "signed" webhook body is {"id", "ref"}.
 type recordingProvider struct {
 	payment.Mock
+	hold     bool
 	mu       sync.Mutex
 	captured []string
 	refunded []string
+}
+
+func (p *recordingProvider) CreateIntent(ctx context.Context, b domain.Booking) (domain.PaymentIntent, error) {
+	intent, err := p.Mock.CreateIntent(ctx, b)
+	if p.hold {
+		intent.Status = domain.PaymentRequiresAction
+	}
+	return intent, err
+}
+
+func (p *recordingProvider) ParseWebhook(payload []byte, signature string) (domain.PaymentEvent, error) {
+	var ev struct{ ID, Ref string }
+	if signature != "valid" || json.Unmarshal(payload, &ev) != nil {
+		return domain.PaymentEvent{}, fmt.Errorf("bad signature")
+	}
+	return domain.PaymentEvent{ID: ev.ID, Kind: domain.PaymentEventAuthorized, Ref: ev.Ref}, nil
 }
 
 func (p *recordingProvider) Capture(_ context.Context, ref string) error {
@@ -194,6 +213,11 @@ func (r response) errorCode(t *testing.T) string {
 
 func (e *testEnv) do(method, path, token string, body any) response {
 	e.t.Helper()
+	return e.doWithHeaders(method, path, token, body, nil)
+}
+
+func (e *testEnv) doWithHeaders(method, path, token string, body any, headers map[string]string) response {
+	e.t.Helper()
 	var reader io.Reader
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -209,6 +233,9 @@ func (e *testEnv) do(method, path, token string, body any) response {
 	req.Header.Set("Content-Type", "application/json")
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
