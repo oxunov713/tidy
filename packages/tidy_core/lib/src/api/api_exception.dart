@@ -70,8 +70,16 @@ sealed class ApiException implements Exception {
         return SlotTakenException(message: message, statusCode: status);
       case 'invalid_transition':
         return InvalidTransitionException(message: message, statusCode: status);
+      case 'offer_gone':
+        return OfferGoneException(message: message, statusCode: status);
       case 'too_many_requests':
         return TooManyRequestsException(message: message, statusCode: status);
+      case 'internal':
+        return ServerException(
+          message: message,
+          code: code,
+          statusCode: status,
+        );
     }
 
     // No (known) code: decide by status so a proxy error page still maps well.
@@ -149,6 +157,12 @@ final class InvalidTransitionException extends ApiException {
   }) : super(code: 'invalid_transition');
 }
 
+/// 409: the offer expired or another cleaner took the job.
+final class OfferGoneException extends ApiException {
+  const OfferGoneException({required super.message, super.statusCode = 409})
+    : super(code: 'offer_gone');
+}
+
 /// 429: OTP or login rate limit.
 final class TooManyRequestsException extends ApiException {
   const TooManyRequestsException({
@@ -157,7 +171,8 @@ final class TooManyRequestsException extends ApiException {
   }) : super(code: 'too_many_requests');
 }
 
-/// 5xx.
+/// 5xx, including the `internal` code. The request id is in the
+/// `X-Request-Id` response header of the failed call.
 final class ServerException extends ApiException {
   const ServerException({
     required super.message,
