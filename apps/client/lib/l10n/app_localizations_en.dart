@@ -281,4 +281,163 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardCvc => 'CVC';
+
+  @override
+  String get chooseServiceFirst => 'Pick a service to start a booking.';
+
+  @override
+  String get sizeOfHome => 'Size of your home';
+
+  @override
+  String get bedrooms => 'Bedrooms';
+
+  @override
+  String get bedroomsHint => 'Living room included';
+
+  @override
+  String get bathrooms => 'Bathrooms';
+
+  @override
+  String get bathroomsHint => 'Toilet, shower or bath';
+
+  @override
+  String get addBedroom => 'Add bedroom';
+
+  @override
+  String get removeBedroom => 'Remove bedroom';
+
+  @override
+  String get addBathroom => 'Add bathroom';
+
+  @override
+  String get removeBathroom => 'Remove bathroom';
+
+  @override
+  String get extras => 'Extras';
+
+  @override
+  String get howOften => 'How often?';
+
+  @override
+  String get frequencyOnce => 'One-off';
+
+  @override
+  String get frequencyOnceNote => 'No discount';
+
+  @override
+  String get frequencyWeekly => 'Weekly';
+
+  @override
+  String get frequencyWeeklyNote => '15% off';
+
+  @override
+  String get frequencyFortnightly => 'Fortnightly';
+
+  @override
+  String get frequencyFortnightlyNote => '10% off';
+
+  @override
+  String get chooseTime => 'Choose time';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String totalWithHours(String hours) {
+    return 'Total · $hours h';
+  }
+
+  @override
+  String get whenShouldWeCome => 'When should we come?';
+
+  @override
+  String get nextSevenDays => 'Next 7 days';
+
+  @override
+  String get startTime => 'Start time';
+
+  @override
+  String get takenTimesNote =>
+      'Greyed-out times are already booked by all nearby cleaners.';
+
+  @override
+  String get noTimesThatDay => 'No times left on this day. Try another day.';
+
+  @override
+  String get cleaner => 'Cleaner';
+
+  @override
+  String get anyCleaner => 'Any available cleaner';
+
+  @override
+  String get anyCleanerNote =>
+      'We will match you with the best available cleaner nearby.';
+
+  @override
+  String yourLastCleaner(String name) {
+    return '$name · your last cleaner';
+  }
+
+  @override
+  String ratingAndReviews(String rating, int count) {
+    return '$rating rating · $count reviews';
+  }
+
+  @override
+  String get continueToPayment => 'Continue to payment';
+
+  @override
+  String get pickATime => 'Pick a day and a start time';
+
+  @override
+  String scheduleSummary(String day, String time, String hours) {
+    return '$day · $time start · about $hours h';
+  }
+
+  @override
+  String scheduleSummaryShort(String day, String time) {
+    return '$day · $time start';
+  }
+
+  @override
+  String get confirmAndPay => 'Confirm and pay';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get payByCard => 'Pay by card';
+
+  @override
+  String get securePaymentStripe => 'Secure payment with Stripe';
+
+  @override
+  String get chargedAfterClean =>
+      'Card is charged only after the clean is finished.';
+
+  @override
+  String get book => 'Book';
+
+  @override
+  String bookFor(String price) {
+    return 'Book for $price';
+  }
+
+  @override
+  String get slotTakenSnack =>
+      'That time was just taken. Here are the times still free.';
+
+  @override
+  String get paymentFailed =>
+      'The payment did not go through. Please try again.';
+
+  @override
+  String get paymentCancelled =>
+      'Payment was not completed. Your booking is waiting for payment.';
 }

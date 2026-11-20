@@ -9,6 +9,9 @@ import 'package:tidy_client/features/addresses/presentation/addresses_screen.dar
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_client/features/auth/presentation/otp_screen.dart';
 import 'package:tidy_client/features/auth/presentation/welcome_screen.dart';
+import 'package:tidy_client/features/booking_wizard/presentation/checkout_screen.dart';
+import 'package:tidy_client/features/booking_wizard/presentation/configure_screen.dart';
+import 'package:tidy_client/features/booking_wizard/presentation/schedule_screen.dart';
 import 'package:tidy_client/features/home/presentation/home_screen.dart';
 
 part 'app_router.g.dart';
@@ -72,6 +75,18 @@ GoRouter appRouter(Ref ref) {
             builder: (context, state) => const AddAddressScreen(),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.configure,
+        builder: (context, state) => const ConfigureScreen(),
+      ),
+      GoRoute(
+        path: Routes.schedule,
+        builder: (context, state) => const ScheduleScreen(),
+      ),
+      GoRoute(
+        path: Routes.checkout,
+        builder: (context, state) => const CheckoutScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => MainShell(shell: shell),

@@ -158,5 +158,106 @@
   "testModeNotice": "No real payment is made. Use any card details.",
   "cardNumber": "Card number",
   "cardExpiry": "MM/YY",
-  "cardCvc": "CVC"
+  "cardCvc": "CVC",
+  "chooseServiceFirst": "Pick a service to start a booking.",
+  "sizeOfHome": "Size of your home",
+  "bedrooms": "Bedrooms",
+  "bedroomsHint": "Living room included",
+  "bathrooms": "Bathrooms",
+  "bathroomsHint": "Toilet, shower or bath",
+  "addBedroom": "Add bedroom",
+  "removeBedroom": "Remove bedroom",
+  "addBathroom": "Add bathroom",
+  "removeBathroom": "Remove bathroom",
+  "extras": "Extras",
+  "howOften": "How often?",
+  "frequencyOnce": "One-off",
+  "frequencyOnceNote": "No discount",
+  "frequencyWeekly": "Weekly",
+  "frequencyWeeklyNote": "15% off",
+  "frequencyFortnightly": "Fortnightly",
+  "frequencyFortnightlyNote": "10% off",
+  "chooseTime": "Choose time",
+  "total": "Total",
+  "totalWithHours": "Total · {hours} h",
+  "@totalWithHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "whenShouldWeCome": "When should we come?",
+  "nextSevenDays": "Next 7 days",
+  "startTime": "Start time",
+  "takenTimesNote": "Greyed-out times are already booked by all nearby cleaners.",
+  "noTimesThatDay": "No times left on this day. Try another day.",
+  "cleaner": "Cleaner",
+  "anyCleaner": "Any available cleaner",
+  "anyCleanerNote": "We will match you with the best available cleaner nearby.",
+  "yourLastCleaner": "{name} · your last cleaner",
+  "@yourLastCleaner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ratingAndReviews": "{rating} rating · {count} reviews",
+  "@ratingAndReviews": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "continueToPayment": "Continue to payment",
+  "pickATime": "Pick a day and a start time",
+  "scheduleSummary": "{day} · {time} start · about {hours} h",
+  "@scheduleSummary": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleSummaryShort": "{day} · {time} start",
+  "@scheduleSummaryShort": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmAndPay": "Confirm and pay",
+  "change": "Change",
+  "summary": "Summary",
+  "payment": "Payment",
+  "payByCard": "Pay by card",
+  "securePaymentStripe": "Secure payment with Stripe",
+  "chargedAfterClean": "Card is charged only after the clean is finished.",
+  "book": "Book",
+  "bookFor": "Book for {price}",
+  "@bookFor": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "slotTakenSnack": "That time was just taken. Here are the times still free.",
+  "paymentFailed": "The payment did not go through. Please try again.",
+  "paymentCancelled": "Payment was not completed. Your booking is waiting for payment."
 }

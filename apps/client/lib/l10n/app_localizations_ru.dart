@@ -281,4 +281,162 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cardCvc => 'CVC';
+
+  @override
+  String get chooseServiceFirst => 'Выберите услугу, чтобы начать заказ.';
+
+  @override
+  String get sizeOfHome => 'Размер жилья';
+
+  @override
+  String get bedrooms => 'Спальни';
+
+  @override
+  String get bedroomsHint => 'Гостиная включена';
+
+  @override
+  String get bathrooms => 'Ванные';
+
+  @override
+  String get bathroomsHint => 'Туалет, душ или ванна';
+
+  @override
+  String get addBedroom => 'Добавить спальню';
+
+  @override
+  String get removeBedroom => 'Убрать спальню';
+
+  @override
+  String get addBathroom => 'Добавить ванную';
+
+  @override
+  String get removeBathroom => 'Убрать ванную';
+
+  @override
+  String get extras => 'Дополнительно';
+
+  @override
+  String get howOften => 'Как часто?';
+
+  @override
+  String get frequencyOnce => 'Разово';
+
+  @override
+  String get frequencyOnceNote => 'Без скидки';
+
+  @override
+  String get frequencyWeekly => 'Каждую неделю';
+
+  @override
+  String get frequencyWeeklyNote => 'скидка 15%';
+
+  @override
+  String get frequencyFortnightly => 'Раз в 2 недели';
+
+  @override
+  String get frequencyFortnightlyNote => 'скидка 10%';
+
+  @override
+  String get chooseTime => 'Выбрать время';
+
+  @override
+  String get total => 'Итого';
+
+  @override
+  String totalWithHours(String hours) {
+    return 'Итого · $hours ч';
+  }
+
+  @override
+  String get whenShouldWeCome => 'Когда приехать?';
+
+  @override
+  String get nextSevenDays => 'Ближайшие 7 дней';
+
+  @override
+  String get startTime => 'Время начала';
+
+  @override
+  String get takenTimesNote =>
+      'Серым отмечено время, занятое всеми клинерами поблизости.';
+
+  @override
+  String get noTimesThatDay =>
+      'На этот день времени не осталось. Выберите другой день.';
+
+  @override
+  String get cleaner => 'Клинер';
+
+  @override
+  String get anyCleaner => 'Любой свободный клинер';
+
+  @override
+  String get anyCleanerNote =>
+      'Мы подберём лучшего свободного клинера поблизости.';
+
+  @override
+  String yourLastCleaner(String name) {
+    return '$name · ваш прошлый клинер';
+  }
+
+  @override
+  String ratingAndReviews(String rating, int count) {
+    return 'Рейтинг $rating · отзывов: $count';
+  }
+
+  @override
+  String get continueToPayment => 'Перейти к оплате';
+
+  @override
+  String get pickATime => 'Выберите день и время начала';
+
+  @override
+  String scheduleSummary(String day, String time, String hours) {
+    return '$day · начало в $time · около $hours ч';
+  }
+
+  @override
+  String scheduleSummaryShort(String day, String time) {
+    return '$day · начало в $time';
+  }
+
+  @override
+  String get confirmAndPay => 'Подтверждение и оплата';
+
+  @override
+  String get change => 'Изменить';
+
+  @override
+  String get summary => 'Детали заказа';
+
+  @override
+  String get payment => 'Оплата';
+
+  @override
+  String get payByCard => 'Оплата картой';
+
+  @override
+  String get securePaymentStripe => 'Безопасная оплата через Stripe';
+
+  @override
+  String get chargedAfterClean =>
+      'Деньги списываются только после завершения уборки.';
+
+  @override
+  String get book => 'Заказать';
+
+  @override
+  String bookFor(String price) {
+    return 'Заказать за $price';
+  }
+
+  @override
+  String get slotTakenSnack =>
+      'Это время только что заняли. Вот свободные варианты.';
+
+  @override
+  String get paymentFailed => 'Оплата не прошла. Попробуйте ещё раз.';
+
+  @override
+  String get paymentCancelled => 'Оплата не завершена. Заказ ожидает оплаты.';
 }

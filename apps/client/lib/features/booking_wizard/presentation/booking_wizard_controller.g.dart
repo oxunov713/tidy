@@ -89,7 +89,7 @@ final class BookingWizardProvider
   }
 }
 
-String _$bookingWizardHash() => r'25cd408de77fcadd4c9e3b150c8da3b6d08ffa0c';
+String _$bookingWizardHash() => r'beaa6f4900711aa0285b29cf6df52531b9b20ec7';
 
 abstract class _$BookingWizard extends $Notifier<BookingWizardState> {
   BookingWizardState build();

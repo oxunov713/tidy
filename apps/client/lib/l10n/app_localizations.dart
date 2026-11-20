@@ -591,6 +591,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CVC'**
   String get cardCvc;
+
+  /// No description provided for @chooseServiceFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a service to start a booking.'**
+  String get chooseServiceFirst;
+
+  /// No description provided for @sizeOfHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Size of your home'**
+  String get sizeOfHome;
+
+  /// No description provided for @bedrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedrooms'**
+  String get bedrooms;
+
+  /// No description provided for @bedroomsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Living room included'**
+  String get bedroomsHint;
+
+  /// No description provided for @bathrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Bathrooms'**
+  String get bathrooms;
+
+  /// No description provided for @bathroomsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Toilet, shower or bath'**
+  String get bathroomsHint;
+
+  /// No description provided for @addBedroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Add bedroom'**
+  String get addBedroom;
+
+  /// No description provided for @removeBedroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bedroom'**
+  String get removeBedroom;
+
+  /// No description provided for @addBathroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Add bathroom'**
+  String get addBathroom;
+
+  /// No description provided for @removeBathroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bathroom'**
+  String get removeBathroom;
+
+  /// No description provided for @extras.
+  ///
+  /// In en, this message translates to:
+  /// **'Extras'**
+  String get extras;
+
+  /// No description provided for @howOften.
+  ///
+  /// In en, this message translates to:
+  /// **'How often?'**
+  String get howOften;
+
+  /// No description provided for @frequencyOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'One-off'**
+  String get frequencyOnce;
+
+  /// No description provided for @frequencyOnceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No discount'**
+  String get frequencyOnceNote;
+
+  /// No description provided for @frequencyWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get frequencyWeekly;
+
+  /// No description provided for @frequencyWeeklyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'15% off'**
+  String get frequencyWeeklyNote;
+
+  /// No description provided for @frequencyFortnightly.
+  ///
+  /// In en, this message translates to:
+  /// **'Fortnightly'**
+  String get frequencyFortnightly;
+
+  /// No description provided for @frequencyFortnightlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'10% off'**
+  String get frequencyFortnightlyNote;
+
+  /// No description provided for @chooseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose time'**
+  String get chooseTime;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @totalWithHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · {hours} h'**
+  String totalWithHours(String hours);
+
+  /// No description provided for @whenShouldWeCome.
+  ///
+  /// In en, this message translates to:
+  /// **'When should we come?'**
+  String get whenShouldWeCome;
+
+  /// No description provided for @nextSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 7 days'**
+  String get nextSevenDays;
+
+  /// No description provided for @startTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time'**
+  String get startTime;
+
+  /// No description provided for @takenTimesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Greyed-out times are already booked by all nearby cleaners.'**
+  String get takenTimesNote;
+
+  /// No description provided for @noTimesThatDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No times left on this day. Try another day.'**
+  String get noTimesThatDay;
+
+  /// No description provided for @cleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaner'**
+  String get cleaner;
+
+  /// No description provided for @anyCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Any available cleaner'**
+  String get anyCleaner;
+
+  /// No description provided for @anyCleanerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'We will match you with the best available cleaner nearby.'**
+  String get anyCleanerNote;
+
+  /// No description provided for @yourLastCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · your last cleaner'**
+  String yourLastCleaner(String name);
+
+  /// No description provided for @ratingAndReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'{rating} rating · {count} reviews'**
+  String ratingAndReviews(String rating, int count);
+
+  /// No description provided for @continueToPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to payment'**
+  String get continueToPayment;
+
+  /// No description provided for @pickATime.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a day and a start time'**
+  String get pickATime;
+
+  /// No description provided for @scheduleSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} · {time} start · about {hours} h'**
+  String scheduleSummary(String day, String time, String hours);
+
+  /// No description provided for @scheduleSummaryShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} · {time} start'**
+  String scheduleSummaryShort(String day, String time);
+
+  /// No description provided for @confirmAndPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and pay'**
+  String get confirmAndPay;
+
+  /// No description provided for @change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payment;
+
+  /// No description provided for @payByCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay by card'**
+  String get payByCard;
+
+  /// No description provided for @securePaymentStripe.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure payment with Stripe'**
+  String get securePaymentStripe;
+
+  /// No description provided for @chargedAfterClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Card is charged only after the clean is finished.'**
+  String get chargedAfterClean;
+
+  /// No description provided for @book.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get book;
+
+  /// No description provided for @bookFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for {price}'**
+  String bookFor(String price);
+
+  /// No description provided for @slotTakenSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'That time was just taken. Here are the times still free.'**
+  String get slotTakenSnack;
+
+  /// No description provided for @paymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment did not go through. Please try again.'**
+  String get paymentFailed;
+
+  /// No description provided for @paymentCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment was not completed. Your booking is waiting for payment.'**
+  String get paymentCancelled;
 }
 
 class _AppLocalizationsDelegate

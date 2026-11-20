@@ -283,4 +283,162 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get cardCvc => 'CVC';
+
+  @override
+  String get chooseServiceFirst => 'Buyurtma boshlash uchun xizmatni tanlang.';
+
+  @override
+  String get sizeOfHome => 'Uy hajmi';
+
+  @override
+  String get bedrooms => 'Yotoq xonalar';
+
+  @override
+  String get bedroomsHint => 'Mehmonxona kiritilgan';
+
+  @override
+  String get bathrooms => 'Hammomlar';
+
+  @override
+  String get bathroomsHint => 'Hojatxona, dush yoki vanna';
+
+  @override
+  String get addBedroom => 'Yotoq xona qo‘shish';
+
+  @override
+  String get removeBedroom => 'Yotoq xonani olib tashlash';
+
+  @override
+  String get addBathroom => 'Hammom qo‘shish';
+
+  @override
+  String get removeBathroom => 'Hammomni olib tashlash';
+
+  @override
+  String get extras => 'Qo‘shimchalar';
+
+  @override
+  String get howOften => 'Qanchalik tez-tez?';
+
+  @override
+  String get frequencyOnce => 'Bir martalik';
+
+  @override
+  String get frequencyOnceNote => 'Chegirmasiz';
+
+  @override
+  String get frequencyWeekly => 'Haftalik';
+
+  @override
+  String get frequencyWeeklyNote => '15% chegirma';
+
+  @override
+  String get frequencyFortnightly => 'Ikki haftalik';
+
+  @override
+  String get frequencyFortnightlyNote => '10% chegirma';
+
+  @override
+  String get chooseTime => 'Vaqtni tanlash';
+
+  @override
+  String get total => 'Jami';
+
+  @override
+  String totalWithHours(String hours) {
+    return 'Jami · $hours soat';
+  }
+
+  @override
+  String get whenShouldWeCome => 'Qachon kelaylik?';
+
+  @override
+  String get nextSevenDays => 'Keyingi 7 kun';
+
+  @override
+  String get startTime => 'Boshlanish vaqti';
+
+  @override
+  String get takenTimesNote =>
+      'Kulrang vaqtlarni atrofdagi barcha tozalovchilar band qilgan.';
+
+  @override
+  String get noTimesThatDay =>
+      'Bu kunga bo‘sh vaqt qolmadi. Boshqa kunni tanlang.';
+
+  @override
+  String get cleaner => 'Tozalovchi';
+
+  @override
+  String get anyCleaner => 'Istalgan bo‘sh tozalovchi';
+
+  @override
+  String get anyCleanerNote =>
+      'Atrofdagi eng yaxshi bo‘sh tozalovchini tanlab beramiz.';
+
+  @override
+  String yourLastCleaner(String name) {
+    return '$name · oxirgi tozalovchingiz';
+  }
+
+  @override
+  String ratingAndReviews(String rating, int count) {
+    return 'Reyting $rating · $count ta sharh';
+  }
+
+  @override
+  String get continueToPayment => 'To‘lovga o‘tish';
+
+  @override
+  String get pickATime => 'Kun va boshlanish vaqtini tanlang';
+
+  @override
+  String scheduleSummary(String day, String time, String hours) {
+    return '$day · $time da boshlanadi · taxminan $hours soat';
+  }
+
+  @override
+  String scheduleSummaryShort(String day, String time) {
+    return '$day · $time da boshlanadi';
+  }
+
+  @override
+  String get confirmAndPay => 'Tasdiqlash va to‘lash';
+
+  @override
+  String get change => 'O‘zgartirish';
+
+  @override
+  String get summary => 'Buyurtma tafsilotlari';
+
+  @override
+  String get payment => 'To‘lov';
+
+  @override
+  String get payByCard => 'Karta orqali to‘lash';
+
+  @override
+  String get securePaymentStripe => 'Stripe orqali xavfsiz to‘lov';
+
+  @override
+  String get chargedAfterClean => 'Pul faqat tozalash tugagach yechiladi.';
+
+  @override
+  String get book => 'Buyurtma berish';
+
+  @override
+  String bookFor(String price) {
+    return '$price ga buyurtma berish';
+  }
+
+  @override
+  String get slotTakenSnack =>
+      'Bu vaqt hozirgina band bo‘ldi. Bo‘sh vaqtlar yangilandi.';
+
+  @override
+  String get paymentFailed => 'To‘lov amalga oshmadi. Qayta urinib ko‘ring.';
+
+  @override
+  String get paymentCancelled =>
+      'To‘lov yakunlanmadi. Buyurtma to‘lovni kutmoqda.';
 }
