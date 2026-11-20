@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tidy",
+  "homePlaceholderTitle": "Coming soon",
+  "homePlaceholderBody": "The booking flow will appear here.",
+  "@homePlaceholderTitle": {
+    "description": "Heading of the placeholder home screen"
+  }
+}

@@ -1,0 +1,16 @@
+name: tidy_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.14.0
+
+workspace:
+  - packages/tidy_ui
+  - packages/tidy_ui/example
+  - packages/tidy_core
+  - apps/client
+  - apps/cleaner
+  - apps/admin
+
+dev_dependencies:
+  very_good_analysis: ^10.0.0

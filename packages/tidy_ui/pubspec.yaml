@@ -1,0 +1,19 @@
+name: tidy_ui
+description: Design tokens, theme and shared widgets for the Tidy apps.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^9.0.0
+  material_ui: ^1.11.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
