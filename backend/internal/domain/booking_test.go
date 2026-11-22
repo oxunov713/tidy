@@ -106,3 +106,24 @@ func TestStatusPhraseNamesEveryStatus(t *testing.T) {
 		t.Error("only confirmed and assigned bookings can be reassigned")
 	}
 }
+
+func TestChatClosed(t *testing.T) {
+	done := time.Date(2026, 12, 1, 12, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name   string
+		status BookingStatus
+		now    time.Time
+		closed bool
+	}{
+		{"assigned", StatusAssigned, done, false},
+		{"cancelled", StatusCancelled, done, true},
+		{"completed an hour ago", StatusCompleted, done.Add(time.Hour), false},
+		{"completed 25 hours ago", StatusCompleted, done.Add(25 * time.Hour), true},
+	}
+	for _, tt := range tests {
+		b := Booking{Status: tt.status, UpdatedAt: done}
+		if got := b.ChatClosed(tt.now) != nil; got != tt.closed {
+			t.Errorf("%s: closed = %v, want %v", tt.name, got, tt.closed)
+		}
+	}
+}

@@ -457,6 +457,9 @@ func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, b
 	if err := s.requireApprovedCleaner(ctx, b, p.UserID); err != nil {
 		return domain.Message{}, err
 	}
+	if err := b.ChatClosed(s.clock.now()); err != nil {
+		return domain.Message{}, err
+	}
 	body, err = domain.ValidateMessageBody(body)
 	if err != nil {
 		return domain.Message{}, err

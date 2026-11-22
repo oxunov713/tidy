@@ -80,6 +80,10 @@ func (s BookingStatus) IsFinal() bool { return len(transitions[s]) == 0 }
 // EarliestDeparture is how long before the start a cleaner can set off.
 const EarliestDeparture = 3 * time.Hour
 
+// ChatOpenAfterCompleted is how long client and cleaner can still write
+// after the clean, e.g. about a forgotten key.
+const ChatOpenAfterCompleted = 24 * time.Hour
+
 // FreeCancellationWindow: cancelling later than this before the start is
 // charged in full.
 const FreeCancellationWindow = 24 * time.Hour
@@ -113,6 +117,19 @@ type Booking struct {
 // IsParticipant reports whether the user is the client or the assigned cleaner.
 func (b Booking) IsParticipant(userID uuid.UUID) bool {
 	return b.ClientID == userID || (b.CleanerID != nil && *b.CleanerID == userID)
+}
+
+// ChatClosed explains why nobody can write in the booking's chat any more,
+// or returns nil.
+func (b Booking) ChatClosed(now time.Time) error {
+	switch {
+	case b.Status == StatusCancelled:
+		return InvalidTransition("The chat is closed because the booking was cancelled.")
+	case b.Status == StatusCompleted && now.Sub(b.UpdatedAt) > ChatOpenAfterCompleted:
+		// A completed booking never changes again, so UpdatedAt is when it was completed.
+		return InvalidTransition("The chat closed 24 hours after the clean.")
+	}
+	return nil
 }
 
 // CancellationIsFree reports whether a cancellation now gets a full refund.

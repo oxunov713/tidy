@@ -419,3 +419,36 @@ func TestDispatchSkipsCleanersNotSeenLately(t *testing.T) {
 		t.Errorf("offer went to %v, want the nearer cleaner %s now that they are back", offered, ghost.ID)
 	}
 }
+
+func TestChatClosesAfterTheBooking(t *testing.T) {
+	e := newEnv(t)
+	cl := e.cleaner("+447700902701", 51.5200, -0.1550, true)
+	c := e.client("+447700902801")
+	start := tomorrowAt(10)
+	done := e.book(c, start)
+	e.expect(e.do("POST", "/cleaner/offers/"+done.ID.String()+"/accept", cl.AccessToken, nil), http.StatusOK)
+	cancelled := e.book(c, tomorrowAt(14))
+	e.expect(e.do("POST", "/bookings/"+cancelled.ID.String()+"/cancel", c.AccessToken, nil), http.StatusOK)
+
+	post := func(id uuid.UUID) response {
+		return e.do("POST", "/bookings/"+id.String()+"/messages", c.AccessToken, map[string]string{"body": "Thanks!"})
+	}
+	if r := post(cancelled.ID); r.status != http.StatusConflict || r.errorCode(t) != "invalid_transition" {
+		t.Errorf("chat on a cancelled booking: got %d %s", r.status, r.body)
+	}
+
+	e.travelTo(start.Add(-time.Hour))
+	for _, s := range []string{"on_the_way", "in_progress", "completed"} {
+		e.expect(e.do("POST", "/cleaner/jobs/"+done.ID.String()+"/status", cl.AccessToken, map[string]string{"status": s}), http.StatusOK)
+	}
+	// The database stamps updated_at with its own clock; line it up with the
+	// travelled service clock.
+	if _, err := e.store.Pool().Exec(t.Context(), `UPDATE bookings SET updated_at = $2 WHERE id = $1`, done.ID, e.now()); err != nil {
+		t.Fatal(err)
+	}
+	e.expect(post(done.ID), http.StatusCreated)
+	e.travelTo(e.now().Add(25 * time.Hour))
+	if r := post(done.ID); r.status != http.StatusConflict || r.errorCode(t) != "invalid_transition" {
+		t.Errorf("chat 25 hours after completion: got %d %s", r.status, r.body)
+	}
+}
