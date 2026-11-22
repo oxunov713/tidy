@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"time"
@@ -227,10 +228,12 @@ func (s *Server) postMessage(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-const maxWebhookBytes = 64 << 10
-
 func (s *Server) stripeWebhook(w http.ResponseWriter, r *http.Request) error {
-	payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxWebhookBytes))
+	payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBodyBytes))
+	var maxErr *http.MaxBytesError
+	if errors.As(err, &maxErr) {
+		return domain.ErrPayloadTooLarge
+	}
 	if err != nil {
 		return domain.NewError(domain.CodeInvalidRequest, "Could not read the webhook body.")
 	}

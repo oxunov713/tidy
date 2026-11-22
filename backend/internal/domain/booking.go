@@ -3,6 +3,7 @@ package domain
 import (
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 )
@@ -144,7 +145,7 @@ const MaxMessageLength = 2000
 
 func ValidateMessageBody(body string) (string, error) {
 	body = strings.TrimSpace(body)
-	if body == "" || len(body) > MaxMessageLength {
+	if n := utf8.RuneCountInString(body); n == 0 || n > MaxMessageLength {
 		return "", Invalid("body", "must be 1 to 2000 characters")
 	}
 	return body, nil
@@ -160,12 +161,22 @@ type Review struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+const (
+	MaxReviewComment = 1000
+	MaxReviewTags    = 10
+	MaxTagLength     = 40
+	MaxTip           = 100_00
+)
+
 func (r Review) Validate() error {
 	fe := FieldErrors{}
 	fe.Check(r.Rating >= 1 && r.Rating <= 5, "rating", "must be 1 to 5")
-	fe.Check(len(r.Tags) <= 10, "tags", "at most 10 tags")
-	fe.Check(len(r.Comment) <= 2000, "comment", "is too long")
-	fe.Check(r.Tip >= 0 && r.Tip <= 100_00, "tip", "must be between 0 and 10000 pence")
+	fe.Check(len(r.Tags) <= MaxReviewTags, "tags", "at most 10 tags")
+	for _, tag := range r.Tags {
+		fe.CheckLength(tag, true, MaxTagLength, "tags")
+	}
+	fe.CheckLength(r.Comment, false, MaxReviewComment, "comment")
+	fe.Check(r.Tip >= 0 && r.Tip <= MaxTip, "tip", "must be between 0 and 10000 pence")
 	return fe.Err()
 }
 

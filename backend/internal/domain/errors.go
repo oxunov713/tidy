@@ -1,6 +1,9 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
 // ErrorCode is the machine readable code sent to the apps in the error body.
 type ErrorCode string
@@ -14,6 +17,7 @@ const (
 	CodeInvalidTransition ErrorCode = "invalid_transition"
 	CodeOfferGone         ErrorCode = "offer_gone"
 	CodeTooManyRequests   ErrorCode = "too_many_requests"
+	CodePayloadTooLarge   ErrorCode = "payload_too_large"
 )
 
 // Error is an error the API can show to the user as is.
@@ -44,6 +48,7 @@ var (
 	ErrInvalidTransition = &Error{Code: CodeInvalidTransition, Message: "The booking can't move to that status."}
 	ErrOfferGone         = &Error{Code: CodeOfferGone, Message: "This job is no longer available."}
 	ErrTooManyRequests   = &Error{Code: CodeTooManyRequests, Message: "Too many attempts. Try again later."}
+	ErrPayloadTooLarge   = &Error{Code: CodePayloadTooLarge, Message: "The request body is too large."}
 )
 
 func NewError(code ErrorCode, message string) *Error {
@@ -82,6 +87,18 @@ func (f FieldErrors) Err() error {
 		return nil
 	}
 	return &Error{Code: CodeInvalidRequest, Message: "Some fields are invalid.", Fields: f}
+}
+
+// CheckLength records a problem when s (counted in characters, not bytes)
+// is longer than limit, or empty while required.
+func (f FieldErrors) CheckLength(s string, required bool, limit int, field string) {
+	n := utf8.RuneCountInString(s)
+	switch {
+	case required && n == 0:
+		f.Check(false, field, "is required")
+	case n > limit:
+		f.Check(false, field, fmt.Sprintf("must be at most %d characters", limit))
+	}
 }
 
 func Invalid(field, message string) *Error {

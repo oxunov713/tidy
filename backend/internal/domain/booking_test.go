@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -66,5 +67,30 @@ func TestCancellationIsFree(t *testing.T) {
 				t.Errorf("got %v, want %v", got, tt.free)
 			}
 		})
+	}
+}
+
+func TestReviewLimits(t *testing.T) {
+	ok := Review{Rating: 5, Comment: strings.Repeat("é", MaxReviewComment), Tip: MaxTip}
+	if err := ok.Validate(); err != nil {
+		t.Errorf("review at the limits: %v", err)
+	}
+	for name, r := range map[string]Review{
+		"long comment": {Rating: 5, Comment: strings.Repeat("a", MaxReviewComment+1)},
+		"big tip":      {Rating: 5, Tip: MaxTip + 1},
+		"long tag":     {Rating: 5, Tags: []string{strings.Repeat("a", MaxTagLength+1)}},
+	} {
+		if r.Validate() == nil {
+			t.Errorf("%s: want an error", name)
+		}
+	}
+}
+
+func TestMessageLengthCountsCharacters(t *testing.T) {
+	if _, err := ValidateMessageBody(strings.Repeat("é", MaxMessageLength)); err != nil {
+		t.Errorf("2000 two-byte characters: %v", err)
+	}
+	if _, err := ValidateMessageBody(strings.Repeat("a", MaxMessageLength+1)); err == nil {
+		t.Error("2001 characters: want an error")
 	}
 }

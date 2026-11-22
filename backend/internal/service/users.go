@@ -47,12 +47,13 @@ func (u *Users) UpdateMe(ctx context.Context, p Principal, in ProfileUpdate) (Me
 	fe := domain.FieldErrors{}
 	if in.FullName != nil {
 		name := strings.TrimSpace(*in.FullName)
-		fe.Check(len(name) <= 100, "full_name", "is too long")
+		fe.CheckLength(name, false, domain.MaxName, "full_name")
 		in.FullName = &name
 	}
 	if in.Email != nil {
 		// An empty email clears it.
 		email := strings.TrimSpace(*in.Email)
+		fe.CheckLength(email, false, domain.MaxEmail, "email")
 		if email != "" {
 			addr, err := mail.ParseAddress(email)
 			fe.Check(err == nil && addr.Address == email, "email", "is not a valid email address")
@@ -86,6 +87,7 @@ func (u *Users) AddAddress(ctx context.Context, p Principal, a domain.Address) (
 	a.UserID = p.UserID
 	a.Line1, a.Line2 = strings.TrimSpace(a.Line1), strings.TrimSpace(a.Line2)
 	a.City, a.Postcode = strings.TrimSpace(a.City), strings.ToUpper(strings.TrimSpace(a.Postcode))
+	a.AccessNotes = strings.TrimSpace(a.AccessNotes)
 	if err := a.Validate(); err != nil {
 		return domain.Address{}, err
 	}
