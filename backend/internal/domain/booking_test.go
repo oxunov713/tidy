@@ -94,3 +94,15 @@ func TestMessageLengthCountsCharacters(t *testing.T) {
 		t.Error("2001 characters: want an error")
 	}
 }
+
+func TestStatusPhraseNamesEveryStatus(t *testing.T) {
+	for _, s := range []BookingStatus{StatusPending, StatusConfirmed, StatusAssigned, StatusOnTheWay,
+		StatusInProgress, StatusCompleted, StatusCancelled} {
+		if p := s.Phrase(); p == "This booking" || p == "" {
+			t.Errorf("%s has no phrase", s)
+		}
+	}
+	if !StatusConfirmed.CanBeReassigned() || !StatusAssigned.CanBeReassigned() || StatusOnTheWay.CanBeReassigned() {
+		t.Error("only confirmed and assigned bookings can be reassigned")
+	}
+}

@@ -50,6 +50,30 @@ func (s BookingStatus) CanTransitionTo(next BookingStatus) bool {
 	return false
 }
 
+var statusPhrases = map[BookingStatus]string{
+	StatusPending:    "A pending booking",
+	StatusConfirmed:  "A confirmed booking",
+	StatusAssigned:   "An assigned booking",
+	StatusOnTheWay:   "A booking whose cleaner is on the way",
+	StatusInProgress: "A booking in progress",
+	StatusCompleted:  "A completed booking",
+	StatusCancelled:  "A cancelled booking",
+}
+
+// Phrase names a booking in this status at the start of a sentence, e.g.
+// "A completed booking", for error messages.
+func (s BookingStatus) Phrase() string {
+	if p, ok := statusPhrases[s]; ok {
+		return p
+	}
+	return "This booking"
+}
+
+// CanBeReassigned: an admin can only swap the cleaner before they set off.
+func (s BookingStatus) CanBeReassigned() bool {
+	return s == StatusConfirmed || s == StatusAssigned
+}
+
 // IsFinal reports whether nothing can happen to the booking any more.
 func (s BookingStatus) IsFinal() bool { return len(transitions[s]) == 0 }
 

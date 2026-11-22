@@ -361,7 +361,7 @@ func (s *Bookings) CancelByAdmin(ctx context.Context, p Principal, id uuid.UUID)
 
 func (s *Bookings) cancel(ctx context.Context, b domain.Booking, actor uuid.UUID, refund bool) (Cancellation, error) {
 	if !b.Status.CanTransitionTo(domain.StatusCancelled) {
-		return Cancellation{}, domain.InvalidTransition("This booking can't be cancelled any more.")
+		return Cancellation{}, domain.InvalidTransition(b.Status.Phrase() + " can't be cancelled.")
 	}
 	b, withdrawn, err := s.store.CancelBooking(ctx, b.ID, b.Status, &actor)
 	if err != nil {

@@ -126,6 +126,9 @@ func (a *Admin) reassign(ctx context.Context, p Principal, id, cleanerID uuid.UU
 	if err != nil {
 		return domain.Booking{}, err
 	}
+	if !before.Status.CanBeReassigned() {
+		return domain.Booking{}, domain.InvalidTransition(before.Status.Phrase() + " can't be reassigned.")
+	}
 	b, withdrawn, err := a.store.AssignCleaner(ctx, id, cleanerID, &p.UserID)
 	if err != nil {
 		return domain.Booking{}, err

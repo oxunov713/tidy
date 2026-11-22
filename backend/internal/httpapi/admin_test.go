@@ -136,3 +136,43 @@ func TestUnapprovedCleanerCantActOnJob(t *testing.T) {
 		t.Errorf("suspended cleaner joining the room: got %v, want forbidden", got)
 	}
 }
+
+func TestAdminStatusRulesNameTheStatus(t *testing.T) {
+	e := newEnv(t)
+	admin := e.admin("+447700902401")
+	cl := e.cleaner("+447700902402", 51.5200, -0.1550, true)
+	other := e.cleaner("+447700902403", 51.5000, -0.1000, false)
+	c := e.client("+447700902501")
+	start := tomorrowAt(10)
+	b := e.book(c, start)
+	e.expect(e.do("POST", "/cleaner/offers/"+b.ID.String()+"/accept", cl.AccessToken, nil), http.StatusOK)
+	e.travelTo(start.Add(-time.Hour))
+	e.expect(e.do("POST", "/cleaner/jobs/"+b.ID.String()+"/status", cl.AccessToken, map[string]string{"status": "on_the_way"}), http.StatusOK)
+
+	message := func(r response) string {
+		var body struct {
+			Error struct{ Code, Message string } `json:"error"`
+		}
+		r.decode(t, &body)
+		if r.status != http.StatusConflict || body.Error.Code != "invalid_transition" {
+			t.Errorf("got %d %s, want 409 invalid_transition", r.status, r.body)
+		}
+		return body.Error.Message
+	}
+	path := "/admin/bookings/" + b.ID.String()
+	if m := message(e.do("PATCH", path, admin.AccessToken, map[string]any{"cleaner_id": other.ID})); m != "A booking whose cleaner is on the way can't be reassigned." {
+		t.Errorf("reassign on the way: %q", m)
+	}
+	for _, s := range []string{"in_progress", "completed"} {
+		e.expect(e.do("POST", "/cleaner/jobs/"+b.ID.String()+"/status", cl.AccessToken, map[string]string{"status": s}), http.StatusOK)
+	}
+	if m := message(e.do("PATCH", path, admin.AccessToken, map[string]string{"status": "cancelled"})); m != "A completed booking can't be cancelled." {
+		t.Errorf("cancel completed: %q", m)
+	}
+	if m := message(e.do("PATCH", path, admin.AccessToken, map[string]any{"cleaner_id": other.ID})); m != "A completed booking can't be reassigned." {
+		t.Errorf("reassign completed: %q", m)
+	}
+	if status, assigned := e.bookingStatus(b.ID); status != domain.StatusCompleted || *assigned != cl.ID {
+		t.Errorf("booking changed to %s / %v", status, assigned)
+	}
+}
