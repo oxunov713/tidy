@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
@@ -26,7 +25,7 @@ class EarningsChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
     final maxAmount = days.fold<int>(0, (m, d) => d.amount > m ? d.amount : m);
-    final dates = [for (final d in days) DateTime.parse(d.date)];
+    final dates = [for (final d in days) BusinessTime.parseDay(d.date)];
 
     return SizedBox(
       height: 120,
@@ -53,7 +52,7 @@ class EarningsChart extends StatelessWidget {
                     child: Text(
                       compact
                           ? '${dates[i].day}'
-                          : Fmt.weekdayNarrow(dates[i], locale),
+                          : TidyDates.weekdayNarrowOf(dates[i], locale),
                       style: const TextStyle(
                         fontSize: 11,
                         color: TidyColors.onInkMuted,
@@ -73,7 +72,7 @@ class EarningsChart extends StatelessWidget {
               ),
               getTooltipItem: (group, groupIndex, rod, rodIndex) =>
                   BarTooltipItem(
-                    Fmt.pounds(days[groupIndex].amount),
+                    TidyFormat.pounds(days[groupIndex].amount),
                     const TextStyle(
                       color: TidyColors.ink,
                       fontWeight: FontWeight.w700,

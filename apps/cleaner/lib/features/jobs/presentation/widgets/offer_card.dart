@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/features/jobs/domain/incoming_offer.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/widgets/booking_text.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
@@ -69,7 +68,7 @@ class OfferCard extends ConsumerWidget {
                   until: offer.expiresAt,
                   now: ref.read(clockProvider),
                   builder: (context, left) => Text(
-                    l10n.expiresIn(Fmt.countdown(left)),
+                    l10n.expiresIn(TidyFormat.countdown(left)),
                     key: const Key('offerCountdown'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -103,7 +102,7 @@ class OfferCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    Fmt.payout(booking.cleanerPayout),
+                    TidyFormat.payout(booking.cleanerPayout),
                     style: text.titleLarge?.copyWith(
                       fontSize: 24,
                       color: TidyColors.primary,
@@ -130,8 +129,8 @@ class OfferCard extends ConsumerWidget {
                 _InfoRow(
                   icon: Icons.calendar_today_outlined,
                   text:
-                      '${Fmt.shortDate(booking.start, locale)} · '
-                      '${Fmt.timeRange(booking.start, booking.end, locale)}',
+                      '${TidyDates.dayShort(booking.start, locale)} · '
+                      '${TidyDates.timeRange(booking.start, booking.end, locale)}',
                 ),
                 const SizedBox(height: TidySpacing.sm),
                 _InfoRow(

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/maps/maps_launcher.dart';
 import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/core/widgets/page_header.dart';
@@ -96,7 +95,7 @@ class ActiveJobPage extends ConsumerWidget {
     final (title, body) = switch (failure) {
       TooEarly(:final availableFrom) => (
         l10n.tooEarlyTitle,
-        l10n.tooEarlyBody(Fmt.time(availableFrom, locale)),
+        l10n.tooEarlyBody(TidyDates.clock(availableFrom, locale)),
       ),
       OutOfSync() => (l10n.errorTitle, l10n.transitionOutOfSync),
       RequestFailed(:final error) => (l10n.errorTitle, errorText(l10n, error)),
@@ -178,10 +177,9 @@ class _JobView extends ConsumerWidget {
         BookingStatus.assigned: booking.updatedAt,
     };
 
-    final start = booking.start.toLocal();
-    final when = Fmt.sameDay(start, now)
-        ? '${l10n.todayLower} ${Fmt.time(booking.start, locale)}'
-        : '${Fmt.shortDate(booking.start, locale)} ${Fmt.time(booking.start, locale)}';
+    final when = BusinessTime.isSameDay(booking.start, now)
+        ? '${l10n.todayLower} ${TidyDates.clock(booking.start, locale)}'
+        : '${TidyDates.dayShort(booking.start, locale)} ${TidyDates.clock(booking.start, locale)}';
 
     final cta = switch (booking.status) {
       BookingStatus.assigned => l10n.ctaOnMyWay,
@@ -198,7 +196,7 @@ class _JobView extends ConsumerWidget {
           subtitle: l10n.jobTitleMeta(
             booking.code,
             when,
-            Fmt.payout(booking.cleanerPayout),
+            TidyFormat.payout(booking.cleanerPayout),
           ),
         ),
         Expanded(

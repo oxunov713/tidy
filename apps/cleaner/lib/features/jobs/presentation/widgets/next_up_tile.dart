@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
@@ -23,12 +22,15 @@ class NextUpTile extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final text = Theme.of(context).textTheme;
     final booking = job.booking;
-    final start = booking.start.toLocal();
-    final dayLabel = Fmt.sameDay(start, now)
+    final today = BusinessTime.today(now);
+    final dayLabel = BusinessTime.isOnDay(booking.start, today)
         ? l10n.todayLower
-        : Fmt.sameDay(start, now.add(const Duration(days: 1)))
+        : BusinessTime.isOnDay(
+            booking.start,
+            DateTime(today.year, today.month, today.day + 1),
+          )
         ? l10n.tomorrowLower
-        : Fmt.shortDate(booking.start, locale);
+        : TidyDates.dayShort(booking.start, locale);
 
     return TidyCard(
       onTap: onTap,
@@ -40,7 +42,7 @@ class NextUpTile extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  Fmt.time(booking.start, locale),
+                  TidyDates.clock(booking.start, locale),
                   style: text.titleLarge?.copyWith(fontSize: 18),
                 ),
                 Text(
@@ -68,7 +70,7 @@ class NextUpTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${job.address.line1} · '
-                  '${l10n.payoutAmount(Fmt.payout(booking.cleanerPayout))}',
+                  '${l10n.payoutAmount(TidyFormat.payout(booking.cleanerPayout))}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: text.bodySmall?.copyWith(

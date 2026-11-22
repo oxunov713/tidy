@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/location/location_service.dart';
 import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/core/widgets/pro_logo.dart';
@@ -238,7 +237,7 @@ class _Header extends ConsumerWidget {
                   label: l10n.statToday,
                   value: stats.earned == null
                       ? dash
-                      : Fmt.poundsShort(stats.earned!),
+                      : TidyFormat.poundsShort(stats.earned!),
                 ),
               ),
               const SizedBox(width: 10),

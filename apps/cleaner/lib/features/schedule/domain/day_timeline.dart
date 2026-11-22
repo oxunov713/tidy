@@ -6,12 +6,12 @@ const travelBufferLimit = Duration(minutes: 60);
 sealed class TimelineEntry {
   const TimelineEntry(this.at);
 
-  /// Local time the entry starts.
+  /// The instant the entry starts at.
   final DateTime at;
 }
 
 final class TimelineJob extends TimelineEntry {
-  TimelineJob(this.job) : super(job.booking.start.toLocal());
+  TimelineJob(this.job) : super(job.booking.start);
 
   final Job job;
 }
@@ -38,15 +38,14 @@ List<TimelineEntry> buildTimeline({
   final entries = <TimelineEntry>[];
 
   if (workStart != null &&
-      (sorted.isEmpty ||
-          workStart.isBefore(sorted.first.booking.start.toLocal()))) {
+      (sorted.isEmpty || workStart.isBefore(sorted.first.booking.start))) {
     entries.add(TimelineFree(workStart));
   }
   for (final (i, job) in sorted.indexed) {
     entries.add(TimelineJob(job));
     if (i + 1 == sorted.length) break;
-    final end = job.booking.end.toLocal();
-    final gap = sorted[i + 1].booking.start.toLocal().difference(end);
+    final end = job.booking.end;
+    final gap = sorted[i + 1].booking.start.difference(end);
     if (gap <= Duration.zero) continue;
     entries.add(
       gap < travelBufferLimit

@@ -162,6 +162,11 @@ void main() {
       expect(TidyFormat.countdown(const Duration(seconds: 125)), '2:05');
     });
 
+    test('countdown never goes below zero', () {
+      expect(TidyFormat.countdown(const Duration(seconds: -3)), '0:00');
+      expect(TidyFormat.countdown(const Duration(seconds: 42)), '0:42');
+    });
+
     test('pounds to pence works on digits', () {
       expect(TidyFormat.poundsToPence('19.99'), 1999);
       expect(TidyFormat.poundsToPence('£1,250.00'), 125000);

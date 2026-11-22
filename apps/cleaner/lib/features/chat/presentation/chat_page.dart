@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/core/widgets/page_header.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
@@ -191,7 +190,7 @@ class _Bubble extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              Fmt.time(message.createdAt, locale),
+              TidyDates.clock(message.createdAt, locale),
               style: text.labelSmall?.copyWith(
                 color: mine
                     ? TidyColors.white.withValues(alpha: 0.75)

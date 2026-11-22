@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/earnings_controller.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/widgets/earnings_chart.dart';
@@ -82,10 +81,10 @@ class EarningsPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final text = Theme.of(context).textTheme;
-    final today = Fmt.isoDay(ref.watch(clockProvider)());
+    final today = TidyDates.isoDay(ref.watch(clockProvider)());
     final isWeek = data.period == 'week';
     final perHour = data.minutes > 0
-        ? Fmt.pounds(Fmt.perHour(data.total, data.minutes))
+        ? TidyFormat.pounds(TidyFormat.perHour(data.total, data.minutes))
         : '–';
 
     return [
@@ -114,7 +113,7 @@ class EarningsPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: TidySpacing.xs),
                       Text(
-                        Fmt.pounds(data.total),
+                        TidyFormat.pounds(data.total),
                         key: const Key('earningsTotal'),
                         style: text.headlineLarge?.copyWith(
                           fontSize: 34,
@@ -123,7 +122,10 @@ class EarningsPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: TidySpacing.xs),
                       Text(
-                        l10n.jobsAndHours(data.jobs, Fmt.hours(data.minutes)),
+                        l10n.jobsAndHours(
+                          data.jobs,
+                          TidyFormat.hours(data.minutes),
+                        ),
                         style: const TextStyle(
                           fontSize: 13,
                           color: TidyColors.mint,
@@ -163,7 +165,7 @@ class EarningsPage extends ConsumerWidget {
       Row(
         children: [
           Expanded(
-            child: _Tile(label: l10n.tips, value: Fmt.pounds(data.tips)),
+            child: _Tile(label: l10n.tips, value: TidyFormat.pounds(data.tips)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -220,10 +222,10 @@ class EarningsPage extends ConsumerWidget {
                             Text(
                               job.tip > 0
                                   ? l10n.recentTip(
-                                      Fmt.shortDate(job.start, locale),
-                                      Fmt.payout(job.tip),
+                                      TidyDates.dayShort(job.start, locale),
+                                      TidyFormat.payout(job.tip),
                                     )
-                                  : Fmt.shortDate(job.start, locale),
+                                  : TidyDates.dayShort(job.start, locale),
                               style: text.bodySmall?.copyWith(
                                 color: TidyColors.muted,
                               ),
@@ -232,7 +234,7 @@ class EarningsPage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        Fmt.pounds(job.amount + job.tip),
+                        TidyFormat.pounds(job.amount + job.tip),
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ],

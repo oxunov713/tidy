@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/jobs_controller.dart';
 import 'package:tidy_cleaner/features/schedule/domain/availability.dart';
@@ -29,9 +28,13 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final text = Theme.of(context).textTheme;
-    final today = Fmt.dayOf(ref.watch(clockProvider)());
+    final today = BusinessTime.today(ref.watch(clockProvider)());
     final selected = _selected ?? today;
-    final monday = today.subtract(Duration(days: today.weekday - 1));
+    final monday = DateTime(
+      today.year,
+      today.month,
+      today.day - (today.weekday - 1),
+    );
     final availability = ref.watch(availabilityControllerProvider);
     final jobs = ref.watch(jobsControllerProvider);
 
@@ -54,9 +57,9 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
               children: [
                 Text(l10n.scheduleTitle, style: text.headlineLarge),
                 Text(
-                  Fmt.dayRange(
+                  TidyDates.dayRangeOf(
                     monday,
-                    monday.add(const Duration(days: 6)),
+                    DateTime(monday.year, monday.month, monday.day + 6),
                     locale,
                   ),
                   style: text.labelLarge?.copyWith(color: TidyColors.muted),
@@ -83,7 +86,7 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
             ),
             const SizedBox(height: 14),
             Text(
-              Fmt.longDate(selected, locale),
+              TidyDates.dayLongOf(selected, locale),
               style: text.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 10),
@@ -93,7 +96,7 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
                 jobs: [
                   for (final job in value)
                     if (job.booking.status != BookingStatus.cancelled &&
-                        Fmt.sameDay(job.booking.start.toLocal(), selected))
+                        BusinessTime.isOnDay(job.booking.start, selected))
                       job,
                 ],
                 window: availability.value?.saved,
@@ -385,15 +388,15 @@ class _DayStrip extends StatelessWidget {
         itemCount: 14,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
-          final day = today.add(Duration(days: i));
-          final isSelected = Fmt.sameDay(day, selected);
+          final day = DateTime(today.year, today.month, today.day + i);
+          final isSelected = day == selected;
           final busy = jobs.any(
             (j) =>
                 j.booking.status != BookingStatus.cancelled &&
-                Fmt.sameDay(j.booking.start.toLocal(), day),
+                BusinessTime.isOnDay(j.booking.start, day),
           );
           return TidyChip(
-            label: '${Fmt.weekdayShort(day, locale)} ${day.day}',
+            label: '${TidyDates.weekdayShortOf(day, locale)} ${day.day}',
             selected: isSelected,
             icon: busy ? Icons.circle : null,
             onSelected: (_) => onSelect(day),
@@ -421,7 +424,11 @@ class _Timeline extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final working = window?.weekdays.contains(day.weekday - 1) ?? false;
     final workStart = working
-        ? day.add(Duration(minutes: window!.fromMinutes))
+        ? BusinessTime.instantAt(
+            day,
+            hour: window!.fromMinutes ~/ 60,
+            minute: window!.fromMinutes % 60,
+          )
         : null;
     final entries = buildTimeline(jobs: jobs, workStart: workStart);
 
@@ -474,7 +481,7 @@ class _TimelineRow extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
-                Fmt.time(entry.at.toUtc(), locale),
+                TidyDates.clock(entry.at, locale),
                 style: text.bodySmall?.copyWith(color: TidyColors.muted),
               ),
             ),
@@ -570,9 +577,9 @@ class _JobBlock extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   l10n.timelineJobLine(
-                    Fmt.timeRange(booking.start, booking.end, locale),
+                    TidyDates.timeRange(booking.start, booking.end, locale),
                     job.address.line1,
-                    Fmt.payout(booking.cleanerPayout),
+                    TidyFormat.payout(booking.cleanerPayout),
                   ),
                   style: TextStyle(fontSize: 13, color: detail),
                 ),
