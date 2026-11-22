@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/auth/presentation/splash_page.dart';
@@ -26,7 +25,6 @@ void main() {
   testWidgets('offline at launch: splash with a retry, then the session', (
     tester,
   ) async {
-    GoogleFonts.config.allowRuntimeFetching = false;
     _FlakySession.calls = 0;
     late ProviderContainer container;
     await tester.pumpWidget(

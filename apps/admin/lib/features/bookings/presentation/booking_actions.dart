@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/core/api_errors.dart';
 import 'package:tidy_admin/core/formatting.dart';
-import 'package:tidy_admin/core/widgets/error_view.dart';
+import 'package:tidy_admin/core/widgets/api_error_view.dart';
 import 'package:tidy_admin/core/widgets/online_dot.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_admin/features/cleaners/presentation/cleaners_providers.dart';
@@ -105,7 +105,7 @@ class _ReassignDialogState extends ConsumerState<ReassignDialog> {
 
     final Widget list;
     if (cleaners.hasError && !cleaners.isLoading) {
-      list = ErrorView(
+      list = ApiErrorView(
         error: cleaners.error!,
         onRetry: () => ref.invalidate(cleanersControllerProvider),
       );
@@ -289,52 +289,14 @@ class _CancelBookingDialogState extends ConsumerState<CancelBookingDialog> {
           expand: false,
           onPressed: _busy ? null : () => Navigator.of(context).pop(false),
         ),
-        _DangerButton(
+        TidyButton(
           label: l10n.cancelBooking,
+          variant: TidyButtonVariant.danger,
+          expand: false,
           isLoading: _busy,
           onPressed: _submit,
         ),
       ],
-    );
-  }
-}
-
-/// Destructive confirm button; tidy_ui has no danger variant yet.
-class _DangerButton extends StatelessWidget {
-  const _DangerButton({
-    required this.label,
-    required this.isLoading,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool isLoading;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: isLoading ? null : onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: TidyColors.danger,
-        disabledBackgroundColor: TidyColors.danger,
-        foregroundColor: TidyColors.white,
-        disabledForegroundColor: TidyColors.white,
-        minimumSize: const Size(64, 52),
-        shape: const RoundedRectangleBorder(
-          borderRadius: TidyRadii.controlBorder,
-        ),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-      child: isLoading
-          ? const SizedBox.square(
-              dimension: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: TidyColors.white,
-              ),
-            )
-          : Text(label),
     );
   }
 }

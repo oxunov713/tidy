@@ -6,8 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/maps/maps_launcher.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
-import 'package:tidy_cleaner/core/widgets/async_states.dart';
+import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/core/widgets/page_header.dart';
 import 'package:tidy_cleaner/features/active_job/data/job_local_store.dart';
 import 'package:tidy_cleaner/features/active_job/domain/job_transitions.dart';
@@ -49,7 +48,7 @@ class ActiveJobPage extends ConsumerWidget {
           children: [
             PageHeader(title: l10n.navJobs),
             Expanded(
-              child: ErrorState(
+              child: ApiErrorView(
                 error: error,
                 onRetry: () => ref.invalidate(jobsControllerProvider),
               ),
@@ -59,9 +58,11 @@ class ActiveJobPage extends ConsumerWidget {
         _ => Column(
           children: [
             PageHeader(title: l10n.navJobs),
-            const Padding(
-              padding: EdgeInsets.all(TidySpacing.xl),
-              child: SkeletonList(),
+            Padding(
+              padding: const EdgeInsets.all(TidySpacing.xl),
+              child: SkeletonList(
+                semanticLabel: AppLocalizations.of(context).loading,
+              ),
             ),
           ],
         ),
@@ -372,7 +373,7 @@ class _ClientCard extends StatelessWidget {
                 address.accessNotes,
                 style: const TextStyle(
                   fontSize: 13,
-                  color: ProColors.onAccentSoftDeep,
+                  color: TidyColors.onAccentSoftDeep,
                 ),
               ),
             ),

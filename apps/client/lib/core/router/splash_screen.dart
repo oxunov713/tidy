@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/widgets/error_state.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
@@ -15,7 +15,7 @@ class SplashScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: TidyColors.white,
       body: auth.hasError
-          ? ErrorState(
+          ? ApiErrorView(
               error: auth.error!,
               onRetry: () => ref.invalidate(authControllerProvider),
             )

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dart';
@@ -13,11 +12,10 @@ import 'package:tidy_ui/tidy_ui.dart';
 
 import 'fakes.dart';
 
-/// Call once per test file: the theme asks Google Fonts for Inter, which
-/// must not hit the network in tests.
+/// Call once per test file: the theme uses the bundled fonts, which
+/// need no network.
 void setUpFonts() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  GoogleFonts.config.allowRuntimeFetching = false;
 }
 
 /// Overrides for every repository the panel reads; pass only the fakes a test

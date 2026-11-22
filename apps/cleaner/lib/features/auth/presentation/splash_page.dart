@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/widgets/async_states.dart';
+import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 
 /// Shown while the stored session is checked. When that fails (the phone is
@@ -16,7 +16,7 @@ class SplashPage extends ConsumerWidget {
     return Scaffold(
       body: error != null
           ? SafeArea(
-              child: ErrorState(
+              child: ApiErrorView(
                 error: error,
                 onRetry: () => ref.invalidate(sessionControllerProvider),
               ),

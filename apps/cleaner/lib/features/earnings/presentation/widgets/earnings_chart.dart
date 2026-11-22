@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
@@ -57,7 +56,7 @@ class EarningsChart extends StatelessWidget {
                           : Fmt.weekdayNarrow(dates[i], locale),
                       style: const TextStyle(
                         fontSize: 11,
-                        color: ProColors.onInkMuted,
+                        color: TidyColors.onInkMuted,
                       ),
                     ),
                   );
@@ -95,7 +94,7 @@ class EarningsChart extends StatelessWidget {
                     width: compact ? 5 : 22,
                     borderRadius: BorderRadius.circular(compact ? 3 : 6),
                     color: day.date == highlight
-                        ? ProColors.mint
+                        ? TidyColors.mint
                         : TidyColors.white.withValues(alpha: 0.22),
                   ),
                 ],

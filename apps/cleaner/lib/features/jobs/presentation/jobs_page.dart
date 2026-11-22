@@ -5,7 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/location/location_service.dart';
-import 'package:tidy_cleaner/core/widgets/async_states.dart';
+import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/core/widgets/pro_logo.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/earnings_controller.dart';
@@ -144,12 +144,17 @@ class JobsPage extends ConsumerWidget {
                       now,
                     ),
                     AsyncError(:final error) => [
-                      ErrorState(
+                      ApiErrorView(
                         error: error,
                         onRetry: () => ref.invalidate(jobsControllerProvider),
                       ),
                     ],
-                    _ => const [SkeletonList(count: 2)],
+                    _ => [
+                      SkeletonList(
+                        count: 2,
+                        semanticLabel: AppLocalizations.of(context).loading,
+                      ),
+                    ],
                   },
                 ],
               ),

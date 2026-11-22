@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
-import 'package:tidy_cleaner/core/widgets/async_states.dart';
+import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/core/widgets/page_header.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/chat/presentation/chat_controller.dart';
@@ -91,14 +91,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   );
                 },
               ),
-              AsyncError(:final error) => ErrorState(
+              AsyncError(:final error) => ApiErrorView(
                 error: error,
                 onRetry: () =>
                     ref.invalidate(chatControllerProvider(widget.bookingId)),
               ),
-              _ => const Padding(
-                padding: EdgeInsets.all(TidySpacing.lg),
-                child: SkeletonList(),
+              _ => Padding(
+                padding: const EdgeInsets.all(TidySpacing.lg),
+                child: SkeletonList(
+                  semanticLabel: AppLocalizations.of(context).loading,
+                ),
               ),
             },
           ),

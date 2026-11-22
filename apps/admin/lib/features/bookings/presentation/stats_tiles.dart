@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_admin/core/widgets/skeleton.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
 import 'package:tidy_ui/tidy_ui.dart';
@@ -18,7 +17,7 @@ class StatsTiles extends ConsumerWidget {
     final loading = data == null && !stats.hasError;
 
     Widget value(String Function() format) => loading
-        ? const Skeleton(width: 72, height: 30)
+        ? const Shimmer(child: SkeletonBox(width: 72, height: 30))
         : Text(
             data == null ? '—' : format(),
             style: Theme.of(context).textTheme.headlineLarge,

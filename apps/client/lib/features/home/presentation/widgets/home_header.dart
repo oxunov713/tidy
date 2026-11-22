@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/round_icon_button.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/addresses/presentation/address_providers.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
 import 'package:tidy_ui/tidy_ui.dart';

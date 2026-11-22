@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
@@ -24,7 +23,7 @@ class OnlineSwitch extends StatelessWidget {
       label: l10n.goOnline,
       button: true,
       child: Material(
-        color: online ? TidyColors.primary : ProColors.switchOff,
+        color: online ? TidyColors.primary : TidyColors.switchOff,
         shape: const StadiumBorder(),
         child: InkWell(
           key: const Key('onlineSwitch'),
@@ -39,7 +38,7 @@ class OnlineSwitch extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: online ? ProColors.mint : ProColors.onInkMuted,
+                    color: online ? TidyColors.mint : TidyColors.onInkMuted,
                     shape: BoxShape.circle,
                   ),
                   child: busy

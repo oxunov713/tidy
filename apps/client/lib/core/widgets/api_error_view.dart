@@ -3,9 +3,10 @@ import 'package:tidy_client/core/error/error_text.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
-/// Full-area error with a retry button.
-class ErrorState extends StatelessWidget {
-  const ErrorState({required this.error, this.onRetry, super.key});
+/// Full-area error for a failed call: the app's words (translated, naming
+/// the actual problem) on the shared [ApiErrorView] layout.
+class ApiErrorView extends StatelessWidget {
+  const ApiErrorView({required this.error, this.onRetry, super.key});
 
   final Object error;
   final VoidCallback? onRetry;
@@ -13,12 +14,11 @@ class ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return EmptyState(
-      icon: Icons.cloud_off_outlined,
+    return ErrorState(
       title: l10n.errorTitle,
       message: errorMessage(context, error),
-      actionLabel: onRetry == null ? null : l10n.retry,
-      onAction: onRetry,
+      retryLabel: l10n.retry,
+      onRetry: onRetry,
     );
   }
 }

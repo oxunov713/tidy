@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// Translucent tile on a dark background: a small label over a big number.
@@ -28,7 +27,7 @@ class StatTile extends StatelessWidget {
                 label,
                 style: const TextStyle(
                   fontSize: 12,
-                  color: ProColors.onInkMuted,
+                  color: TidyColors.onInkMuted,
                 ),
               ),
               const SizedBox(height: TidySpacing.xs),

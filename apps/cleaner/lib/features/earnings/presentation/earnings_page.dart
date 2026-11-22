@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
-import 'package:tidy_cleaner/core/widgets/async_states.dart';
+import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/earnings_controller.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/widgets/earnings_chart.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
@@ -56,15 +55,21 @@ class EarningsPage extends ConsumerWidget {
             ...switch (earnings) {
               AsyncData(:final value) => _content(context, ref, value),
               AsyncError(:final error) => [
-                ErrorState(
+                ApiErrorView(
                   error: error,
                   onRetry: () => ref.invalidate(earningsProvider(period)),
                 ),
               ],
               _ => const [
-                SkeletonBox(height: 250, radius: 24),
-                SizedBox(height: 16),
-                SkeletonBox(height: 80),
+                Shimmer(
+                  child: Column(
+                    children: [
+                      SkeletonBox(height: 250, radius: 24),
+                      SizedBox(height: 16),
+                      SkeletonBox(height: 80, radius: TidyRadii.card),
+                    ],
+                  ),
+                ),
               ],
             },
           ],
@@ -104,7 +109,7 @@ class EarningsPage extends ConsumerWidget {
                         isWeek ? l10n.thisWeek : l10n.thisMonth,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: ProColors.onInkMuted,
+                          color: TidyColors.onInkMuted,
                         ),
                       ),
                       const SizedBox(height: TidySpacing.xs),
@@ -121,7 +126,7 @@ class EarningsPage extends ConsumerWidget {
                         l10n.jobsAndHours(data.jobs, Fmt.hours(data.minutes)),
                         style: const TextStyle(
                           fontSize: 13,
-                          color: ProColors.mint,
+                          color: TidyColors.mint,
                         ),
                       ),
                     ],

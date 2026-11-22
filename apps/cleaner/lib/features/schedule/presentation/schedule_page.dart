@@ -3,8 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_cleaner/core/errors/error_text.dart';
 import 'package:tidy_cleaner/core/format/formatters.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
-import 'package:tidy_cleaner/core/widgets/async_states.dart';
+import 'package:tidy_cleaner/core/widgets/api_error_view.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/jobs_controller.dart';
 import 'package:tidy_cleaner/features/schedule/domain/availability.dart';
 import 'package:tidy_cleaner/features/schedule/domain/day_timeline.dart';
@@ -67,11 +66,13 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
             const SizedBox(height: 16),
             switch (availability) {
               AsyncData(:final value) => _HoursCard(state: value),
-              AsyncError(:final error) => ErrorState(
+              AsyncError(:final error) => ApiErrorView(
                 error: error,
                 onRetry: () => ref.invalidate(availabilityControllerProvider),
               ),
-              _ => const SkeletonBox(height: 190),
+              _ => const Shimmer(
+                child: SkeletonBox(height: 190, radius: TidyRadii.card),
+              ),
             },
             const SizedBox(height: 16),
             _DayStrip(
@@ -97,11 +98,15 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
                 ],
                 window: availability.value?.saved,
               ),
-              AsyncError(:final error) => ErrorState(
+              AsyncError(:final error) => ApiErrorView(
                 error: error,
                 onRetry: () => ref.invalidate(jobsControllerProvider),
               ),
-              _ => const SkeletonList(count: 2, height: 90),
+              _ => SkeletonList(
+                count: 2,
+                height: 90,
+                semanticLabel: AppLocalizations.of(context).loading,
+              ),
             },
           ],
         ),
@@ -491,7 +496,7 @@ class _Gap extends StatelessWidget {
     constraints: const BoxConstraints(minHeight: 56),
     padding: const EdgeInsets.only(top: 8),
     decoration: const BoxDecoration(
-      border: Border(top: BorderSide(color: ProColors.dash)),
+      border: Border(top: BorderSide(color: TidyColors.dash)),
     ),
     child: Text(
       label,
@@ -527,7 +532,7 @@ class _JobBlock extends StatelessWidget {
         ? TidyColors.white.withValues(alpha: 0.85)
         : done
         ? TidyColors.muted
-        : ProColors.onPrimarySoft;
+        : TidyColors.onPrimarySoft;
 
     // Taller blocks for longer visits, so the day reads like a timeline.
     final minutes = booking.end.difference(booking.start).inMinutes;

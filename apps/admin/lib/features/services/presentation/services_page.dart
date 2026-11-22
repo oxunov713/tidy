@@ -2,8 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/core/api_errors.dart';
 import 'package:tidy_admin/core/responsive.dart';
-import 'package:tidy_admin/core/widgets/error_view.dart';
-import 'package:tidy_admin/core/widgets/skeleton.dart';
+import 'package:tidy_admin/core/widgets/api_error_view.dart';
 import 'package:tidy_admin/features/services/presentation/service_form.dart';
 import 'package:tidy_admin/features/services/presentation/services_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
@@ -48,7 +47,7 @@ class ServicesPage extends ConsumerWidget {
 
     final Widget body;
     if (async.hasError && !async.isLoading) {
-      body = ErrorView(
+      body = ApiErrorView(
         error: async.error!,
         onRetry: () => ref.invalidate(servicesControllerProvider),
       );
@@ -331,9 +330,9 @@ class _LoadingRows extends StatelessWidget {
               padding: EdgeInsets.all(TidySpacing.md),
               child: Row(
                 children: [
-                  Expanded(child: Skeleton()),
+                  Expanded(child: Shimmer(child: SkeletonBox())),
                   SizedBox(width: 24),
-                  Skeleton(width: 80),
+                  Shimmer(child: SkeletonBox(width: 80)),
                 ],
               ),
             ),

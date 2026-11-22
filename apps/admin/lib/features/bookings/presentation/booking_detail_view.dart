@@ -3,8 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/core/formatting.dart';
 import 'package:tidy_admin/core/labels.dart';
 import 'package:tidy_admin/core/responsive.dart';
-import 'package:tidy_admin/core/widgets/error_view.dart';
-import 'package:tidy_admin/core/widgets/skeleton.dart';
+import 'package:tidy_admin/core/widgets/api_error_view.dart';
 import 'package:tidy_admin/features/bookings/presentation/booking_actions.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
@@ -33,7 +32,7 @@ class BookingDetailView extends ConsumerWidget {
 
     final Widget body;
     if (details.hasError && !details.isLoading) {
-      body = ErrorView(
+      body = ApiErrorView(
         error: details.error!,
         onRetry: () => ref.invalidate(bookingDetailControllerProvider(id)),
       );
@@ -429,19 +428,19 @@ class _DetailSkeleton extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Skeleton(width: 90, height: 12),
+          Shimmer(child: SkeletonBox(width: 90, height: 12)),
           SizedBox(height: 12),
-          Skeleton(),
+          Shimmer(child: SkeletonBox()),
           SizedBox(height: 8),
-          Skeleton(),
+          Shimmer(child: SkeletonBox()),
           SizedBox(height: 8),
-          Skeleton(width: 180),
+          Shimmer(child: SkeletonBox(width: 180)),
           SizedBox(height: 28),
-          Skeleton(width: 90, height: 12),
+          Shimmer(child: SkeletonBox(width: 90, height: 12)),
           SizedBox(height: 12),
-          Skeleton(),
+          Shimmer(child: SkeletonBox()),
           SizedBox(height: 8),
-          Skeleton(width: 140),
+          Shimmer(child: SkeletonBox(width: 140)),
         ],
       ),
     );

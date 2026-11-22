@@ -4,10 +4,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/providers/map_factory.dart';
 import 'package:tidy_client/core/router/routes.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
-import 'package:tidy_client/core/widgets/error_state.dart';
 import 'package:tidy_client/core/widgets/round_icon_button.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/bookings/presentation/status_labels.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_controller.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_geometry.dart';
@@ -41,7 +40,7 @@ class TrackingScreen extends ConsumerWidget {
         ),
         error: (error, _) => Stack(
           children: [
-            ErrorState(
+            ApiErrorView(
               error: error,
               onRetry: () => ref.invalidate(trackingProvider(bookingId)),
             ),

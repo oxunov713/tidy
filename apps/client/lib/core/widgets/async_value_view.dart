@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/widgets/error_state.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 
 /// Renders an [AsyncValue] with the same loading and error handling
-/// everywhere: a skeleton (or spinner) while loading, [ErrorState] with a
+/// everywhere: a skeleton (or spinner) while loading, [ApiErrorView] with a
 /// retry button on failure.
 ///
 /// While a refresh is running the previous data stays on screen.
@@ -31,7 +31,7 @@ class AsyncValueView<T> extends StatelessWidget {
       loading: () =>
           loading?.call(context) ??
           const Center(child: CircularProgressIndicator()),
-      error: (error, _) => ErrorState(error: error, onRetry: onRetry),
+      error: (error, _) => ApiErrorView(error: error, onRetry: onRetry),
     );
   }
 }

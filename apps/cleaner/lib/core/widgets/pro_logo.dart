@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// The "tidy pro" wordmark. Use [onDark] on the ink header.
@@ -31,7 +30,7 @@ class ProLogo extends StatelessWidget {
               TextSpan(
                 text: 'pro',
                 style: TextStyle(
-                  color: onDark ? ProColors.mint : TidyColors.primary,
+                  color: onDark ? TidyColors.mint : TidyColors.primary,
                 ),
               ),
             ],

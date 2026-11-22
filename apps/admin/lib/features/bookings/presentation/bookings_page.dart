@@ -7,8 +7,7 @@ import 'package:tidy_admin/core/api_errors.dart';
 import 'package:tidy_admin/core/formatting.dart';
 import 'package:tidy_admin/core/labels.dart';
 import 'package:tidy_admin/core/responsive.dart';
-import 'package:tidy_admin/core/widgets/error_view.dart';
-import 'package:tidy_admin/core/widgets/skeleton.dart';
+import 'package:tidy_admin/core/widgets/api_error_view.dart';
 import 'package:tidy_admin/features/bookings/presentation/booking_detail_view.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_table.dart';
@@ -241,7 +240,7 @@ class _Results extends ConsumerWidget {
     final controller = ref.read(bookingsControllerProvider.notifier);
 
     if (bookings.hasError && !bookings.isLoading) {
-      return ErrorView(
+      return ApiErrorView(
         error: bookings.error!,
         onRetry: () => ref.invalidate(bookingsControllerProvider),
       );
@@ -345,13 +344,13 @@ class _LoadingRows extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 14, horizontal: 8),
               child: Row(
                 children: [
-                  Skeleton(width: 64),
+                  Shimmer(child: SkeletonBox(width: 64)),
                   SizedBox(width: 24),
-                  Expanded(child: Skeleton()),
+                  Expanded(child: Shimmer(child: SkeletonBox())),
                   SizedBox(width: 24),
-                  Expanded(child: Skeleton()),
+                  Expanded(child: Shimmer(child: SkeletonBox())),
                   SizedBox(width: 24),
-                  Skeleton(width: 70),
+                  Shimmer(child: SkeletonBox(width: 70)),
                 ],
               ),
             ),

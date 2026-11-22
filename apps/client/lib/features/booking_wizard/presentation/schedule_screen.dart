@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
-import 'package:tidy_client/core/widgets/error_state.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/core/widgets/wizard_header.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_controller.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_state.dart';
@@ -163,7 +162,7 @@ class _Slots extends ConsumerWidget {
     if (state.slotsError != null && !state.slotsLoading) {
       return SizedBox(
         height: 220,
-        child: ErrorState(error: state.slotsError!, onRetry: onRetry),
+        child: ApiErrorView(error: state.slotsError!, onRetry: onRetry),
       );
     }
     if (state.slotsLoading && state.slots.isEmpty) {
