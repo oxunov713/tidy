@@ -1,21 +1,16 @@
-import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:tidy_core/tidy_core.dart';
 
-/// Times come from the API in UTC; the panel shows them in the admin's zone.
-String formatDateTime(BuildContext context, DateTime value) {
-  final locale = Localizations.localeOf(context).toString();
-  return DateFormat.MMMd(locale).add_Hm().format(value.toLocal());
-}
+/// Times come from the API in UTC; the panel shows them in the business
+/// zone (see `BusinessTime`), not in the zone of the admin's computer.
+String formatDateTime(BuildContext context, DateTime value) =>
+    TidyDates.dateTime(value, Localizations.localeOf(context).toString());
 
-String formatTime(BuildContext context, DateTime value) {
-  final locale = Localizations.localeOf(context).toString();
-  return DateFormat.Hm(locale).format(value.toLocal());
-}
+String formatTime(BuildContext context, DateTime value) =>
+    TidyDates.clock(value, Localizations.localeOf(context).toString());
 
-String formatLongDate(BuildContext context, DateTime value) {
-  final locale = Localizations.localeOf(context).toString();
-  return DateFormat.MMMMEEEEd(locale).format(value.toLocal());
-}
+String formatLongDate(BuildContext context, DateTime value) =>
+    TidyDates.dayFull(value, Localizations.localeOf(context).toString());
 
 /// Accounts created straight from a phone number have no name yet.
 String nameOrPhone(String name, String phone) =>

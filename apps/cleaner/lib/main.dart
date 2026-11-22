@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tidy_cleaner/app.dart';
 import 'package:tidy_cleaner/core/location/geolocator_location_service.dart';
@@ -8,6 +9,8 @@ import 'package:tidy_core/tidy_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Dates are printed in ru and uz too, which need their symbols loaded.
+  await initializeDateFormatting();
   final prefs = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(

@@ -134,7 +134,7 @@ class _BookingsListState extends ConsumerState<BookingsList> {
             children: [
               Expanded(
                 child: Text(
-                  formatLongDate(context, DateTime.now()),
+                  formatLongDate(context, ref.read(clockProvider)()),
                   style: const TextStyle(color: TidyColors.muted),
                 ),
               ),

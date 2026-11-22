@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_admin/features/services/domain/money.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
@@ -36,13 +35,13 @@ class _ServiceFormState extends State<ServiceForm> {
   final _formKey = GlobalKey<FormState>();
   late final _title = TextEditingController(text: widget.service.title);
   late final _base = TextEditingController(
-    text: penceToPounds(widget.service.basePrice),
+    text: TidyFormat.penceToPounds(widget.service.basePrice),
   );
   late final _bedroom = TextEditingController(
-    text: penceToPounds(widget.service.perBedroom),
+    text: TidyFormat.penceToPounds(widget.service.perBedroom),
   );
   late final _bathroom = TextEditingController(
-    text: penceToPounds(widget.service.perBathroom),
+    text: TidyFormat.penceToPounds(widget.service.perBathroom),
   );
   late final _baseMinutes = TextEditingController(
     text: '${widget.service.baseMinutes}',
@@ -72,9 +71,9 @@ class _ServiceFormState extends State<ServiceForm> {
     widget.onSubmit(
       ServiceUpdate(
         title: _title.text.trim(),
-        basePrice: poundsToPence(_base.text)!,
-        perBedroom: poundsToPence(_bedroom.text)!,
-        perBathroom: poundsToPence(_bathroom.text)!,
+        basePrice: TidyFormat.poundsToPence(_base.text)!,
+        perBedroom: TidyFormat.poundsToPence(_bedroom.text)!,
+        perBathroom: TidyFormat.poundsToPence(_bathroom.text)!,
         baseMinutes: int.parse(_baseMinutes.text.trim()),
         minutesPerRoom: int.parse(_roomMinutes.text.trim()),
         isActive: _active,
@@ -87,7 +86,7 @@ class _ServiceFormState extends State<ServiceForm> {
     final l10n = AppLocalizations.of(context);
 
     String? price(String? v, {required bool mustBePositive}) {
-      final pence = poundsToPence(v ?? '');
+      final pence = TidyFormat.poundsToPence(v ?? '');
       if (pence == null) return l10n.validationPrice;
       if (mustBePositive && pence == 0) return l10n.validationPricePositive;
       if (pence > _maxPence) return l10n.validationPriceTooHigh;
