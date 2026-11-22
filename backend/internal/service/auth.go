@@ -86,18 +86,17 @@ func (a *Auth) RequestCode(ctx context.Context, rawPhone string) error {
 	return a.sender.SendCode(ctx, phone, code)
 }
 
-// Verify checks the code and signs the user in, creating the account on
-// first login. Role only matters for new accounts.
+// Verify checks the code and signs the user in. An unknown number signs up
+// as a client or cleaner; admins are never created here. A role that
+// doesn't match the existing account is refused, so a cleaner can't end up
+// in the client app by mistake. No role means "whatever the account is".
 func (a *Auth) Verify(ctx context.Context, rawPhone, code string, role domain.Role) (Session, error) {
 	phone, ok := domain.NormalizePhone(rawPhone)
 	if !ok {
 		return Session{}, errBadPhone
 	}
-	if role == "" {
-		role = domain.RoleClient
-	}
-	if role != domain.RoleClient && role != domain.RoleCleaner {
-		return Session{}, domain.Invalid("role", "must be client or cleaner")
+	if role != "" && !role.Valid() {
+		return Session{}, domain.Invalid("role", "must be client, cleaner or admin")
 	}
 
 	otp, err := a.store.TouchOTP(ctx, phone)
@@ -126,7 +125,7 @@ func (a *Auth) Verify(ctx context.Context, rawPhone, code string, role domain.Ro
 		return Session{}, errWrongCode
 	}
 
-	user, err := a.store.FindOrCreateUser(ctx, phone, role)
+	user, err := a.account(ctx, phone, role)
 	if err != nil {
 		return Session{}, err
 	}
@@ -136,6 +135,33 @@ func (a *Auth) Verify(ctx context.Context, rawPhone, code string, role domain.Ro
 	}
 	s.User = &user
 	return s, nil
+}
+
+func (a *Auth) account(ctx context.Context, phone string, role domain.Role) (domain.User, error) {
+	user, err := a.store.GetUserByPhone(ctx, phone)
+	if errors.Is(err, domain.ErrNotFound) {
+		switch role {
+		case domain.RoleAdmin:
+			return domain.User{}, domain.Forbidden("This number isn't an admin.")
+		case "":
+			role = domain.RoleClient
+		}
+		user, err = a.store.CreateUser(ctx, phone, role)
+	}
+	if err != nil {
+		return domain.User{}, err
+	}
+	if role != "" && user.Role != role {
+		return domain.User{}, domain.Forbidden("This number is registered as " + withArticle(user.Role) + ".")
+	}
+	return user, nil
+}
+
+func withArticle(r domain.Role) string {
+	if r == domain.RoleAdmin {
+		return "an admin"
+	}
+	return "a " + string(r)
 }
 
 // Refresh swaps a refresh token for a new pair. Each refresh token works

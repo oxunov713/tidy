@@ -76,3 +76,87 @@ func TestRefreshTokenExpiresOnTheServiceClock(t *testing.T) {
 	e.travelTo(time.Now().Add(61 * time.Minute))
 	e.refresh(s.RefreshToken, http.StatusUnauthorized)
 }
+
+func (e *testEnv) verify(phone string, role domain.Role) response {
+	e.t.Helper()
+	e.expect(e.do("POST", "/auth/otp", "", map[string]string{"phone": phone}), http.StatusNoContent)
+	return e.do("POST", "/auth/verify", "", map[string]string{"phone": phone, "code": e.codes.last(phone), "role": string(role)})
+}
+
+func wantForbidden(t *testing.T, r response, message string) {
+	t.Helper()
+	var body struct {
+		Error struct{ Code, Message string } `json:"error"`
+	}
+	r.decode(t, &body)
+	if r.status != http.StatusForbidden || body.Error.Code != "forbidden" || (message != "" && body.Error.Message != message) {
+		t.Errorf("got %d %s, want 403 forbidden %q", r.status, r.body, message)
+	}
+}
+
+func TestAdminVerifyNeverCreatesAnAccount(t *testing.T) {
+	e := newEnv(t)
+	const phone = "+447700902601"
+	wantForbidden(t, e.verify(phone, domain.RoleAdmin), "")
+	var n int
+	if err := e.store.Pool().QueryRow(t.Context(), `SELECT count(*) FROM users WHERE phone = $1`, phone).Scan(&n); err != nil {
+		t.Fatal(err)
+	}
+	if n != 0 {
+		t.Errorf("admin sign-in with an unknown number created %d users", n)
+	}
+
+	// A client asking for admin is refused too.
+	e.login(phone, domain.RoleClient)
+	wantForbidden(t, e.verify(phone, domain.RoleAdmin), "This number is registered as a client.")
+
+	admin := e.admin("+447700902602")
+	r := e.expect(e.verify("+447700902602", domain.RoleAdmin), http.StatusOK)
+	var s session
+	r.decode(t, &s)
+	if s.User.ID != admin.User.ID || s.User.Role != domain.RoleAdmin {
+		t.Errorf("admin sign-in = %+v", s.User)
+	}
+}
+
+func TestVerifyRefusesAnotherRole(t *testing.T) {
+	e := newEnv(t)
+	e.login("+447700902603", domain.RoleCleaner)
+	wantForbidden(t, e.verify("+447700902603", domain.RoleClient), "This number is registered as a cleaner.")
+
+	e.login("+447700902604", domain.RoleClient)
+	wantForbidden(t, e.verify("+447700902604", domain.RoleCleaner), "This number is registered as a client.")
+
+	e.admin("+447700902605")
+	wantForbidden(t, e.verify("+447700902605", domain.RoleClient), "This number is registered as an admin.")
+
+	// New numbers still sign up with the role they ask for, client by default.
+	if s := e.login("+447700902606", ""); s.User.Role != domain.RoleClient {
+		t.Errorf("new number without a role signed up as %s", s.User.Role)
+	}
+}
+
+func TestDeleteDevice(t *testing.T) {
+	e := newEnv(t)
+	a := e.login("+447700902607", domain.RoleClient)
+	b := e.login("+447700902608", domain.RoleClient)
+	const token = "fcm:APA91b-token_1"
+	e.expect(e.do("POST", "/me/devices", a.AccessToken, map[string]string{"token": token, "platform": "android"}), http.StatusNoContent)
+
+	count := func() int {
+		var n int
+		if err := e.store.Pool().QueryRow(t.Context(), `SELECT count(*) FROM device_tokens WHERE token = $1`, token).Scan(&n); err != nil {
+			t.Fatal(err)
+		}
+		return n
+	}
+	e.expect(e.do("DELETE", "/me/devices/"+token, b.AccessToken, nil), http.StatusNoContent)
+	if count() != 1 {
+		t.Fatal("another user removed the device")
+	}
+	e.expect(e.do("DELETE", "/me/devices/"+token, a.AccessToken, nil), http.StatusNoContent)
+	if count() != 0 {
+		t.Error("device token still stored after DELETE")
+	}
+	e.expect(e.do("DELETE", "/me/devices/"+token, a.AccessToken, nil), http.StatusNoContent)
+}

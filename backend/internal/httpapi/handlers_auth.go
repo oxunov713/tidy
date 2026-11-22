@@ -2,6 +2,9 @@ package httpapi
 
 import (
 	"net/http"
+	"net/url"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/oxunov713/tidy/backend/internal/domain"
 	"github.com/oxunov713/tidy/backend/internal/service"
@@ -99,6 +102,17 @@ func (s *Server) registerDevice(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	if err := s.users.RegisterDevice(r.Context(), principal(r), in.Token, in.Platform); err != nil {
+		return err
+	}
+	return noContent(w)
+}
+
+func (s *Server) removeDevice(w http.ResponseWriter, r *http.Request) error {
+	token, err := url.PathUnescape(chi.URLParam(r, "token"))
+	if err != nil {
+		return domain.Invalid("token", "is not a valid path segment")
+	}
+	if err := s.users.RemoveDevice(r.Context(), principal(r), token); err != nil {
 		return err
 	}
 	return noContent(w)

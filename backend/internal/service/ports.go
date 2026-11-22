@@ -29,7 +29,10 @@ type AuthStore interface {
 	ConsumeOTP(ctx context.Context, phone, codeHash string) (bool, error)
 	DeleteOTP(ctx context.Context, phone string) error
 
-	FindOrCreateUser(ctx context.Context, phone string, role domain.Role) (domain.User, error)
+	GetUserByPhone(ctx context.Context, phone string) (domain.User, error)
+	// CreateUser signs a phone number up. If the number signed up in the
+	// meantime, it returns that account unchanged.
+	CreateUser(ctx context.Context, phone string, role domain.Role) (domain.User, error)
 	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 
 	SaveRefreshToken(ctx context.Context, userID uuid.UUID, tokenHash string, expiresAt time.Time) error
@@ -55,6 +58,8 @@ type UserStore interface {
 	GetCleaner(ctx context.Context, id uuid.UUID) (domain.Cleaner, error)
 
 	UpsertDevice(ctx context.Context, userID uuid.UUID, token string, platform domain.DevicePlatform) error
+	// DeleteUserDevice removes the token only if it belongs to the user.
+	DeleteUserDevice(ctx context.Context, userID uuid.UUID, token string) error
 
 	ListAddresses(ctx context.Context, userID uuid.UUID) ([]domain.Address, error)
 	CreateAddress(ctx context.Context, a domain.Address) (domain.Address, error)

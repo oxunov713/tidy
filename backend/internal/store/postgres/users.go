@@ -68,7 +68,11 @@ func scanUser(row pgx.Row) (domain.User, error) {
 	return u, err
 }
 
-func (s *Store) FindOrCreateUser(ctx context.Context, phone string, role domain.Role) (domain.User, error) {
+func (s *Store) GetUserByPhone(ctx context.Context, phone string) (domain.User, error) {
+	return scanUser(s.pool.QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE phone = $1`, phone))
+}
+
+func (s *Store) CreateUser(ctx context.Context, phone string, role domain.Role) (domain.User, error) {
 	var u domain.User
 	err := s.inTx(ctx, func(tx pgx.Tx) error {
 		// The no-op update makes RETURNING work for an existing row too.
@@ -202,6 +206,11 @@ func (s *Store) UpsertDevice(ctx context.Context, userID uuid.UUID, token string
 		INSERT INTO device_tokens (token, user_id, platform) VALUES ($1, $2, $3)
 		ON CONFLICT (token) DO UPDATE SET user_id = $2, platform = $3, updated_at = now()`,
 		token, userID, platform)
+	return err
+}
+
+func (s *Store) DeleteUserDevice(ctx context.Context, userID uuid.UUID, token string) error {
+	_, err := s.pool.Exec(ctx, `DELETE FROM device_tokens WHERE token = $1 AND user_id = $2`, token, userID)
 	return err
 }
 

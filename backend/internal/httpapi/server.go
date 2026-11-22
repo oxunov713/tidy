@@ -114,6 +114,7 @@ func (s *Server) meRoutes(r chi.Router) {
 	r.Get("/me", s.handle(s.getMe))
 	r.Patch("/me", s.handle(s.patchMe))
 	r.Post("/me/devices", s.handle(s.registerDevice))
+	r.Delete("/me/devices/{token}", s.handle(s.removeDevice))
 	r.Get("/me/addresses", s.handle(s.listAddresses))
 	r.Post("/me/addresses", s.handle(s.createAddress))
 	r.Delete("/me/addresses/{id}", s.handle(s.deleteAddress))

@@ -57,8 +57,9 @@ func TestOTPLogin(t *testing.T) {
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": s.RefreshToken}), http.StatusUnauthorized)
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": next.RefreshToken}), http.StatusUnauthorized)
 
-	// Logout revokes the refresh token.
-	again := e.login(phone, domain.RoleClient)
+	// Logout revokes the refresh token. Leaving the role out signs in as
+	// whatever the account is.
+	again := e.login(phone, "")
 	if again.User.Role != domain.RoleCleaner {
 		t.Errorf("existing user kept role %s, want cleaner", again.User.Role)
 	}

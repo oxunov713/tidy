@@ -79,6 +79,15 @@ func (u *Users) RegisterDevice(ctx context.Context, p Principal, token string, p
 	return u.store.UpsertDevice(ctx, p.UserID, token, platform)
 }
 
+// RemoveDevice stops push notifications to a device, e.g. on logout.
+// Unknown tokens are ignored, so it is safe to call twice.
+func (u *Users) RemoveDevice(ctx context.Context, p Principal, token string) error {
+	if token == "" {
+		return domain.Invalid("token", "is required")
+	}
+	return u.store.DeleteUserDevice(ctx, p.UserID, token)
+}
+
 func (u *Users) Addresses(ctx context.Context, p Principal) ([]domain.Address, error) {
 	return u.store.ListAddresses(ctx, p.UserID)
 }
