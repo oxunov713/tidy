@@ -17,4 +17,27 @@ abstract final class TidyColors {
   static const accentSoft = Color(0xFFFDF0D8);
   static const infoSoft = Color(0xFFE4EEF9);
   static const info = Color(0xFF2B6CB0);
+
+  // -- Tones the cleaner app ("tidy pro") needs on its dark header and
+  //    timeline. They live here so any app can use them.
+
+  /// Light mint on the dark ink header (the "pro" wordmark, highlights).
+  static const mint = Color(0xFF8FD9B6);
+
+  /// Secondary text on ink backgrounds.
+  static const onInkMuted = Color(0xFFB9C7C2);
+
+  /// Track of a switch that is off, on an ink background.
+  static const switchOff = Color(0xFF3E4F49);
+
+  /// Amber text on [accentSoft] (offer badge, notes).
+  static const onAccentSoft = Color(0xFF7A4B00);
+  static const onAccentSoftDeep = Color(0xFF5A3800);
+
+  /// Dashed hairlines on a timeline.
+  static const dash = Color(0xFFD0DAD5);
+
+  /// Text on a [primarySoft] block.
+  static const onPrimarySoft = Color(0xFF33463F);
+  static const primaryDeep = Color(0xFF075C40);
 }

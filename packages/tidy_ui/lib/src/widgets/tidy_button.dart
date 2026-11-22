@@ -2,7 +2,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tidy_ui/src/tokens/colors.dart';
 import 'package:tidy_ui/src/tokens/radii.dart';
 
-enum TidyButtonVariant { primary, secondary, ghost }
+/// [danger] is for destructive confirmations such as cancelling a booking.
+enum TidyButtonVariant { primary, secondary, ghost, danger }
 
 /// Full-width-capable button with a loading state.
 ///
@@ -44,6 +45,11 @@ class TidyButton extends StatelessWidget {
         Colors.transparent,
         TidyColors.primary,
         TidyColors.line,
+      ),
+      TidyButtonVariant.danger => (
+        TidyColors.danger,
+        TidyColors.white,
+        Colors.transparent,
       ),
     };
 

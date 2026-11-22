@@ -42,13 +42,19 @@ class TidyChip extends StatelessWidget {
                   Icon(icon, size: 16, color: foreground),
                   const SizedBox(width: 6),
                 ],
-                ExcludeSemantics(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: foreground,
+                // Flexible: a long label shortens instead of overflowing when
+                // the chip sits in a narrow row.
+                Flexible(
+                  child: ExcludeSemantics(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: foreground,
+                      ),
                     ),
                   ),
                 ),

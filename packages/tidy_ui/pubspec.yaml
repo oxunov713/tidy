@@ -11,9 +11,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^9.0.0
   material_ui: ^1.11.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter:
+  fonts:
+    # Bundled so the first paint (and the web demo) never falls back to
+    # Roboto, and so the apps work offline. Latin and Cyrillic subsets of the
+    # SIL OFL fonts, see assets/fonts/OFL-*.txt.
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SpaceGrotesk-Bold.ttf
+          weight: 700
