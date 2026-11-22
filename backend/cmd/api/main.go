@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -99,6 +100,13 @@ func run() error {
 		IdleTimeout:       2 * time.Minute,
 	}
 
+	// Bind first: if the port is taken, fail before the scheduler touches
+	// any booking.
+	ln, err := net.Listen("tcp", cfg.HTTPAddr)
+	if err != nil {
+		return fmt.Errorf("listen: %w", err)
+	}
+
 	var jobs sync.WaitGroup
 	jobs.Add(1)
 	go func() {
@@ -108,8 +116,8 @@ func run() error {
 
 	serveErr := make(chan error, 1)
 	go func() {
-		log.Info("api listening", "addr", cfg.HTTPAddr, "env", cfg.Env, "payments", provider.Name(), "push", cfg.PushProvider)
-		serveErr <- srv.ListenAndServe()
+		log.Info("api listening", "addr", ln.Addr().String(), "env", cfg.Env, "payments", provider.Name(), "push", cfg.PushProvider)
+		serveErr <- srv.Serve(ln)
 	}()
 
 	select {
