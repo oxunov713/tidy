@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
@@ -54,7 +53,7 @@ class CurrentBookingCard extends ConsumerWidget {
                 Text(title, style: text.titleSmall?.copyWith(fontSize: 15)),
                 const SizedBox(height: 2),
                 Text(
-                  '${booking.serviceTitle} · ${formatClock(booking.start)}',
+                  '${booking.serviceTitle} · ${TidyDates.clock(booking.start)}',
                   style: text.bodySmall?.copyWith(
                     color: TidyColors.muted,
                     fontSize: 13,

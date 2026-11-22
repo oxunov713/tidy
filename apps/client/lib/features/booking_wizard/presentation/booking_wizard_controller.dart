@@ -243,7 +243,6 @@ class BookingWizard extends _$BookingWizard {
   }
 
   DateTime _today() {
-    final now = ref.read(clockProvider)();
-    return DateTime(now.year, now.month, now.day);
+    return BusinessTime.today(ref.read(clockProvider)());
   }
 }

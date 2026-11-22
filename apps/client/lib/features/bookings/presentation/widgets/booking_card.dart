@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/bookings/presentation/status_labels.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
@@ -45,9 +44,9 @@ class BookingCard extends ConsumerWidget {
         ? '…'
         : (booking.status.canCancel ? l10n.findingCleaner : l10n.noCleaner);
 
-    final when = isSameDay(booking.start, now)
-        ? l10n.todayAt(formatClock(booking.start))
-        : '${formatDayShort(booking.start, locale)} · ${formatClock(booking.start)}';
+    final when = BusinessTime.isSameDay(booking.start, now)
+        ? l10n.todayAt(TidyDates.clock(booking.start))
+        : '${TidyDates.dayShort(booking.start, locale)} · ${TidyDates.clock(booking.start)}';
 
     final (primaryLabel, primaryAction) = switch (booking.status) {
       BookingStatus.assigned ||

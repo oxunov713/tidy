@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/core/widgets/wizard_header.dart';
@@ -46,7 +45,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final state = ref.watch(bookingWizardProvider);
     final wizard = ref.read(bookingWizardProvider.notifier);
     final now = ref.watch(clockProvider)();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = BusinessTime.today(now);
     final date = state.date ?? today;
 
     return Scaffold(
@@ -66,7 +65,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        formatMonthYear(date, locale),
+                        TidyDates.monthYearOf(date, locale),
                         style: text.titleSmall?.copyWith(fontSize: 15),
                       ),
                     ),
@@ -141,10 +140,14 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final slot = state.slot;
     if (slot == null) return l10n.pickATime;
     final minutes = state.quote?.minutes;
-    final day = formatDayLong(slot, locale);
+    final day = TidyDates.dayLong(slot, locale);
     return minutes == null
-        ? l10n.scheduleSummaryShort(day, formatClock(slot))
-        : l10n.scheduleSummary(day, formatClock(slot), hoursValue(minutes));
+        ? l10n.scheduleSummaryShort(day, TidyDates.clock(slot))
+        : l10n.scheduleSummary(
+            day,
+            TidyDates.clock(slot),
+            TidyFormat.hoursValue(minutes),
+          );
   }
 }
 

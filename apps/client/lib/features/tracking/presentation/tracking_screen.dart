@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/providers/map_factory.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/api_error_view.dart';
@@ -211,7 +210,7 @@ class _Sheet extends ConsumerWidget {
             ? l10n.onTheWayHeadline
             : l10n.minutesShort(state.etaMinutes!),
       ),
-      BookingStatus.assigned => (l10n.startsAt, formatClock(booking.start)),
+      BookingStatus.assigned => (l10n.startsAt, TidyDates.clock(booking.start)),
       BookingStatus.inProgress => (l10n.rightNow, l10n.cleaningHeadline),
       BookingStatus.completed => (l10n.finished, l10n.allDone),
       BookingStatus.cancelled => (l10n.bookingLabel, l10n.statusCancelled),
@@ -299,7 +298,7 @@ class _Sheet extends ConsumerWidget {
                 _CleanerRow(
                   cleaner: cleaner,
                   subtitle:
-                      '${cleaner.rating.toStringAsFixed(1)} · ${booking.serviceTitle} · ${formatClock(booking.start)}',
+                      '${cleaner.rating.toStringAsFixed(1)} · ${booking.serviceTitle} · ${TidyDates.clock(booking.start)}',
                   canChat: status != BookingStatus.cancelled,
                   onChat: () => context.push(Routes.bookingChat(booking.id)),
                   onCall: () => ScaffoldMessenger.of(context).showSnackBar(

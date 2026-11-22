@@ -156,6 +156,7 @@ void main() {
       expect(TidyFormat.hoursValue(150), '2.5');
       expect(TidyFormat.hours(1290), '21.5');
       expect(TidyFormat.hoursRange(120), '2–3');
+      expect(TidyFormat.hoursRange(240), '4–6');
       expect(TidyFormat.hoursRange(300), '5–8');
       expect(TidyFormat.perHour(48600, 1290), 2260);
       expect(TidyFormat.perHour(100, 0), 0);

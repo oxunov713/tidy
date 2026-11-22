@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/error/error_text.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/providers/map_factory.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/wizard_header.dart';
@@ -323,7 +322,7 @@ class _SummaryCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${formatDayShort(slot, locale)} · ${formatClock(slot)}',
+                    '${TidyDates.dayShort(slot, locale)} · ${TidyDates.clock(slot)}',
                     style: text.bodyMedium?.copyWith(color: TidyColors.muted),
                   ),
                 ),

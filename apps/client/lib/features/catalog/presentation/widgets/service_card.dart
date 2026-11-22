@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/features/catalog/presentation/service_style.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -90,7 +89,9 @@ class ServiceCard extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  l10n.hoursUnit(hoursRange(service.minutes)),
+                                  l10n.hoursUnit(
+                                    TidyFormat.hoursRange(service.minutes),
+                                  ),
                                 ),
                                 const SizedBox(width: 6),
                                 const Icon(

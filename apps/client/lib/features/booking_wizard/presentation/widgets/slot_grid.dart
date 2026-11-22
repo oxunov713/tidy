@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
@@ -29,7 +28,7 @@ class SlotGrid extends StatelessWidget {
       children: [
         for (final slot in slots)
           _SlotButton(
-            label: formatClock(slot.start),
+            label: TidyDates.clock(slot.start),
             available: slot.available,
             selected: slot.start == selected,
             onTap: () => onSelected(slot.start),

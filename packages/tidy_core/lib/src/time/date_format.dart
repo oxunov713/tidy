@@ -49,6 +49,18 @@ abstract final class TidyDates {
   static String dayLongOf(DateTime day, [String? locale]) =>
       DateFormat('EEEE, d MMM', locale).format(day);
 
+  /// `Wednesday, 3 December`.
+  static String dayLongMonthOf(DateTime day, [String? locale]) =>
+      DateFormat('EEEE, d MMMM', locale).format(day);
+
+  /// `December 2026`.
+  static String monthYearOf(DateTime day, [String? locale]) =>
+      DateFormat('MMMM y', locale).format(day);
+
+  /// `WED`.
+  static String weekdayUpperOf(DateTime day, [String? locale]) =>
+      DateFormat('E', locale).format(day).toUpperCase();
+
   /// `T`, for chart labels.
   static String weekdayNarrowOf(DateTime day, [String? locale]) =>
       DateFormat('EEEEE', locale).format(day);

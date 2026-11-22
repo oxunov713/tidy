@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/async_value_view.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
@@ -122,7 +121,7 @@ class _Content extends ConsumerWidget {
                 _InfoRow(
                   icon: Icons.event_outlined,
                   text:
-                      '${formatDayLong(booking.start, locale)} · ${formatClock(booking.start)}–${formatClock(booking.end)}',
+                      '${TidyDates.dayLong(booking.start, locale)} · ${TidyDates.clock(booking.start)}–${TidyDates.clock(booking.end)}',
                 ),
                 _InfoRow(
                   icon: Icons.bed_outlined,
@@ -417,7 +416,7 @@ class _Timeline extends StatelessWidget {
             _TimelineRow(
               label: event.status.label(l10n),
               time:
-                  '${formatDayShort(event.at, locale)} · ${formatClock(event.at)}',
+                  '${TidyDates.dayShort(event.at, locale)} · ${TidyDates.clock(event.at)}',
               isFirst: index == 0,
               isLast: index == events.length - 1,
             ),
