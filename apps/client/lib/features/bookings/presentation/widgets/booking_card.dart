@@ -16,6 +16,7 @@ class BookingCard extends ConsumerWidget {
     required this.onRate,
     required this.onBookAgain,
     required this.onCancel,
+    required this.onPay,
     super.key,
   });
 
@@ -25,6 +26,7 @@ class BookingCard extends ConsumerWidget {
   final VoidCallback onRate;
   final VoidCallback onBookAgain;
   final VoidCallback onCancel;
+  final VoidCallback onPay;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,10 +56,8 @@ class BookingCard extends ConsumerWidget {
       BookingStatus.inProgress => (l10n.track, onTrack),
       BookingStatus.completed => (l10n.rate, onRate),
       BookingStatus.cancelled => (l10n.bookAgain, onBookAgain),
-      BookingStatus.pending || BookingStatus.confirmed => (
-        l10n.details,
-        onOpen,
-      ),
+      BookingStatus.pending => (l10n.payNow, onPay),
+      BookingStatus.confirmed => (l10n.details, onOpen),
     };
     final showBookAgain = booking.status == BookingStatus.completed;
     final showCancel = booking.status.canCancel;
@@ -140,6 +140,9 @@ class BookingCard extends ConsumerWidget {
                         child: Text(l10n.bookAgain),
                       ),
                     _ActionButton(
+                      key: booking.status == BookingStatus.pending
+                          ? const Key('payNow')
+                          : null,
                       label: primaryLabel,
                       onPressed: primaryAction,
                     ),
@@ -155,7 +158,11 @@ class BookingCard extends ConsumerWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.label, required this.onPressed});
+  const _ActionButton({
+    required this.label,
+    required this.onPressed,
+    super.key,
+  });
 
   final String label;
   final VoidCallback onPressed;

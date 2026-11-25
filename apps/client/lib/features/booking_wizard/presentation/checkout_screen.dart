@@ -80,6 +80,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               clientSecret: created.payment.clientSecret,
               amountPence: booking.total,
               bookingCode: booking.code,
+              kind: created.payment.kind,
             ),
           );
     } on PaymentFailure catch (failure) {
@@ -91,6 +92,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (!mounted) return;
 
     switch (outcome) {
+      case PaymentOutcome.paid when created.payment.kind == PaymentKind.setup:
+        // The card is saved; the booking stays pending until it is charged,
+        // 48 hours before the visit.
+        _snack(l10n.cardSaved);
+        context.go(Routes.bookings);
       case PaymentOutcome.paid:
         context.go(Routes.home);
         unawaited(context.push(Routes.track(booking.id)));

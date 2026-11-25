@@ -10,6 +10,7 @@ import 'package:tidy_client/features/bookings/presentation/book_again.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/bookings/presentation/cancel_booking.dart';
 import 'package:tidy_client/features/bookings/presentation/widgets/booking_card.dart';
+import 'package:tidy_client/features/payment/presentation/pay_booking.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
@@ -139,6 +140,7 @@ class BookingsListView extends ConsumerWidget {
                   onRate: () => context.push(Routes.review(booking.id)),
                   onBookAgain: () => bookAgain(context, ref, booking),
                   onCancel: () => cancelBooking(context, ref, booking),
+                  onPay: () => payForBooking(context, ref, booking),
                 );
               },
             ),
