@@ -9,6 +9,7 @@ export 'src/tokens/radii.dart';
 export 'src/tokens/spacing.dart';
 export 'src/widgets/avatar.dart';
 export 'src/widgets/bottom_nav_bar.dart';
+export 'src/widgets/chat_view.dart';
 export 'src/widgets/countdown.dart';
 export 'src/widgets/empty_state.dart';
 export 'src/widgets/error_state.dart';
