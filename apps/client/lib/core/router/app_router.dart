@@ -17,6 +17,7 @@ import 'package:tidy_client/features/bookings/presentation/bookings_screen.dart'
 import 'package:tidy_client/features/chat/presentation/chat_list_screen.dart';
 import 'package:tidy_client/features/chat/presentation/chat_screen.dart';
 import 'package:tidy_client/features/home/presentation/home_screen.dart';
+import 'package:tidy_client/features/plans/presentation/plans_screen.dart';
 import 'package:tidy_client/features/profile/presentation/profile_screen.dart';
 import 'package:tidy_client/features/review/presentation/review_screen.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_screen.dart';
@@ -87,6 +88,10 @@ GoRouter appRouter(Ref ref) {
             builder: (context, state) => const AddAddressScreen(),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.plans,
+        builder: (context, state) => const PlansScreen(),
       ),
       GoRoute(
         path: Routes.configure,

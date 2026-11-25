@@ -13,6 +13,7 @@ abstract final class Routes {
   static const chat = '/chat';
   static const profile = '/profile';
 
+  static const plans = '/plans';
   static const addresses = '/addresses';
   static const addAddress = '/addresses/new';
 

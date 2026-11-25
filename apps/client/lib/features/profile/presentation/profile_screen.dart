@@ -78,6 +78,12 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _Tile(
+            icon: Icons.repeat,
+            label: l10n.managePlans,
+            onTap: () => context.push(Routes.plans),
+          ),
+          const SizedBox(height: 12),
+          _Tile(
             icon: Icons.language,
             label: l10n.language,
             trailing: _languageName(l10n, locale?.languageCode),
