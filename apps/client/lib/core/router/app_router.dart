@@ -25,7 +25,9 @@ part 'app_router.g.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
-const Set<String> _publicRoutes = {Routes.splash, Routes.welcome, Routes.otp};
+const Set<String> _publicRoutes = {Routes.splash, Routes.welcome};
+
+bool _isOtp(String location) => location.startsWith('${Routes.otp}/');
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
@@ -46,11 +48,13 @@ GoRouter appRouter(Ref ref) {
     }
     final signedIn = auth.value != null;
     if (!signedIn) {
-      return location == Routes.welcome || location == Routes.otp
+      return location == Routes.welcome || _isOtp(location)
           ? null
           : Routes.welcome;
     }
-    return _publicRoutes.contains(location) ? Routes.home : null;
+    return _publicRoutes.contains(location) || _isOtp(location)
+        ? Routes.home
+        : null;
   }
 
   return GoRouter(
@@ -68,8 +72,9 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
-        path: Routes.otp,
-        builder: (context, state) => OtpScreen(phone: state.extra! as String),
+        path: '${Routes.otp}/:phone',
+        builder: (context, state) =>
+            OtpScreen(phone: state.pathParameters['phone']!),
       ),
       GoRoute(
         path: Routes.addresses,

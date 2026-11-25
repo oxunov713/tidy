@@ -161,3 +161,8 @@ class FakeAuthController extends AuthController {
   @override
   Future<User?> build() async => fx.user();
 }
+
+class FakeSignedOutAuthController extends AuthController {
+  @override
+  Future<User?> build() async => null;
+}

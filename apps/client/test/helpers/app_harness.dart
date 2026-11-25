@@ -25,6 +25,7 @@ class Fakes {
     FakeAddressRepository? addresses,
     FakeBookingRepository? bookings,
     FakeRealtimeClient? realtime,
+    this.signedOut = false,
   }) : realtime = realtime ?? FakeRealtimeClient(),
        catalog = catalog ?? FakeCatalogRepository(),
        addresses = addresses ?? FakeAddressRepository(),
@@ -35,12 +36,17 @@ class Fakes {
   final FakeBookingRepository bookings;
   final FakeRealtimeClient realtime;
 
+  /// Start without a session, as on a fresh install.
+  final bool signedOut;
+
   List<Override> get overrides => [
     realtimeClientProvider.overrideWithValue(realtime),
     catalogRepositoryProvider.overrideWithValue(catalog),
     addressRepositoryProvider.overrideWithValue(addresses),
     bookingRepositoryProvider.overrideWithValue(bookings),
-    authControllerProvider.overrideWith(FakeAuthController.new),
+    authControllerProvider.overrideWith(
+      signedOut ? FakeSignedOutAuthController.new : FakeAuthController.new,
+    ),
     mapFactoryProvider.overrideWithValue(
       ({zoom = 15}) => const FakeMapProvider(),
     ),
