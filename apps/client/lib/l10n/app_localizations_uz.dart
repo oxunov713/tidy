@@ -761,4 +761,81 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get loading => 'Yuklanmoqda';
+
+  @override
+  String get cancelScopeTitle => 'Qaysi tashriflar bekor qilinsin?';
+
+  @override
+  String get cancelThisVisit => 'Faqat shu tashrif';
+
+  @override
+  String get cancelWholeSeries => 'Butun seriya';
+
+  @override
+  String get cancelSeriesHint =>
+      'Tozalovchisiz kelgusi tashriflar bekor qilinib, pul qaytariladi, yangi tashriflar band qilinmaydi.';
+
+  @override
+  String get cancelledSeriesEnded =>
+      'Bekor qilindi. Muntazam tozalash tugatildi.';
+
+  @override
+  String get managePlans => 'Muntazam tozalashlar';
+
+  @override
+  String get plansEmptyTitle => 'Muntazam tozalashlar yoʻq';
+
+  @override
+  String get plansEmptyBody =>
+      'Haftalik yoki ikki haftalik tozalashni band qiling, u shu yerda koʻrinadi.';
+
+  @override
+  String planNextVisit(String date, String time) {
+    return 'Keyingi tashrif $date, $time';
+  }
+
+  @override
+  String get stopSeries => 'Seriyani toʻxtatish';
+
+  @override
+  String get stopSeriesTitle => 'Bu seriya toʻxtatilsinmi?';
+
+  @override
+  String get stopSeriesBody =>
+      'Tozalovchisiz kelgusi tashriflar bekor qilinib, pul qaytariladi. Yangi tashriflar band qilinmaydi.';
+
+  @override
+  String get seriesStopped => 'Seriya tugatildi.';
+
+  @override
+  String get saveCard => 'Kartani saqlash';
+
+  @override
+  String get saveCardTitle => 'Kartangizni saqlang';
+
+  @override
+  String get setupNotice => 'Toʻlov tashrifdan 48 soat oldin yechiladi.';
+
+  @override
+  String get cardSaved =>
+      'Karta saqlandi. Toʻlov tashrifdan 48 soat oldin yechiladi.';
+
+  @override
+  String get cardDeclined =>
+      'Karta rad etildi. Maʼlumotlarni tekshiring yoki boshqa kartani sinab koʻring.';
+
+  @override
+  String get payNow => 'Hozir toʻlash';
+
+  @override
+  String get payNowHint =>
+      '30 daqiqa ichida toʻlang, aks holda bron bekor qilinadi.';
+
+  @override
+  String get cancelledUnpaid =>
+      'Bron bekor qilindi: 30 daqiqa ichida toʻlanmadi.';
+
+  @override
+  String get cancelledNoCleaner =>
+      'Bron bekor qilinib, pul qaytarildi: tozalovchi topilmadi. Hech kim tayinlanmasa, boshlanishiga 2 soat qolganda bekor qilamiz.';
 }

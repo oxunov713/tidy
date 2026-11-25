@@ -54,6 +54,7 @@ Booking booking({
   int total = 6800,
   Frequency frequency = Frequency.once,
   String title = 'Standard clean',
+  String? planId,
 }) {
   final s = start ?? DateTime.utc(2026, 12, 3, 10);
   return Booking(
@@ -76,6 +77,7 @@ Booking booking({
     createdAt: DateTime.utc(2026, 11),
     updatedAt: DateTime.utc(2026, 11),
     cleanerId: cleanerId,
+    planId: planId,
   );
 }
 

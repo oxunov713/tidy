@@ -442,5 +442,37 @@
   "logout": "Log out",
   "logoutTitle": "Log out of Tidy?",
   "chatClosed": "This conversation is closed.",
-  "loading": "Loading"
+  "loading": "Loading",
+  "cancelScopeTitle": "Cancel which visits?",
+  "cancelThisVisit": "This visit only",
+  "cancelWholeSeries": "The whole series",
+  "cancelSeriesHint": "Future visits without a cleaner are cancelled and refunded, and no new visits are booked.",
+  "cancelledSeriesEnded": "Cancelled. Your recurring clean has ended.",
+  "managePlans": "Manage recurring cleans",
+  "plansEmptyTitle": "No recurring cleans",
+  "plansEmptyBody": "Book a weekly or fortnightly clean and it will show up here.",
+  "planNextVisit": "Next visit {date} at {time}",
+  "@planNextVisit": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stopSeries": "Stop series",
+  "stopSeriesTitle": "Stop this series?",
+  "stopSeriesBody": "Future visits that have no cleaner yet are cancelled and refunded. No new visits will be booked.",
+  "seriesStopped": "The series has ended.",
+  "saveCard": "Save card",
+  "saveCardTitle": "Save your card",
+  "setupNotice": "You'll be charged 48 h before the visit.",
+  "cardSaved": "Card saved. You'll be charged 48 h before the visit.",
+  "cardDeclined": "Your card was declined. Check the details or try another card.",
+  "payNow": "Pay now",
+  "payNowHint": "Pay within 30 minutes or the booking is cancelled.",
+  "cancelledUnpaid": "This booking was cancelled because it wasn't paid within 30 minutes.",
+  "cancelledNoCleaner": "This booking was cancelled and refunded because no cleaner could take it. We cancel 2 hours before the start when nobody is assigned."
 }
