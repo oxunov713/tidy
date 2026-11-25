@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// Seven days starting today; tap one to choose it.
@@ -25,19 +25,21 @@ class DayStrip extends StatelessWidget {
       children: [
         for (var i = 0; i < days; i++) ...[
           if (i > 0) const SizedBox(width: 6),
-          Expanded(child: _tile(today.add(Duration(days: i)))),
+          Expanded(
+            child: _tile(DateTime(today.year, today.month, today.day + i)),
+          ),
         ],
       ],
     );
   }
 
   Widget _tile(DateTime day) {
-    final isSelected = selected != null && isSameDay(day, selected!);
+    final isSelected = selected != null && day == selected;
     final foreground = isSelected ? TidyColors.white : TidyColors.ink;
     return Semantics(
       button: true,
       selected: isSelected,
-      label: formatDayLong(day, locale),
+      label: TidyDates.dayLongMonthOf(day, locale),
       child: Material(
         color: isSelected ? TidyColors.primary : TidyColors.white,
         shape: RoundedRectangleBorder(
@@ -58,7 +60,7 @@ class DayStrip extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    formatWeekdayShort(day, locale),
+                    TidyDates.weekdayUpperOf(day, locale),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

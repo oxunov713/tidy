@@ -4,11 +4,18 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/features/payment/domain/payment_sheet.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// A card form that looks like a payment sheet but charges nothing. Used while
 /// the backend runs with `PAYMENT_PROVIDER=mock`, so the whole flow can be
 /// demoed without a Stripe account.
+///
+/// The test card `4000 0000 0000 0002` is declined, like Stripe's: the sheet
+/// shows the error and stays open for another try.
+/// Digits of the card the mock provider declines.
+const declinedTestCard = '4000000000000002';
+
 class MockPaymentSheet implements PaymentSheet {
   const MockPaymentSheet({
     this.processingTime = const Duration(milliseconds: 1100),
@@ -55,6 +62,7 @@ class _MockPaymentFormState extends State<_MockPaymentForm> {
   final _expiry = TextEditingController(text: '12/28');
   final _cvc = TextEditingController(text: '123');
   bool _processing = false;
+  bool _declined = false;
 
   @override
   void dispose() {
@@ -66,9 +74,20 @@ class _MockPaymentFormState extends State<_MockPaymentForm> {
 
   Future<void> _pay() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _processing = true);
+    setState(() {
+      _processing = true;
+      _declined = false;
+    });
     await Future<void>.delayed(widget.processingTime);
-    if (mounted) Navigator.of(context).pop(PaymentOutcome.paid);
+    if (!mounted) return;
+    if (_number.text.replaceAll(RegExp(r'\D'), '') == declinedTestCard) {
+      setState(() {
+        _processing = false;
+        _declined = true;
+      });
+      return;
+    }
+    Navigator.of(context).pop(PaymentOutcome.paid);
   }
 
   bool _hasDigits(String? value, int length) =>
@@ -79,6 +98,8 @@ class _MockPaymentFormState extends State<_MockPaymentForm> {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final amount = PriceText.format(widget.request.amountPence);
+    final saveOnly = widget.request.kind == PaymentKind.setup;
+    final title = saveOnly ? l10n.saveCardTitle : l10n.payAmount(amount);
     final invalid = l10n.cardDetailInvalid;
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -96,7 +117,7 @@ class _MockPaymentFormState extends State<_MockPaymentForm> {
             Row(
               children: [
                 Expanded(
-                  child: Text(l10n.payAmount(amount), style: text.titleLarge),
+                  child: Text(title, style: text.titleLarge),
                 ),
                 const DecoratedBox(
                   decoration: BoxDecoration(
@@ -112,7 +133,8 @@ class _MockPaymentFormState extends State<_MockPaymentForm> {
             ),
             const SizedBox(height: 4),
             Text(
-              l10n.testModeNotice,
+              saveOnly ? l10n.setupNotice : l10n.testModeNotice,
+              key: const Key('paymentNotice'),
               style: text.bodySmall?.copyWith(color: TidyColors.muted),
             ),
             const SizedBox(height: 16),
@@ -163,9 +185,14 @@ class _MockPaymentFormState extends State<_MockPaymentForm> {
                 ),
               ],
             ),
+            if (_declined) ...[
+              const SizedBox(height: 12),
+              ErrorBanner(message: l10n.cardDeclined),
+            ],
             const SizedBox(height: 20),
             TidyButton(
-              label: l10n.payAmount(amount),
+              key: const Key('paymentSubmit'),
+              label: saveOnly ? l10n.saveCard : l10n.payAmount(amount),
               isLoading: _processing,
               onPressed: _pay,
             ),

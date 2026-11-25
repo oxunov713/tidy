@@ -1,6 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_cleaner/features/auth/data/api_auth_repository.dart';
-import 'package:tidy_cleaner/features/auth/domain/auth_repository.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 
 part 'sign_in_controller.g.dart';
@@ -64,7 +62,7 @@ class SignInController extends _$SignInController {
     }
     state = state.copyWith(busy: true, clearError: true);
     try {
-      await ref.read(authRepositoryProvider).requestCode(phone);
+      await ref.read(sessionRepositoryProvider).requestOtp(phone);
       state = SignInState(step: SignInStep.code, phone: phone);
       return true;
     } on Object catch (e) {
@@ -80,8 +78,6 @@ class SignInController extends _$SignInController {
           .read(sessionControllerProvider.notifier)
           .signIn(phone: state.phone, code: code.trim());
       state = state.copyWith(busy: false);
-    } on WrongRoleException catch (e) {
-      state = state.copyWith(busy: false, error: e);
     } on Object catch (e) {
       state = state.copyWith(busy: false, error: e);
     }

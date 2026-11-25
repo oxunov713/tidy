@@ -1,8 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
-import 'package:tidy_client/core/providers/clock.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/bookings/presentation/status_labels.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
@@ -19,6 +16,7 @@ class BookingCard extends ConsumerWidget {
     required this.onRate,
     required this.onBookAgain,
     required this.onCancel,
+    required this.onPay,
     super.key,
   });
 
@@ -28,6 +26,7 @@ class BookingCard extends ConsumerWidget {
   final VoidCallback onRate;
   final VoidCallback onBookAgain;
   final VoidCallback onCancel;
+  final VoidCallback onPay;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,11 +44,11 @@ class BookingCard extends ConsumerWidget {
         ? cleaner.fullName
         : booking.cleanerId != null
         ? '…'
-        : (booking.status.isCancellable ? l10n.findingCleaner : l10n.noCleaner);
+        : (booking.status.canCancel ? l10n.findingCleaner : l10n.noCleaner);
 
-    final when = isSameDay(booking.start, now)
-        ? l10n.todayAt(formatClock(booking.start))
-        : '${formatDayShort(booking.start, locale)} · ${formatClock(booking.start)}';
+    final when = BusinessTime.isSameDay(booking.start, now)
+        ? l10n.todayAt(TidyDates.clock(booking.start))
+        : '${TidyDates.dayShort(booking.start, locale)} · ${TidyDates.clock(booking.start)}';
 
     final (primaryLabel, primaryAction) = switch (booking.status) {
       BookingStatus.assigned ||
@@ -57,13 +56,11 @@ class BookingCard extends ConsumerWidget {
       BookingStatus.inProgress => (l10n.track, onTrack),
       BookingStatus.completed => (l10n.rate, onRate),
       BookingStatus.cancelled => (l10n.bookAgain, onBookAgain),
-      BookingStatus.pending || BookingStatus.confirmed => (
-        l10n.details,
-        onOpen,
-      ),
+      BookingStatus.pending => (l10n.payNow, onPay),
+      BookingStatus.confirmed => (l10n.details, onOpen),
     };
     final showBookAgain = booking.status == BookingStatus.completed;
-    final showCancel = booking.status.isCancellable;
+    final showCancel = booking.status.canCancel;
 
     return TidyCard(
       onTap: onOpen,
@@ -143,6 +140,9 @@ class BookingCard extends ConsumerWidget {
                         child: Text(l10n.bookAgain),
                       ),
                     _ActionButton(
+                      key: booking.status == BookingStatus.pending
+                          ? const Key('payNow')
+                          : null,
                       label: primaryLabel,
                       onPressed: primaryAction,
                     ),
@@ -158,7 +158,11 @@ class BookingCard extends ConsumerWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.label, required this.onPressed});
+  const _ActionButton({
+    required this.label,
+    required this.onPressed,
+    super.key,
+  });
 
   final String label;
   final VoidCallback onPressed;

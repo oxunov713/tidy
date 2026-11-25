@@ -2,8 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/error/error_text.dart';
-import 'package:tidy_client/core/format/formatters.dart';
-import 'package:tidy_client/core/widgets/async_value_view.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
 import 'package:tidy_client/core/widgets/round_icon_button.dart';
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
@@ -14,68 +13,24 @@ import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// Conversation with the cleaner of one booking.
-class ChatScreen extends ConsumerStatefulWidget {
+class ChatScreen extends ConsumerWidget {
   const ChatScreen({required this.bookingId, super.key});
 
   final String bookingId;
 
   @override
-  ConsumerState<ChatScreen> createState() => _ChatScreenState();
-}
-
-class _ChatScreenState extends ConsumerState<ChatScreen> {
-  final _input = TextEditingController();
-  final _scroll = ScrollController();
-  bool _sending = false;
-
-  @override
-  void dispose() {
-    _input.dispose();
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  Future<void> _send() async {
-    final body = _input.text.trim();
-    if (body.isEmpty || _sending) return;
-    setState(() => _sending = true);
-    try {
-      await ref.read(chatProvider(widget.bookingId).notifier).send(body);
-      _input.clear();
-    } on Object catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage(context, e))));
-      }
-    } finally {
-      if (mounted) setState(() => _sending = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final messages = ref.watch(chatProvider(widget.bookingId));
+    final messages = ref.watch(chatProvider(bookingId));
     final me = ref.watch(currentUserProvider)?.id;
-    final cleaner = ref
-        .watch(bookingDetailsProvider(widget.bookingId))
-        .value
-        ?.cleaner;
-
-    ref.listen(chatProvider(widget.bookingId), (_, next) {
-      if (next.hasValue) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scroll.hasClients) {
-            _scroll.animateTo(
-              _scroll.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-            );
-          }
-        });
-      }
-    });
+    final details = ref.watch(bookingDetailsProvider(bookingId)).value;
+    final cleaner = details?.cleaner;
+    final revoked = ref.watch(
+      roomAccessRevokedProvider(Rooms.booking(bookingId)),
+    );
+    final closed =
+        revoked || details?.booking.status == BookingStatus.cancelled;
+    final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
       backgroundColor: TidyColors.surface,
@@ -107,111 +62,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
             Expanded(
-              child: AsyncValueView<List<Message>>(
-                value: messages,
-                onRetry: () => ref.invalidate(chatProvider(widget.bookingId)),
-                data: (list) => list.isEmpty
-                    ? EmptyState(
-                        icon: Icons.chat_bubble_outline,
-                        title: l10n.noMessagesTitle,
-                        message: l10n.noMessagesBody,
-                      )
-                    : ListView.builder(
-                        controller: _scroll,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 8,
-                        ),
-                        itemCount: list.length,
-                        itemBuilder: (context, i) => _Bubble(
-                          message: list[i],
-                          mine: list[i].senderId == me,
-                        ),
-                      ),
-              ),
-            ),
-            DecoratedBox(
-              decoration: const BoxDecoration(
-                color: TidyColors.white,
-                border: Border(top: BorderSide(color: TidyColors.line)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _input,
-                        minLines: 1,
-                        maxLines: 4,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: InputDecoration(
-                          hintText: l10n.messageHint,
-                          isDense: true,
-                        ),
-                        onSubmitted: (_) => _send(),
-                      ),
+              child: ChatView(
+                entries: [
+                  for (final m in messages.value ?? const <Message>[])
+                    ChatEntry(
+                      id: '${m.id}',
+                      body: m.body,
+                      timeLabel: TidyDates.clock(m.createdAt, locale),
+                      mine: m.senderId == me,
                     ),
-                    const SizedBox(width: 8),
-                    IconButton.filled(
-                      tooltip: l10n.send,
-                      onPressed: _sending ? null : _send,
-                      style: IconButton.styleFrom(
-                        backgroundColor: TidyColors.primary,
-                        foregroundColor: TidyColors.white,
-                        fixedSize: const Size(48, 48),
-                      ),
-                      icon: const Icon(Icons.arrow_upward),
+                ],
+                messagesOverride: switch (messages) {
+                  AsyncError(:final error) => ApiErrorView(
+                    error: error,
+                    onRetry: () => ref.invalidate(chatProvider(bookingId)),
+                  ),
+                  AsyncData() => null,
+                  _ => Padding(
+                    padding: const EdgeInsets.all(TidySpacing.lg),
+                    child: SkeletonList(semanticLabel: l10n.loading),
+                  ),
+                },
+                onSend: (body) =>
+                    ref.read(chatProvider(bookingId).notifier).send(body),
+                onSendError: (e) =>
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(
+                      SnackBar(content: Text(errorMessage(context, e))),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message, required this.mine});
-
-  final Message message;
-  final bool mine;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.75,
-        ),
-        decoration: BoxDecoration(
-          color: mine ? TidyColors.primary : TidyColors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: mine ? null : Border.all(color: TidyColors.line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              message.body,
-              style: text.bodyMedium?.copyWith(
-                color: mine ? TidyColors.white : TidyColors.ink,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              formatClock(message.createdAt),
-              style: text.labelSmall?.copyWith(
-                color: mine
-                    ? TidyColors.white.withValues(alpha: 0.8)
-                    : TidyColors.muted,
+                hintText: l10n.messageHint,
+                sendLabel: l10n.send,
+                emptyTitle: l10n.noMessagesTitle,
+                emptyMessage: l10n.noMessagesBody,
+                closedNotice: closed ? l10n.chatClosed : null,
               ),
             ),
           ],

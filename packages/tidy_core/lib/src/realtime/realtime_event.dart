@@ -48,7 +48,10 @@ sealed class RealtimeEvent {
           ),
         ),
         'subscribed' => RoomSubscribed(json['room'] as String),
-        'unsubscribed' => RoomUnsubscribed(json['room'] as String),
+        'unsubscribed' => RoomUnsubscribed(
+          json['room'] as String,
+          reason: json['reason'] as String?,
+        ),
         'error' => RealtimeError(
           code: json['code'] as String,
           message: json['message'] as String,
@@ -124,11 +127,28 @@ final class RoomSubscribed extends RealtimeEvent {
 }
 
 /// `unsubscribed`: answer to `unsubscribe`, sent even if the room was not
-/// joined.
+/// joined. The server also sends it on its own, with [reason]
+/// `access_revoked`, when the user loses access to the room (the booking was
+/// reassigned or cancelled, the cleaner was suspended). `RealtimeClient`
+/// has already dropped the room by the time this event is delivered.
 final class RoomUnsubscribed extends RealtimeEvent {
-  const RoomUnsubscribed(this.room);
+  const RoomUnsubscribed(this.room, {this.reason});
+
+  static const accessRevokedReason = 'access_revoked';
 
   final String room;
+
+  /// Set when the server ended the subscription, not the client.
+  final String? reason;
+
+  bool get accessRevoked => reason == accessRevokedReason;
+}
+
+/// Not a server message: the socket is back after it was lost (or after the
+/// first attempt failed) and the rooms are joined again. Anything that
+/// happened in the meantime was missed, so refetch what the screen shows.
+final class Reconnected extends RealtimeEvent {
+  const Reconnected();
 }
 
 /// `error`: the server refused a message, for example a `subscribe` to

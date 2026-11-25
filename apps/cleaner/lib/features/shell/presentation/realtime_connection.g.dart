@@ -59,4 +59,4 @@ final class RealtimeConnectionProvider
 }
 
 String _$realtimeConnectionHash() =>
-    r'1009c09de3d9cc52ee5e3099dfb8fd5738f02379';
+    r'433f9eb9ca32d288721ea05dba6b331fb69dcd56';

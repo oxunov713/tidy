@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tidy_cleaner/core/location/location_service.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/jobs_controller.dart';
 import 'package:tidy_core/tidy_core.dart';
 
@@ -17,12 +16,12 @@ part 'location_reporter.g.dart';
 class LocationReporter {
   LocationReporter({
     required this._location,
-    required this._gateway,
+    required this._realtime,
     this.interval = const Duration(seconds: 5),
   });
 
   final LocationService _location;
-  final RealtimeGateway _gateway;
+  final RealtimeClient _realtime;
   final Duration interval;
 
   String? _bookingId;
@@ -41,7 +40,7 @@ class LocationReporter {
     stop();
     _bookingId = bookingId;
     _positions = _location.positions().listen(_onPosition, onError: (_) {});
-    _events = _gateway.events.listen((event) {
+    _events = _realtime.events.listen((event) {
       if (event is RealtimeError && event.code == 'invalid_transition') stop();
     });
     _timer = Timer.periodic(interval, (_) => _send());
@@ -69,7 +68,7 @@ class LocationReporter {
     final id = _bookingId;
     final position = _last;
     if (id == null || position == null) return;
-    _gateway.sendLocation(
+    _realtime.sendLocation(
       bookingId: id,
       lat: position.lat,
       lng: position.lng,
@@ -81,7 +80,7 @@ class LocationReporter {
 LocationReporter locationReporter(Ref ref) {
   final reporter = LocationReporter(
     location: ref.watch(locationServiceProvider),
-    gateway: ref.watch(realtimeGatewayProvider),
+    realtime: ref.watch(realtimeClientProvider),
   );
   ref.onDispose(reporter.stop);
   return reporter;

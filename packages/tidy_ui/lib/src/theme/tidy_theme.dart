@@ -1,5 +1,5 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:tidy_ui/src/theme/tidy_fonts.dart';
 import 'package:tidy_ui/src/tokens/colors.dart';
 import 'package:tidy_ui/src/tokens/radii.dart';
 
@@ -26,7 +26,9 @@ abstract final class TidyTheme {
           error: TidyColors.danger,
         );
 
-    final body = GoogleFonts.interTextTheme();
+    final body = ThemeData(
+      useMaterial3: true,
+    ).textTheme.apply(fontFamily: TidyFonts.body);
     final textTheme = body
         .copyWith(
           displayLarge: _heading(32),
@@ -43,6 +45,7 @@ abstract final class TidyTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: TidyFonts.body,
       colorScheme: scheme,
       scaffoldBackgroundColor: TidyColors.surface,
       textTheme: textTheme,
@@ -102,7 +105,8 @@ abstract final class TidyTheme {
     );
   }
 
-  static TextStyle _heading(double size) => GoogleFonts.spaceGrotesk(
+  static TextStyle _heading(double size) => TextStyle(
+    fontFamily: TidyFonts.heading,
     fontSize: size,
     fontWeight: FontWeight.w700,
     height: 1.2,

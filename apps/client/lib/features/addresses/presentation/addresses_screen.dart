@@ -7,7 +7,6 @@ import 'package:tidy_client/core/error/error_text.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/async_value_view.dart';
 import 'package:tidy_client/core/widgets/round_icon_button.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/addresses/presentation/address_providers.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';

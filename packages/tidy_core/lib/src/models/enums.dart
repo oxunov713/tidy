@@ -47,6 +47,19 @@ enum BookingStatus {
   ];
 
   bool get isActive => this != completed && this != cancelled;
+
+  /// The server only lets an admin reassign a booking in these statuses
+  /// (`409 invalid_transition` otherwise).
+  bool get canReassign => this == confirmed || this == assigned;
+
+  /// Statuses an admin or the client may cancel from. Once the cleaner is on
+  /// the way the visit can no longer be cancelled.
+  bool get canCancel => this == pending || canReassign;
+
+  /// A cleaner has been assigned and the visit is not over: the client can
+  /// follow it on the map.
+  bool get isTrackable =>
+      this == assigned || this == onTheWay || this == inProgress;
 }
 
 enum Frequency {
@@ -65,6 +78,21 @@ enum DevicePlatform {
   ios,
   @JsonValue('web')
   web,
+}
+
+/// What `POST /bookings/{id}/cancel` ends: this visit or the whole recurring
+/// series.
+enum CancelScope { visit, series }
+
+/// What the client has to do with the `client_secret` of a new booking.
+enum PaymentKind {
+  /// Authorise the price now (a manual-capture PaymentIntent).
+  @JsonValue('payment')
+  payment,
+
+  /// Only save the card; it is charged 48 hours before the visit.
+  @JsonValue('setup')
+  setup,
 }
 
 /// Filter for `GET /bookings`.

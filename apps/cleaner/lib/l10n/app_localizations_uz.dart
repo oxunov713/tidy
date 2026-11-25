@@ -33,6 +33,15 @@ class AppLocalizationsUz extends AppLocalizations {
       'Urinishlar juda ko\'p. Bir daqiqa kutib turing.';
 
   @override
+  String get errorSlotTaken => 'Bu vaqtda sizda boshqa buyurtma bor.';
+
+  @override
+  String get errorNotFound => 'Topilmadi.';
+
+  @override
+  String get errorInvalidTransition => 'Bu buyurtma uchun endi bu mumkin emas.';
+
+  @override
   String get errorSessionExpired => 'Seans tugadi. Qaytadan kiring.';
 
   @override
@@ -562,4 +571,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get profileSaved => 'Profil yangilandi';
+
+  @override
+  String get chatClosed => 'Bu suhbat yopilgan.';
 }

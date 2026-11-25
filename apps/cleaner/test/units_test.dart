@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/core/maps/maps_launcher.dart';
 import 'package:tidy_cleaner/features/auth/presentation/sign_in_controller.dart';
 import 'package:tidy_cleaner/features/chat/presentation/chat_controller.dart';
@@ -20,6 +19,13 @@ void main() {
     test('waits on the splash while the session loads', () {
       expect(go(const AsyncLoading(), '/jobs'), Routes.splash);
       expect(go(const AsyncLoading(), Routes.splash), isNull);
+    });
+
+    test('a failed session check stays on the splash, not on sign-in', () {
+      const offline = AsyncError<User?>(NetworkException(), StackTrace.empty);
+      expect(go(offline, '/jobs'), Routes.splash);
+      expect(go(offline, Routes.signIn), Routes.splash);
+      expect(go(offline, Routes.splash), isNull);
     });
 
     test('signed out users go to sign-in', () {
@@ -56,26 +62,6 @@ void main() {
     test('rejects too short numbers', () {
       expect(normalizePhone('123'), isNull);
       expect(normalizePhone(''), isNull);
-    });
-  });
-
-  group('formatters', () {
-    test('money drops pence only for whole pounds', () {
-      expect(Fmt.payout(8400), '£84');
-      expect(Fmt.payout(8450), '£84.50');
-      expect(Fmt.poundsShort(9600), '£96');
-    });
-
-    test('hours and average per hour use integer rounding', () {
-      expect(Fmt.hours(1290), '21.5');
-      expect(Fmt.perHour(48600, 1290), 2260);
-      expect(Fmt.perHour(100, 0), 0);
-    });
-
-    test('countdown', () {
-      expect(Fmt.countdown(const Duration(seconds: 42)), '0:42');
-      expect(Fmt.countdown(const Duration(seconds: 125)), '2:05');
-      expect(Fmt.countdown(const Duration(seconds: -3)), '0:00');
     });
   });
 
@@ -116,7 +102,7 @@ void main() {
     test('free time before, travel buffer between, free gap when long', () {
       final entries = buildTimeline(
         jobs: [at('a', 10), at('b', 12, hours: 1).copyWith(), at('c', 16)],
-        workStart: DateTime.utc(2026, 12, 3, 8).toLocal(),
+        workStart: DateTime.utc(2026, 12, 3, 8),
       );
       expect(entries.map((e) => e.runtimeType.toString()), [
         'TimelineFree',
@@ -209,7 +195,7 @@ void main() {
             .value!
             .map((m) => m.body);
         expect(bodies, ['Hi', 'On my way']);
-        expect(h.gateway.subscribed, contains(Rooms.booking('b1')));
+        expect(h.gateway.subscribeCalls, contains(Rooms.booking('b1')));
         c.dispose();
       },
     );

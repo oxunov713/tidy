@@ -134,9 +134,50 @@ class FakeBookingRepository implements BookingRepository {
         address: fx.home,
       );
 
+  final cancelCalls = <(String, CancelScope)>[];
+  bool cancelRefunds = true;
+  ApiException? cancelError;
+
   @override
-  Future<Cancellation> cancel(String id) async =>
-      Cancellation(booking: fx.booking(id: id), refunded: true);
+  Future<Cancellation> cancel(
+    String id, {
+    CancelScope scope = CancelScope.visit,
+  }) async {
+    cancelCalls.add((id, scope));
+    final error = cancelError;
+    if (error != null) throw error;
+    return Cancellation(
+      booking: fx.booking(id: id, status: BookingStatus.cancelled),
+      refunded: cancelRefunds,
+      planEnded: scope == CancelScope.series,
+    );
+  }
+
+  final payCalls = <String>[];
+  ApiException? payError;
+  PaymentIntentInfo payIntent = const PaymentIntentInfo(
+    clientSecret: 'pay-secret',
+  );
+
+  @override
+  Future<PaymentIntentInfo> pay(String id) async {
+    payCalls.add(id);
+    final error = payError;
+    if (error != null) throw error;
+    return payIntent;
+  }
+
+  List<Plan> planList = [];
+  final endedPlans = <String>[];
+
+  @override
+  Future<List<Plan>> plans() async => [...planList];
+
+  @override
+  Future<void> endPlan(String id) async {
+    endedPlans.add(id);
+    planList.removeWhere((p) => p.id == id);
+  }
 
   @override
   Future<Review> review(String id, ReviewRequest request) =>
@@ -160,4 +201,9 @@ class FakeMapProvider implements MapProvider {
 class FakeAuthController extends AuthController {
   @override
   Future<User?> build() async => fx.user();
+}
+
+class FakeSignedOutAuthController extends AuthController {
+  @override
+  Future<User?> build() async => null;
 }

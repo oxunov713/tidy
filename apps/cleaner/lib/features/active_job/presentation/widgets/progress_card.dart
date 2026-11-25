@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/features/active_job/domain/job_transitions.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -59,7 +58,7 @@ class ProgressCard extends StatelessWidget {
                     const Spacer(),
                     if (i <= step && times[at] != null)
                       Text(
-                        Fmt.time(times[at]!, locale),
+                        TidyDates.clock(times[at]!, locale),
                         style: text.bodySmall?.copyWith(
                           color: TidyColors.muted,
                         ),

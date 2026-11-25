@@ -16,6 +16,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
+  String get trackingEnded => 'Live updates for this visit have ended.';
+
+  @override
   String get retry => 'Try again';
 
   @override
@@ -39,6 +42,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorTooManyRequests => 'Too many attempts. Please wait a moment.';
+
+  @override
+  String get errorWrongRole =>
+      'This number belongs to a cleaner account. Use the Tidy Pro app instead.';
+
+  @override
+  String get errorForbidden => 'You do not have permission to do that.';
+
+  @override
+  String get errorNotFound => 'We could not find that.';
+
+  @override
+  String get errorInvalidTransition =>
+      'That is not possible for this booking any more.';
 
   @override
   String get errorSessionExpired =>
@@ -734,4 +751,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutTitle => 'Log out of Tidy?';
+
+  @override
+  String get chatClosed => 'This conversation is closed.';
+
+  @override
+  String get loading => 'Loading';
+
+  @override
+  String get cancelScopeTitle => 'Cancel which visits?';
+
+  @override
+  String get cancelThisVisit => 'This visit only';
+
+  @override
+  String get cancelWholeSeries => 'The whole series';
+
+  @override
+  String get cancelSeriesHint =>
+      'Future visits without a cleaner are cancelled and refunded, and no new visits are booked.';
+
+  @override
+  String get cancelledSeriesEnded =>
+      'Cancelled. Your recurring clean has ended.';
+
+  @override
+  String get managePlans => 'Manage recurring cleans';
+
+  @override
+  String get plansEmptyTitle => 'No recurring cleans';
+
+  @override
+  String get plansEmptyBody =>
+      'Book a weekly or fortnightly clean and it will show up here.';
+
+  @override
+  String planNextVisit(String date, String time) {
+    return 'Next visit $date at $time';
+  }
+
+  @override
+  String get stopSeries => 'Stop series';
+
+  @override
+  String get stopSeriesTitle => 'Stop this series?';
+
+  @override
+  String get stopSeriesBody =>
+      'Future visits that have no cleaner yet are cancelled and refunded. No new visits will be booked.';
+
+  @override
+  String get seriesStopped => 'The series has ended.';
+
+  @override
+  String get saveCard => 'Save card';
+
+  @override
+  String get saveCardTitle => 'Save your card';
+
+  @override
+  String get setupNotice => 'You\'ll be charged 48 h before the visit.';
+
+  @override
+  String get cardSaved =>
+      'Card saved. You\'ll be charged 48 h before the visit.';
+
+  @override
+  String get cardDeclined =>
+      'Your card was declined. Check the details or try another card.';
+
+  @override
+  String get payNow => 'Pay now';
+
+  @override
+  String get payNowHint => 'Pay within 30 minutes or the booking is cancelled.';
+
+  @override
+  String get cancelledUnpaid =>
+      'This booking was cancelled because it wasn\'t paid within 30 minutes.';
+
+  @override
+  String get cancelledNoCleaner =>
+      'This booking was cancelled and refunded because no cleaner could take it. We cancel 2 hours before the start when nobody is assigned.';
 }

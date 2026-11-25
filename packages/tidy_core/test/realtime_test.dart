@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tidy_core/tidy_core.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'support/fake_channel.dart';
 import 'support/fixtures.dart';
@@ -90,6 +92,27 @@ void main() {
               )!
               as MessageReceived;
       expect(message.message.body, 'On my way');
+    });
+
+    test('unsubscribed with a reason', () {
+      final revoked =
+          RealtimeEvent.parse(
+                _frame({
+                  'type': 'unsubscribed',
+                  'room': 'booking:b1',
+                  'reason': 'access_revoked',
+                }),
+              )!
+              as RoomUnsubscribed;
+      expect(revoked.accessRevoked, isTrue);
+      expect(revoked.room, 'booking:b1');
+
+      final plain =
+          RealtimeEvent.parse(
+                _frame({'type': 'unsubscribed', 'room': 'booking:b1'}),
+              )!
+              as RoomUnsubscribed;
+      expect(plain.accessRevoked, isFalse);
     });
 
     test('subscribed, unsubscribed and error', () {
@@ -282,6 +305,268 @@ void main() {
       await client.connect();
       expect(channels, isEmpty);
       expect(client.state, RealtimeConnectionState.disconnected);
+    });
+
+    group('reference counted rooms', () {
+      Iterable<Object?> sent() => channels.single.sent.map(jsonDecode);
+
+      test('two screens share one room: one subscribe frame', () async {
+        client = build();
+        await client.connect();
+        client
+          ..subscribe(Rooms.booking('b1'))
+          ..subscribe(Rooms.booking('b1'));
+        expect(sent(), [
+          {'type': 'subscribe', 'room': 'booking:b1'},
+        ]);
+      });
+
+      test('closing one screen keeps the room for the other', () async {
+        client = build();
+        await client.connect();
+        client
+          ..subscribe(Rooms.booking('b1')) // tracking
+          ..subscribe(Rooms.booking('b1')) // chat
+          ..unsubscribe(Rooms.booking('b1')); // chat closed
+        expect(client.rooms, {'booking:b1'});
+        expect(sent(), [
+          {'type': 'subscribe', 'room': 'booking:b1'},
+        ]);
+
+        client.unsubscribe(Rooms.booking('b1')); // tracking closed
+        expect(client.rooms, isEmpty);
+        expect(sent().last, {'type': 'unsubscribe', 'room': 'booking:b1'});
+      });
+
+      test('an unmatched unsubscribe is ignored', () async {
+        client = build();
+        await client.connect();
+        client.unsubscribe(Rooms.booking('nope'));
+        expect(sent(), isEmpty);
+        client
+          ..subscribe(Rooms.booking('b1'))
+          ..unsubscribe(Rooms.booking('b1'))
+          ..unsubscribe(Rooms.booking('b1'));
+        expect(sent(), hasLength(2));
+      });
+
+      test('a reconnect joins a shared room once', () async {
+        client = build();
+        await client.connect();
+        client
+          ..subscribe(Rooms.booking('b1'))
+          ..subscribe(Rooms.booking('b1'));
+        await channels.first.serverClose();
+        await settle();
+        expect(channels.last.sent.map(jsonDecode), [
+          {'type': 'subscribe', 'room': 'booking:b1'},
+        ]);
+      });
+
+      test('disconnect forgets the rooms', () async {
+        client = build();
+        await client.connect();
+        client.subscribe(Rooms.booking('b1'));
+        await client.disconnect();
+        expect(client.rooms, isEmpty);
+        client.unsubscribe(Rooms.booking('b1'));
+      });
+    });
+
+    group('access_revoked', () {
+      test('drops the room, is delivered, and is not rejoined', () async {
+        client = build();
+        final events = <RealtimeEvent>[];
+        client.events.listen(events.add);
+        await client.connect();
+        client
+          ..subscribe(Rooms.booking('b1'))
+          ..subscribe(Rooms.booking('b1'));
+
+        channels.single.serverSend(
+          _frame({
+            'type': 'unsubscribed',
+            'room': 'booking:b1',
+            'reason': 'access_revoked',
+          }),
+        );
+        await settle(5);
+
+        expect(client.rooms, isEmpty);
+        final revoked = events.whereType<RoomUnsubscribed>().single;
+        expect(revoked.accessRevoked, isTrue);
+
+        // The screens let go later; that must not send anything.
+        client
+          ..unsubscribe(Rooms.booking('b1'))
+          ..unsubscribe(Rooms.booking('b1'));
+        expect(channels.single.sent.map(jsonDecode), [
+          {'type': 'subscribe', 'room': 'booking:b1'},
+        ]);
+
+        await channels.first.serverClose();
+        await settle();
+        expect(channels.last.sent, isEmpty);
+      });
+
+      test('other rooms stay joined', () async {
+        client = build();
+        await client.connect();
+        client
+          ..subscribe(Rooms.booking('b1'))
+          ..subscribe(Rooms.booking('b2'));
+        channels.single.serverSend(
+          _frame({
+            'type': 'unsubscribed',
+            'room': 'booking:b1',
+            'reason': 'access_revoked',
+          }),
+        );
+        await settle(5);
+        expect(client.rooms, {'booking:b2'});
+      });
+    });
+
+    group('Reconnected', () {
+      test('is not emitted for the first connection', () async {
+        client = build();
+        final events = <RealtimeEvent>[];
+        client.events.listen(events.add);
+        await client.connect();
+        await settle(5);
+        expect(events.whereType<Reconnected>(), isEmpty);
+      });
+
+      test('is emitted after a drop, once the rooms are rejoined', () async {
+        client = build();
+        final events = <RealtimeEvent>[];
+        client.events.listen(events.add);
+        await client.connect();
+        client.subscribe(Rooms.booking('b1'));
+
+        await channels.first.serverClose();
+        await settle();
+
+        expect(events.whereType<Reconnected>(), hasLength(1));
+        expect(channels.last.sent, isNotEmpty);
+      });
+
+      test('is emitted when the first attempt failed', () async {
+        client = build(failHandshake: (i) => i == 0);
+        final events = <RealtimeEvent>[];
+        client.events.listen(events.add);
+        await client.connect();
+        await settle();
+        expect(events.whereType<Reconnected>(), hasLength(1));
+      });
+
+      test('a second drop emits a second event', () async {
+        client = build();
+        final events = <RealtimeEvent>[];
+        client.events.listen(events.add);
+        await client.connect();
+        await channels.first.serverClose();
+        await settle();
+        await channels[1].serverClose();
+        await settle();
+        expect(events.whereType<Reconnected>(), hasLength(2));
+      });
+
+      test('a new session starts without one', () async {
+        client = build();
+        final events = <RealtimeEvent>[];
+        client.events.listen(events.add);
+        await client.connect();
+        await channels.first.serverClose();
+        await client.disconnect();
+        await client.connect();
+        await settle();
+        expect(events.whereType<Reconnected>(), isEmpty);
+      });
+    });
+
+    group('sign-out then sign-in while connecting', () {
+      test('a socket opened for the previous user is dropped', () async {
+        final gate = Completer<void>();
+        channels = [];
+        uris = [];
+        client = RealtimeClient(
+          config: const ApiConfig(baseUrl: 'https://tidy.test'),
+          tokenStorage: storage,
+          backoff: (_) => const Duration(milliseconds: 5),
+          connector: (uri) {
+            uris.add(uri);
+            // The first handshake hangs until the gate opens.
+            final channel = FakeChannel(
+              readyWhen: channels.isEmpty ? gate.future : null,
+            );
+            channels.add(channel);
+            return channel;
+          },
+        );
+
+        // User A starts connecting and the handshake stalls.
+        final first = client.connect();
+        await settle(5);
+        expect(uris.single.queryParameters['token'], 'tok');
+
+        // A signs out, B signs in: new token, new connect().
+        await client.disconnect();
+        await storage.write(
+          const TokenPair(accessToken: 'token-b', refreshToken: 'ref-b'),
+        );
+        await client.connect();
+        expect(uris.last.queryParameters['token'], 'token-b');
+
+        // A's handshake finally completes.
+        gate.complete();
+        await first;
+        await settle();
+
+        expect(channels.first.closed, isTrue, reason: 'A socket is closed');
+        expect(channels, hasLength(2));
+        expect(client.state, RealtimeConnectionState.connected);
+        client.subscribe(Rooms.booking('b1'));
+        expect(channels.first.sent, isEmpty);
+        expect(channels.last.sent.map(jsonDecode), [
+          {'type': 'subscribe', 'room': 'booking:b1'},
+        ]);
+      });
+
+      test('a failed attempt of the old session does not reconnect', () async {
+        final gate = Completer<void>();
+        channels = [];
+        uris = [];
+        client = RealtimeClient(
+          config: const ApiConfig(baseUrl: 'https://tidy.test'),
+          tokenStorage: storage,
+          backoff: (_) => const Duration(milliseconds: 5),
+          connector: (uri) {
+            uris.add(uri);
+            final channel = FakeChannel(
+              readyWhen: channels.isEmpty
+                  ? gate.future.then<void>(
+                      (_) => throw WebSocketChannelException('late'),
+                    )
+                  : null,
+            );
+            channels.add(channel);
+            return channel;
+          },
+        );
+
+        final first = client.connect();
+        await settle(5);
+        await client.disconnect();
+        await client.connect();
+        gate.complete();
+        await first;
+        await settle();
+
+        // One socket for A (failed) and exactly one for B.
+        expect(channels, hasLength(2));
+        expect(client.state, RealtimeConnectionState.connected);
+      });
     });
 
     test('backoff grows and is capped at about 30 seconds', () {

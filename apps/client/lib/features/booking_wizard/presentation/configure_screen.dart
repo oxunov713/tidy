@@ -4,14 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/error/error_text.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/core/widgets/wizard_header.dart';
 import 'package:tidy_client/features/addresses/presentation/address_providers.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_controller.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_state.dart';
-import 'package:tidy_client/features/booking_wizard/presentation/widgets/count_stepper.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/widgets/frequency_picker.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/widgets/wizard_bottom_bar.dart';
 import 'package:tidy_client/features/catalog/presentation/catalog_providers.dart';
@@ -84,7 +81,9 @@ class ConfigureScreen extends ConsumerWidget {
                       _RoomRow(
                         label: l10n.bedrooms,
                         hint: l10n.bedroomsHint,
-                        stepper: CountStepper(
+                        stepper: TidyStepper(
+                          min: 1,
+                          max: 6,
                           value: state.bedrooms,
                           onChanged: wizard.setBedrooms,
                           decreaseLabel: l10n.removeBedroom,
@@ -95,7 +94,9 @@ class ConfigureScreen extends ConsumerWidget {
                       _RoomRow(
                         label: l10n.bathrooms,
                         hint: l10n.bathroomsHint,
-                        stepper: CountStepper(
+                        stepper: TidyStepper(
+                          min: 1,
+                          max: 6,
                           value: state.bathrooms,
                           onChanged: wizard.setBathrooms,
                           decreaseLabel: l10n.removeBathroom,
@@ -322,7 +323,7 @@ class _Total extends StatelessWidget {
         Text(
           quote == null
               ? l10n.total
-              : l10n.totalWithHours(hoursValue(quote.minutes)),
+              : l10n.totalWithHours(TidyFormat.hoursValue(quote.minutes)),
           style: text.bodySmall?.copyWith(
             color: TidyColors.muted,
             fontSize: 13,

@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get back;
 
+  /// No description provided for @trackingEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Live updates for this visit have ended.'**
+  String get trackingEnded;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
@@ -159,6 +165,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many attempts. Please wait a moment.'**
   String get errorTooManyRequests;
+
+  /// No description provided for @errorWrongRole.
+  ///
+  /// In en, this message translates to:
+  /// **'This number belongs to a cleaner account. Use the Tidy Pro app instead.'**
+  String get errorWrongRole;
+
+  /// No description provided for @errorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to do that.'**
+  String get errorForbidden;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find that.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorInvalidTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not possible for this booking any more.'**
+  String get errorInvalidTransition;
 
   /// No description provided for @errorSessionExpired.
   ///
@@ -1407,6 +1437,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log out of Tidy?'**
   String get logoutTitle;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation is closed.'**
+  String get chatClosed;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loading;
+
+  /// No description provided for @cancelScopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel which visits?'**
+  String get cancelScopeTitle;
+
+  /// No description provided for @cancelThisVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'This visit only'**
+  String get cancelThisVisit;
+
+  /// No description provided for @cancelWholeSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole series'**
+  String get cancelWholeSeries;
+
+  /// No description provided for @cancelSeriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Future visits without a cleaner are cancelled and refunded, and no new visits are booked.'**
+  String get cancelSeriesHint;
+
+  /// No description provided for @cancelledSeriesEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Your recurring clean has ended.'**
+  String get cancelledSeriesEnded;
+
+  /// No description provided for @managePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage recurring cleans'**
+  String get managePlans;
+
+  /// No description provided for @plansEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring cleans'**
+  String get plansEmptyTitle;
+
+  /// No description provided for @plansEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a weekly or fortnightly clean and it will show up here.'**
+  String get plansEmptyBody;
+
+  /// No description provided for @planNextVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Next visit {date} at {time}'**
+  String planNextVisit(String date, String time);
+
+  /// No description provided for @stopSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop series'**
+  String get stopSeries;
+
+  /// No description provided for @stopSeriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop this series?'**
+  String get stopSeriesTitle;
+
+  /// No description provided for @stopSeriesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Future visits that have no cleaner yet are cancelled and refunded. No new visits will be booked.'**
+  String get stopSeriesBody;
+
+  /// No description provided for @seriesStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'The series has ended.'**
+  String get seriesStopped;
+
+  /// No description provided for @saveCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Save card'**
+  String get saveCard;
+
+  /// No description provided for @saveCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your card'**
+  String get saveCardTitle;
+
+  /// No description provided for @setupNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll be charged 48 h before the visit.'**
+  String get setupNotice;
+
+  /// No description provided for @cardSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Card saved. You\'ll be charged 48 h before the visit.'**
+  String get cardSaved;
+
+  /// No description provided for @cardDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Your card was declined. Check the details or try another card.'**
+  String get cardDeclined;
+
+  /// No description provided for @payNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay now'**
+  String get payNow;
+
+  /// No description provided for @payNowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay within 30 minutes or the booking is cancelled.'**
+  String get payNowHint;
+
+  /// No description provided for @cancelledUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking was cancelled because it wasn\'t paid within 30 minutes.'**
+  String get cancelledUnpaid;
+
+  /// No description provided for @cancelledNoCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking was cancelled and refunded because no cleaner could take it. We cancel 2 hours before the start when nobody is assigned.'**
+  String get cancelledNoCleaner;
 }
 
 class _AppLocalizationsDelegate

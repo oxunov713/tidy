@@ -1,14 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/async_value_view.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/chat/presentation/chat_providers.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// The Chat tab: one row per booking that has a cleaner.
@@ -97,7 +96,7 @@ class ChatListScreen extends ConsumerWidget {
                                           ).textTheme.titleSmall,
                                         ),
                                         Text(
-                                          '${t.booking.serviceTitle} · ${formatDayShort(t.booking.start, locale)}',
+                                          '${t.booking.serviceTitle} · ${TidyDates.dayShort(t.booking.start, locale)}',
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall

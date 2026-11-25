@@ -16,6 +16,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get back => 'Назад';
 
   @override
+  String get trackingEnded => 'Обновления по этому визиту больше не приходят.';
+
+  @override
   String get retry => 'Повторить';
 
   @override
@@ -39,6 +42,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get errorTooManyRequests =>
       'Слишком много попыток. Подождите немного.';
+
+  @override
+  String get errorWrongRole =>
+      'Этот номер привязан к аккаунту клинера. Используйте приложение Tidy Pro.';
+
+  @override
+  String get errorForbidden => 'У вас нет прав на это действие.';
+
+  @override
+  String get errorNotFound => 'Не удалось найти.';
+
+  @override
+  String get errorInvalidTransition => 'Это уже невозможно для этой брони.';
 
   @override
   String get errorSessionExpired => 'Сессия истекла. Войдите снова.';
@@ -733,4 +749,86 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get logoutTitle => 'Выйти из Tidy?';
+
+  @override
+  String get chatClosed => 'Этот чат закрыт.';
+
+  @override
+  String get loading => 'Загрузка';
+
+  @override
+  String get cancelScopeTitle => 'Какие визиты отменить?';
+
+  @override
+  String get cancelThisVisit => 'Только этот визит';
+
+  @override
+  String get cancelWholeSeries => 'Всю серию';
+
+  @override
+  String get cancelSeriesHint =>
+      'Будущие визиты без уборщика будут отменены с возвратом, новые визиты бронироваться не будут.';
+
+  @override
+  String get cancelledSeriesEnded => 'Отменено. Регулярная уборка завершена.';
+
+  @override
+  String get managePlans => 'Регулярные уборки';
+
+  @override
+  String get plansEmptyTitle => 'Нет регулярных уборок';
+
+  @override
+  String get plansEmptyBody =>
+      'Закажите еженедельную или двухнедельную уборку, и она появится здесь.';
+
+  @override
+  String planNextVisit(String date, String time) {
+    return 'Следующий визит $date в $time';
+  }
+
+  @override
+  String get stopSeries => 'Остановить серию';
+
+  @override
+  String get stopSeriesTitle => 'Остановить эту серию?';
+
+  @override
+  String get stopSeriesBody =>
+      'Будущие визиты без уборщика будут отменены с возвратом. Новые визиты бронироваться не будут.';
+
+  @override
+  String get seriesStopped => 'Серия завершена.';
+
+  @override
+  String get saveCard => 'Сохранить карту';
+
+  @override
+  String get saveCardTitle => 'Сохраните карту';
+
+  @override
+  String get setupNotice => 'Оплата спишется за 48 часов до визита.';
+
+  @override
+  String get cardSaved =>
+      'Карта сохранена. Оплата спишется за 48 часов до визита.';
+
+  @override
+  String get cardDeclined =>
+      'Карта отклонена. Проверьте данные или попробуйте другую карту.';
+
+  @override
+  String get payNow => 'Оплатить';
+
+  @override
+  String get payNowHint =>
+      'Оплатите в течение 30 минут, иначе бронь будет отменена.';
+
+  @override
+  String get cancelledUnpaid =>
+      'Бронь отменена: она не была оплачена в течение 30 минут.';
+
+  @override
+  String get cancelledNoCleaner =>
+      'Бронь отменена с возвратом: уборщик не нашёлся. Мы отменяем бронь за 2 часа до начала, если никто не назначен.';
 }

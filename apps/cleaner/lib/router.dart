@@ -5,6 +5,7 @@ import 'package:tidy_cleaner/features/active_job/presentation/active_job_page.da
 import 'package:tidy_cleaner/features/auth/presentation/account_status_pages.dart';
 import 'package:tidy_cleaner/features/auth/presentation/session_controller.dart';
 import 'package:tidy_cleaner/features/auth/presentation/sign_in_page.dart';
+import 'package:tidy_cleaner/features/auth/presentation/splash_page.dart';
 import 'package:tidy_cleaner/features/chat/presentation/chat_page.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/earnings_page.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/jobs_page.dart';
@@ -36,7 +37,10 @@ String? redirectFor({
   required AsyncValue<User?> session,
   required String location,
 }) {
-  if (session.isLoading && !session.hasValue) {
+  // Still checking the stored session, or the check failed (offline, server
+  // down): stay on the splash screen, which offers a retry. A failed check is
+  // not a sign-out.
+  if ((session.isLoading || session.hasError) && !session.hasValue) {
     return location == Routes.splash ? null : Routes.splash;
   }
   final user = session.value;
@@ -75,8 +79,7 @@ GoRouter router(Ref ref) {
     routes: [
       GoRoute(
         path: Routes.splash,
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: CircularProgressIndicator())),
+        builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
         path: Routes.signIn,

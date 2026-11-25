@@ -2,59 +2,12 @@ import 'dart:async';
 
 import 'package:tidy_cleaner/core/alerts/offer_alerts.dart';
 import 'package:tidy_cleaner/core/location/location_service.dart';
-import 'package:tidy_cleaner/core/realtime/realtime_gateway.dart';
 import 'package:tidy_cleaner/features/chat/domain/chat_repository.dart';
 import 'package:tidy_cleaner/features/earnings/domain/earnings_repository.dart';
 import 'package:tidy_cleaner/features/jobs/domain/incoming_offer.dart';
 import 'package:tidy_cleaner/features/jobs/domain/jobs_repository.dart';
 import 'package:tidy_cleaner/features/jobs/domain/offers_repository.dart';
 import 'package:tidy_core/tidy_core.dart';
-
-class SentLocation {
-  const SentLocation(this.bookingId, this.lat, this.lng);
-
-  final String bookingId;
-  final double lat;
-  final double lng;
-
-  @override
-  String toString() => 'SentLocation($bookingId, $lat, $lng)';
-}
-
-class FakeGateway implements RealtimeGateway {
-  final _events = StreamController<RealtimeEvent>.broadcast();
-  final subscribed = <String>[];
-  final unsubscribed = <String>[];
-  final sent = <SentLocation>[];
-  bool connected = false;
-
-  void emit(RealtimeEvent event) => _events.add(event);
-
-  @override
-  Stream<RealtimeEvent> get events => _events.stream;
-
-  @override
-  Future<void> connect() async => connected = true;
-
-  @override
-  Future<void> disconnect() async => connected = false;
-
-  @override
-  void subscribe(String room) => subscribed.add(room);
-
-  @override
-  void unsubscribe(String room) => unsubscribed.add(room);
-
-  @override
-  bool sendLocation({
-    required String bookingId,
-    required double lat,
-    required double lng,
-  }) {
-    sent.add(SentLocation(bookingId, lat, lng));
-    return true;
-  }
-}
 
 class FakeLocation implements LocationService {
   LocationAccess accessResult = LocationAccess.granted;
@@ -125,9 +78,16 @@ class FakeJobsRepository implements JobsRepository {
   final statusCalls = <(String, BookingStatus)>[];
   int loads = 0;
 
+  /// Makes the next [jobs] call fail once.
+  bool failNext = false;
+
   @override
   Future<List<Job>> jobs({DateTime? from, DateTime? to}) async {
     loads++;
+    if (failNext) {
+      failNext = false;
+      throw const NetworkException();
+    }
     return jobs_;
   }
 

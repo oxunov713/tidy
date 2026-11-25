@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 mixin _$TrackingState {
 
  BookingDetails get details;/// Latest status, which may be newer than [details].
- BookingStatus get status; GeoPoint? get cleanerPosition; int? get etaMinutes;
+ BookingStatus get status; GeoPoint? get cleanerPosition; int? get etaMinutes;/// The server removed us from the booking's room (cancelled or
+/// reassigned): no more live updates will come.
+ bool get accessRevoked;
 /// Create a copy of TrackingState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,20 +30,20 @@ $TrackingStateCopyWith<TrackingState> get copyWith => _$TrackingStateCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as TrackingState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrackingState&&(identical(other.details, _this.details) || other.details == _this.details)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.cleanerPosition, _this.cleanerPosition) || other.cleanerPosition == _this.cleanerPosition)&&(identical(other.etaMinutes, _this.etaMinutes) || other.etaMinutes == _this.etaMinutes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrackingState&&(identical(other.details, _this.details) || other.details == _this.details)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.cleanerPosition, _this.cleanerPosition) || other.cleanerPosition == _this.cleanerPosition)&&(identical(other.etaMinutes, _this.etaMinutes) || other.etaMinutes == _this.etaMinutes)&&(identical(other.accessRevoked, _this.accessRevoked) || other.accessRevoked == _this.accessRevoked));
 }
 
 
 @override
 int get hashCode {
   final _this = this as TrackingState;
-  return Object.hash(runtimeType,_this.details,_this.status,_this.cleanerPosition,_this.etaMinutes);
+  return Object.hash(runtimeType,_this.details,_this.status,_this.cleanerPosition,_this.etaMinutes,_this.accessRevoked);
 }
 
 @override
 String toString() {
   final _this = this as TrackingState;
-  return 'TrackingState(details: ${_this.details}, status: ${_this.status}, cleanerPosition: ${_this.cleanerPosition}, etaMinutes: ${_this.etaMinutes})';
+  return 'TrackingState(details: ${_this.details}, status: ${_this.status}, cleanerPosition: ${_this.cleanerPosition}, etaMinutes: ${_this.etaMinutes}, accessRevoked: ${_this.accessRevoked})';
 }
 
 
@@ -52,7 +54,7 @@ abstract mixin class $TrackingStateCopyWith<$Res>  {
   factory $TrackingStateCopyWith(TrackingState value, $Res Function(TrackingState) _then) = _$TrackingStateCopyWithImpl;
 @useResult
 $Res call({
- BookingDetails details, BookingStatus status, GeoPoint? cleanerPosition, int? etaMinutes
+ BookingDetails details, BookingStatus status, GeoPoint? cleanerPosition, int? etaMinutes, bool accessRevoked
 });
 
 
@@ -69,13 +71,14 @@ class _$TrackingStateCopyWithImpl<$Res>
 
 /// Create a copy of TrackingState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? details = null,Object? status = null,Object? cleanerPosition = freezed,Object? etaMinutes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? details = null,Object? status = null,Object? cleanerPosition = freezed,Object? etaMinutes = freezed,Object? accessRevoked = null,}) {
   return _then(TrackingState(
 details: null == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
 as BookingDetails,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as BookingStatus,cleanerPosition: freezed == cleanerPosition ? _self.cleanerPosition : cleanerPosition // ignore: cast_nullable_to_non_nullable
 as GeoPoint?,etaMinutes: freezed == etaMinutes ? _self.etaMinutes : etaMinutes // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,accessRevoked: null == accessRevoked ? _self.accessRevoked : accessRevoked // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of TrackingState
@@ -181,10 +184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BookingDetails details,  BookingStatus status,  GeoPoint? cleanerPosition,  int? etaMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BookingDetails details,  BookingStatus status,  GeoPoint? cleanerPosition,  int? etaMinutes,  bool accessRevoked)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TrackingState() when $default != null:
-return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinutes);case _:
+return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinutes,_that.accessRevoked);case _:
   return orElse();
 
 }
@@ -202,10 +205,10 @@ return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinute
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BookingDetails details,  BookingStatus status,  GeoPoint? cleanerPosition,  int? etaMinutes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BookingDetails details,  BookingStatus status,  GeoPoint? cleanerPosition,  int? etaMinutes,  bool accessRevoked)  $default,) {final _that = this;
 switch (_that) {
 case _TrackingState():
-return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinutes);case _:
+return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinutes,_that.accessRevoked);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -222,10 +225,10 @@ return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinute
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BookingDetails details,  BookingStatus status,  GeoPoint? cleanerPosition,  int? etaMinutes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BookingDetails details,  BookingStatus status,  GeoPoint? cleanerPosition,  int? etaMinutes,  bool accessRevoked)?  $default,) {final _that = this;
 switch (_that) {
 case _TrackingState() when $default != null:
-return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinutes);case _:
+return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinutes,_that.accessRevoked);case _:
   return null;
 
 }
@@ -237,7 +240,7 @@ return $default(_that.details,_that.status,_that.cleanerPosition,_that.etaMinute
 
 
 class _TrackingState extends TrackingState {
-  const _TrackingState({required this.details, required this.status, this.cleanerPosition, this.etaMinutes}): super._();
+  const _TrackingState({required this.details, required this.status, this.cleanerPosition, this.etaMinutes, this.accessRevoked = false}): super._();
   
 
 @override final  BookingDetails details;
@@ -245,6 +248,9 @@ class _TrackingState extends TrackingState {
 @override final  BookingStatus status;
 @override final  GeoPoint? cleanerPosition;
 @override final  int? etaMinutes;
+/// The server removed us from the booking's room (cancelled or
+/// reassigned): no more live updates will come.
+@override@JsonKey() final  bool accessRevoked;
 
 /// Create a copy of TrackingState
 /// with the given fields replaced by the non-null parameter values.
@@ -256,18 +262,18 @@ _$TrackingStateCopyWith<_TrackingState> get copyWith => __$TrackingStateCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrackingState&&(identical(other.details, details) || other.details == details)&&(identical(other.status, status) || other.status == status)&&(identical(other.cleanerPosition, cleanerPosition) || other.cleanerPosition == cleanerPosition)&&(identical(other.etaMinutes, etaMinutes) || other.etaMinutes == etaMinutes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrackingState&&(identical(other.details, details) || other.details == details)&&(identical(other.status, status) || other.status == status)&&(identical(other.cleanerPosition, cleanerPosition) || other.cleanerPosition == cleanerPosition)&&(identical(other.etaMinutes, etaMinutes) || other.etaMinutes == etaMinutes)&&(identical(other.accessRevoked, accessRevoked) || other.accessRevoked == accessRevoked));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,details,status,cleanerPosition,etaMinutes);
+    return Object.hash(runtimeType,details,status,cleanerPosition,etaMinutes,accessRevoked);
 }
 
 @override
 String toString() {
-    return 'TrackingState(details: $details, status: $status, cleanerPosition: $cleanerPosition, etaMinutes: $etaMinutes)';
+    return 'TrackingState(details: $details, status: $status, cleanerPosition: $cleanerPosition, etaMinutes: $etaMinutes, accessRevoked: $accessRevoked)';
 }
 
 
@@ -278,7 +284,7 @@ abstract mixin class _$TrackingStateCopyWith<$Res> implements $TrackingStateCopy
   factory _$TrackingStateCopyWith(_TrackingState value, $Res Function(_TrackingState) _then) = __$TrackingStateCopyWithImpl;
 @override @useResult
 $Res call({
- BookingDetails details, BookingStatus status, GeoPoint? cleanerPosition, int? etaMinutes
+ BookingDetails details, BookingStatus status, GeoPoint? cleanerPosition, int? etaMinutes, bool accessRevoked
 });
 
 
@@ -295,13 +301,14 @@ class __$TrackingStateCopyWithImpl<$Res>
 
 /// Create a copy of TrackingState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? details = null,Object? status = null,Object? cleanerPosition = freezed,Object? etaMinutes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? details = null,Object? status = null,Object? cleanerPosition = freezed,Object? etaMinutes = freezed,Object? accessRevoked = null,}) {
   return _then(_TrackingState(
 details: null == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
 as BookingDetails,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as BookingStatus,cleanerPosition: freezed == cleanerPosition ? _self.cleanerPosition : cleanerPosition // ignore: cast_nullable_to_non_nullable
 as GeoPoint?,etaMinutes: freezed == etaMinutes ? _self.etaMinutes : etaMinutes // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,accessRevoked: null == accessRevoked ? _self.accessRevoked : accessRevoked // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/providers/map_factory.dart';
 import 'package:tidy_client/core/router/routes.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
-import 'package:tidy_client/core/widgets/error_state.dart';
 import 'package:tidy_client/core/widgets/round_icon_button.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/bookings/presentation/status_labels.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_controller.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_geometry.dart';
@@ -41,7 +39,7 @@ class TrackingScreen extends ConsumerWidget {
         ),
         error: (error, _) => Stack(
           children: [
-            ErrorState(
+            ApiErrorView(
               error: error,
               onRetry: () => ref.invalidate(trackingProvider(bookingId)),
             ),
@@ -212,7 +210,7 @@ class _Sheet extends ConsumerWidget {
             ? l10n.onTheWayHeadline
             : l10n.minutesShort(state.etaMinutes!),
       ),
-      BookingStatus.assigned => (l10n.startsAt, formatClock(booking.start)),
+      BookingStatus.assigned => (l10n.startsAt, TidyDates.clock(booking.start)),
       BookingStatus.inProgress => (l10n.rightNow, l10n.cleaningHeadline),
       BookingStatus.completed => (l10n.finished, l10n.allDone),
       BookingStatus.cancelled => (l10n.bookingLabel, l10n.statusCancelled),
@@ -287,12 +285,20 @@ class _Sheet extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               ProgressSteps(status: status),
+              if (state.accessRevoked) ...[
+                const SizedBox(height: 12),
+                Text(
+                  l10n.trackingEnded,
+                  key: const ValueKey('tracking-ended'),
+                  style: text.bodySmall?.copyWith(color: TidyColors.muted),
+                ),
+              ],
               const SizedBox(height: 16),
               if (cleaner != null)
                 _CleanerRow(
                   cleaner: cleaner,
                   subtitle:
-                      '${cleaner.rating.toStringAsFixed(1)} · ${booking.serviceTitle} · ${formatClock(booking.start)}',
+                      '${cleaner.rating.toStringAsFixed(1)} · ${booking.serviceTitle} · ${TidyDates.clock(booking.start)}',
                   canChat: status != BookingStatus.cancelled,
                   onChat: () => context.push(Routes.bookingChat(booking.id)),
                   onCall: () => ScaffoldMessenger.of(context).showSnackBar(

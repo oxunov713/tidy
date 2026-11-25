@@ -2,8 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/core/api_errors.dart';
 import 'package:tidy_admin/core/responsive.dart';
-import 'package:tidy_admin/core/widgets/error_view.dart';
-import 'package:tidy_admin/core/widgets/skeleton.dart';
+import 'package:tidy_admin/core/widgets/api_error_view.dart';
 import 'package:tidy_admin/features/services/presentation/service_form.dart';
 import 'package:tidy_admin/features/services/presentation/services_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
@@ -33,7 +32,7 @@ class ServicesPage extends ConsumerWidget {
         ..showSnackBar(
           SnackBar(
             content: Text(
-              '${l10n.serviceUpdateFailed} ${describeError(e, l10n)}',
+              '${l10n.serviceUpdateFailed} ${errorText(l10n, e)}',
             ),
           ),
         );
@@ -48,7 +47,7 @@ class ServicesPage extends ConsumerWidget {
 
     final Widget body;
     if (async.hasError && !async.isLoading) {
-      body = ErrorView(
+      body = ApiErrorView(
         error: async.error!,
         onRetry: () => ref.invalidate(servicesControllerProvider),
       );
@@ -162,7 +161,7 @@ class _EditServiceDialogState extends ConsumerState<EditServiceDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (error != null) ...[
-                ErrorBanner(message: describeError(error, l10n)),
+                ErrorBanner(message: errorText(l10n, error)),
                 const SizedBox(height: TidySpacing.lg),
               ],
               ServiceForm(
@@ -331,9 +330,9 @@ class _LoadingRows extends StatelessWidget {
               padding: EdgeInsets.all(TidySpacing.md),
               child: Row(
                 children: [
-                  Expanded(child: Skeleton()),
+                  Expanded(child: Shimmer(child: SkeletonBox())),
                   SizedBox(width: 24),
-                  Skeleton(width: 80),
+                  Shimmer(child: SkeletonBox(width: 80)),
                 ],
               ),
             ),

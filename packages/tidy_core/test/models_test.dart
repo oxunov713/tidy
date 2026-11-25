@@ -63,6 +63,7 @@ void main() {
       perBathroom: 1000,
       baseMinutes: 120,
       minutesPerRoom: 30,
+      isActive: true,
     ).toJson();
     expect(json, {
       'title': 'Standard clean',
@@ -246,6 +247,70 @@ void main() {
       'payment': {'client_secret': 'mock_secret'},
     });
     expect(created.payment.clientSecret, 'mock_secret');
+    expect(created.payment.kind, PaymentKind.payment, reason: 'old servers');
+  });
+
+  test('payment kinds: payment and setup', () {
+    final payment = PaymentIntentInfo.fromJson({
+      'kind': 'payment',
+      'client_secret': 'pi_1_secret',
+    });
+    final setup = PaymentIntentInfo.fromJson({
+      'kind': 'setup',
+      'client_secret': 'seti_1_secret',
+    });
+    expect(payment.kind, PaymentKind.payment);
+    expect(setup.kind, PaymentKind.setup);
+    expect(setup.clientSecret, 'seti_1_secret');
+  });
+
+  test('Cancellation carries plan_ended, false when absent', () {
+    final series = Cancellation.fromJson({
+      'booking': bookingJson(status: 'cancelled'),
+      'refunded': true,
+      'plan_ended': true,
+    });
+    final visit = Cancellation.fromJson({
+      'booking': bookingJson(status: 'cancelled'),
+      'refunded': false,
+    });
+    expect(series.planEnded, isTrue);
+    expect(visit.planEnded, isFalse);
+  });
+
+  test('Plan', () {
+    final plan = Plan.fromJson({
+      'id': 'p1',
+      'frequency': 'fortnightly',
+      'next_run_on': '2026-12-17',
+      'service_title': 'Standard clean',
+      'start_time': '10:00',
+      'address_id': 'a1',
+    });
+    expect(plan.frequency, Frequency.fortnightly);
+    expect(plan.nextRunOn, DateTime(2026, 12, 17));
+    expect(plan.startTime, '10:00');
+    expect(plan.toJson()['next_run_on'], '2026-12-17');
+  });
+
+  group('BookingStatus rules the server enforces', () {
+    test('canReassign: only confirmed and assigned', () {
+      expect(
+        BookingStatus.values.where((s) => s.canReassign),
+        [BookingStatus.confirmed, BookingStatus.assigned],
+      );
+    });
+
+    test('canCancel: pending, confirmed and assigned', () {
+      expect(
+        BookingStatus.values.where((s) => s.canCancel),
+        [
+          BookingStatus.pending,
+          BookingStatus.confirmed,
+          BookingStatus.assigned,
+        ],
+      );
+    });
   });
 
   test('Earnings', () {

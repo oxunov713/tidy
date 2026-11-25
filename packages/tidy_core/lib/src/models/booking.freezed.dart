@@ -3625,7 +3625,8 @@ as String?,
 mixin _$PaymentIntentInfo {
 
 /// Stripe client secret; the mock provider returns a placeholder.
- String get clientSecret;
+ String get clientSecret;/// Servers that predate setup intents only send payments.
+ PaymentKind get kind;
 /// Create a copy of PaymentIntentInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3639,20 +3640,20 @@ $PaymentIntentInfoCopyWith<PaymentIntentInfo> get copyWith => _$PaymentIntentInf
 @override
 bool operator ==(Object other) {
   final _this = this as PaymentIntentInfo;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaymentIntentInfo&&(identical(other.clientSecret, _this.clientSecret) || other.clientSecret == _this.clientSecret));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaymentIntentInfo&&(identical(other.clientSecret, _this.clientSecret) || other.clientSecret == _this.clientSecret)&&(identical(other.kind, _this.kind) || other.kind == _this.kind));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PaymentIntentInfo;
-  return Object.hash(runtimeType,_this.clientSecret);
+  return Object.hash(runtimeType,_this.clientSecret,_this.kind);
 }
 
 @override
 String toString() {
   final _this = this as PaymentIntentInfo;
-  return 'PaymentIntentInfo(clientSecret: ${_this.clientSecret})';
+  return 'PaymentIntentInfo(clientSecret: ${_this.clientSecret}, kind: ${_this.kind})';
 }
 
 
@@ -3663,7 +3664,7 @@ abstract mixin class $PaymentIntentInfoCopyWith<$Res>  {
   factory $PaymentIntentInfoCopyWith(PaymentIntentInfo value, $Res Function(PaymentIntentInfo) _then) = _$PaymentIntentInfoCopyWithImpl;
 @useResult
 $Res call({
- String clientSecret
+ String clientSecret, PaymentKind kind
 });
 
 
@@ -3680,10 +3681,11 @@ class _$PaymentIntentInfoCopyWithImpl<$Res>
 
 /// Create a copy of PaymentIntentInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? clientSecret = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? clientSecret = null,Object? kind = null,}) {
   return _then(PaymentIntentInfo(
 clientSecret: null == clientSecret ? _self.clientSecret : clientSecret // ignore: cast_nullable_to_non_nullable
-as String,
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as PaymentKind,
   ));
 }
 
@@ -3768,10 +3770,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String clientSecret)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String clientSecret,  PaymentKind kind)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PaymentIntentInfo() when $default != null:
-return $default(_that.clientSecret);case _:
+return $default(_that.clientSecret,_that.kind);case _:
   return orElse();
 
 }
@@ -3789,10 +3791,10 @@ return $default(_that.clientSecret);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String clientSecret)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String clientSecret,  PaymentKind kind)  $default,) {final _that = this;
 switch (_that) {
 case _PaymentIntentInfo():
-return $default(_that.clientSecret);case _:
+return $default(_that.clientSecret,_that.kind);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3809,10 +3811,10 @@ return $default(_that.clientSecret);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String clientSecret)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String clientSecret,  PaymentKind kind)?  $default,) {final _that = this;
 switch (_that) {
 case _PaymentIntentInfo() when $default != null:
-return $default(_that.clientSecret);case _:
+return $default(_that.clientSecret,_that.kind);case _:
   return null;
 
 }
@@ -3824,11 +3826,13 @@ return $default(_that.clientSecret);case _:
 @JsonSerializable()
 
 class _PaymentIntentInfo implements PaymentIntentInfo {
-  const _PaymentIntentInfo({required this.clientSecret});
+  const _PaymentIntentInfo({required this.clientSecret, this.kind = PaymentKind.payment});
   factory _PaymentIntentInfo.fromJson(Map<String, dynamic> json) => _$PaymentIntentInfoFromJson(json);
 
 /// Stripe client secret; the mock provider returns a placeholder.
 @override final  String clientSecret;
+/// Servers that predate setup intents only send payments.
+@override@JsonKey() final  PaymentKind kind;
 
 /// Create a copy of PaymentIntentInfo
 /// with the given fields replaced by the non-null parameter values.
@@ -3843,18 +3847,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaymentIntentInfo&&(identical(other.clientSecret, clientSecret) || other.clientSecret == clientSecret));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaymentIntentInfo&&(identical(other.clientSecret, clientSecret) || other.clientSecret == clientSecret)&&(identical(other.kind, kind) || other.kind == kind));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,clientSecret);
+    return Object.hash(runtimeType,clientSecret,kind);
 }
 
 @override
 String toString() {
-    return 'PaymentIntentInfo(clientSecret: $clientSecret)';
+    return 'PaymentIntentInfo(clientSecret: $clientSecret, kind: $kind)';
 }
 
 
@@ -3865,7 +3869,7 @@ abstract mixin class _$PaymentIntentInfoCopyWith<$Res> implements $PaymentIntent
   factory _$PaymentIntentInfoCopyWith(_PaymentIntentInfo value, $Res Function(_PaymentIntentInfo) _then) = __$PaymentIntentInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String clientSecret
+ String clientSecret, PaymentKind kind
 });
 
 
@@ -3882,10 +3886,11 @@ class __$PaymentIntentInfoCopyWithImpl<$Res>
 
 /// Create a copy of PaymentIntentInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? clientSecret = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? clientSecret = null,Object? kind = null,}) {
   return _then(_PaymentIntentInfo(
 clientSecret: null == clientSecret ? _self.clientSecret : clientSecret // ignore: cast_nullable_to_non_nullable
-as String,
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as PaymentKind,
   ));
 }
 
@@ -4206,7 +4211,8 @@ $PaymentIntentInfoCopyWith<$Res> get payment {
 mixin _$Cancellation {
 
  Booking get booking;/// False when the cancellation came too late and the price is charged.
- bool get refunded;
+ bool get refunded;/// True when the cancellation ended the recurring plan as well.
+ bool get planEnded;
 /// Create a copy of Cancellation
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4220,20 +4226,20 @@ $CancellationCopyWith<Cancellation> get copyWith => _$CancellationCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as Cancellation;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Cancellation&&(identical(other.booking, _this.booking) || other.booking == _this.booking)&&(identical(other.refunded, _this.refunded) || other.refunded == _this.refunded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Cancellation&&(identical(other.booking, _this.booking) || other.booking == _this.booking)&&(identical(other.refunded, _this.refunded) || other.refunded == _this.refunded)&&(identical(other.planEnded, _this.planEnded) || other.planEnded == _this.planEnded));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Cancellation;
-  return Object.hash(runtimeType,_this.booking,_this.refunded);
+  return Object.hash(runtimeType,_this.booking,_this.refunded,_this.planEnded);
 }
 
 @override
 String toString() {
   final _this = this as Cancellation;
-  return 'Cancellation(booking: ${_this.booking}, refunded: ${_this.refunded})';
+  return 'Cancellation(booking: ${_this.booking}, refunded: ${_this.refunded}, planEnded: ${_this.planEnded})';
 }
 
 
@@ -4244,7 +4250,7 @@ abstract mixin class $CancellationCopyWith<$Res>  {
   factory $CancellationCopyWith(Cancellation value, $Res Function(Cancellation) _then) = _$CancellationCopyWithImpl;
 @useResult
 $Res call({
- Booking booking, bool refunded
+ Booking booking, bool refunded, bool planEnded
 });
 
 
@@ -4261,10 +4267,11 @@ class _$CancellationCopyWithImpl<$Res>
 
 /// Create a copy of Cancellation
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? booking = null,Object? refunded = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? booking = null,Object? refunded = null,Object? planEnded = null,}) {
   return _then(Cancellation(
 booking: null == booking ? _self.booking : booking // ignore: cast_nullable_to_non_nullable
 as Booking,refunded: null == refunded ? _self.refunded : refunded // ignore: cast_nullable_to_non_nullable
+as bool,planEnded: null == planEnded ? _self.planEnded : planEnded // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -4359,10 +4366,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Booking booking,  bool refunded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Booking booking,  bool refunded,  bool planEnded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Cancellation() when $default != null:
-return $default(_that.booking,_that.refunded);case _:
+return $default(_that.booking,_that.refunded,_that.planEnded);case _:
   return orElse();
 
 }
@@ -4380,10 +4387,10 @@ return $default(_that.booking,_that.refunded);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Booking booking,  bool refunded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Booking booking,  bool refunded,  bool planEnded)  $default,) {final _that = this;
 switch (_that) {
 case _Cancellation():
-return $default(_that.booking,_that.refunded);case _:
+return $default(_that.booking,_that.refunded,_that.planEnded);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4400,10 +4407,10 @@ return $default(_that.booking,_that.refunded);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Booking booking,  bool refunded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Booking booking,  bool refunded,  bool planEnded)?  $default,) {final _that = this;
 switch (_that) {
 case _Cancellation() when $default != null:
-return $default(_that.booking,_that.refunded);case _:
+return $default(_that.booking,_that.refunded,_that.planEnded);case _:
   return null;
 
 }
@@ -4415,12 +4422,14 @@ return $default(_that.booking,_that.refunded);case _:
 @JsonSerializable()
 
 class _Cancellation implements Cancellation {
-  const _Cancellation({required this.booking, required this.refunded});
+  const _Cancellation({required this.booking, required this.refunded, this.planEnded = false});
   factory _Cancellation.fromJson(Map<String, dynamic> json) => _$CancellationFromJson(json);
 
 @override final  Booking booking;
 /// False when the cancellation came too late and the price is charged.
 @override final  bool refunded;
+/// True when the cancellation ended the recurring plan as well.
+@override@JsonKey() final  bool planEnded;
 
 /// Create a copy of Cancellation
 /// with the given fields replaced by the non-null parameter values.
@@ -4435,18 +4444,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Cancellation&&(identical(other.booking, booking) || other.booking == booking)&&(identical(other.refunded, refunded) || other.refunded == refunded));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Cancellation&&(identical(other.booking, booking) || other.booking == booking)&&(identical(other.refunded, refunded) || other.refunded == refunded)&&(identical(other.planEnded, planEnded) || other.planEnded == planEnded));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,booking,refunded);
+    return Object.hash(runtimeType,booking,refunded,planEnded);
 }
 
 @override
 String toString() {
-    return 'Cancellation(booking: $booking, refunded: $refunded)';
+    return 'Cancellation(booking: $booking, refunded: $refunded, planEnded: $planEnded)';
 }
 
 
@@ -4457,7 +4466,7 @@ abstract mixin class _$CancellationCopyWith<$Res> implements $CancellationCopyWi
   factory _$CancellationCopyWith(_Cancellation value, $Res Function(_Cancellation) _then) = __$CancellationCopyWithImpl;
 @override @useResult
 $Res call({
- Booking booking, bool refunded
+ Booking booking, bool refunded, bool planEnded
 });
 
 
@@ -4474,10 +4483,11 @@ class __$CancellationCopyWithImpl<$Res>
 
 /// Create a copy of Cancellation
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? booking = null,Object? refunded = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? booking = null,Object? refunded = null,Object? planEnded = null,}) {
   return _then(_Cancellation(
 booking: null == booking ? _self.booking : booking // ignore: cast_nullable_to_non_nullable
 as Booking,refunded: null == refunded ? _self.refunded : refunded // ignore: cast_nullable_to_non_nullable
+as bool,planEnded: null == planEnded ? _self.planEnded : planEnded // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -4492,6 +4502,295 @@ $BookingCopyWith<$Res> get booking {
     return _then(_self.copyWith(booking: value));
   });
 }
+}
+
+
+/// @nodoc
+mixin _$Plan {
+
+ String get id; Frequency get frequency;/// The day of the next booking to be created, as a calendar date.
+@JsonKey(fromJson: _day, toJson: _dayToJson) DateTime get nextRunOn; String get serviceTitle;/// Wall-clock start in the business zone, `10:00`.
+ String get startTime; String get addressId;
+/// Create a copy of Plan
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PlanCopyWith<Plan> get copyWith => _$PlanCopyWithImpl<Plan>(this as Plan, _$identity);
+
+  /// Serializes this Plan to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as Plan;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Plan&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.frequency, _this.frequency) || other.frequency == _this.frequency)&&(identical(other.nextRunOn, _this.nextRunOn) || other.nextRunOn == _this.nextRunOn)&&(identical(other.serviceTitle, _this.serviceTitle) || other.serviceTitle == _this.serviceTitle)&&(identical(other.startTime, _this.startTime) || other.startTime == _this.startTime)&&(identical(other.addressId, _this.addressId) || other.addressId == _this.addressId));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as Plan;
+  return Object.hash(runtimeType,_this.id,_this.frequency,_this.nextRunOn,_this.serviceTitle,_this.startTime,_this.addressId);
+}
+
+@override
+String toString() {
+  final _this = this as Plan;
+  return 'Plan(id: ${_this.id}, frequency: ${_this.frequency}, nextRunOn: ${_this.nextRunOn}, serviceTitle: ${_this.serviceTitle}, startTime: ${_this.startTime}, addressId: ${_this.addressId})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PlanCopyWith<$Res>  {
+  factory $PlanCopyWith(Plan value, $Res Function(Plan) _then) = _$PlanCopyWithImpl;
+@useResult
+$Res call({
+ String id, Frequency frequency,@JsonKey(fromJson: _day, toJson: _dayToJson) DateTime nextRunOn, String serviceTitle, String startTime, String addressId
+});
+
+
+
+
+}
+/// @nodoc
+class _$PlanCopyWithImpl<$Res>
+    implements $PlanCopyWith<$Res> {
+  _$PlanCopyWithImpl(this._self, this._then);
+
+  final Plan _self;
+  final $Res Function(Plan) _then;
+
+/// Create a copy of Plan
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? frequency = null,Object? nextRunOn = null,Object? serviceTitle = null,Object? startTime = null,Object? addressId = null,}) {
+  return _then(Plan(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,frequency: null == frequency ? _self.frequency : frequency // ignore: cast_nullable_to_non_nullable
+as Frequency,nextRunOn: null == nextRunOn ? _self.nextRunOn : nextRunOn // ignore: cast_nullable_to_non_nullable
+as DateTime,serviceTitle: null == serviceTitle ? _self.serviceTitle : serviceTitle // ignore: cast_nullable_to_non_nullable
+as String,startTime: null == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
+as String,addressId: null == addressId ? _self.addressId : addressId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [Plan].
+extension PlanPatterns on Plan {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Plan value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _Plan() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Plan value)  $default,){
+final _that = this;
+switch (_that) {
+case _Plan():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Plan value)?  $default,){
+final _that = this;
+switch (_that) {
+case _Plan() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Frequency frequency, @JsonKey(fromJson: _day, toJson: _dayToJson)  DateTime nextRunOn,  String serviceTitle,  String startTime,  String addressId)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _Plan() when $default != null:
+return $default(_that.id,_that.frequency,_that.nextRunOn,_that.serviceTitle,_that.startTime,_that.addressId);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Frequency frequency, @JsonKey(fromJson: _day, toJson: _dayToJson)  DateTime nextRunOn,  String serviceTitle,  String startTime,  String addressId)  $default,) {final _that = this;
+switch (_that) {
+case _Plan():
+return $default(_that.id,_that.frequency,_that.nextRunOn,_that.serviceTitle,_that.startTime,_that.addressId);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Frequency frequency, @JsonKey(fromJson: _day, toJson: _dayToJson)  DateTime nextRunOn,  String serviceTitle,  String startTime,  String addressId)?  $default,) {final _that = this;
+switch (_that) {
+case _Plan() when $default != null:
+return $default(_that.id,_that.frequency,_that.nextRunOn,_that.serviceTitle,_that.startTime,_that.addressId);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _Plan implements Plan {
+  const _Plan({required this.id, required this.frequency, @JsonKey(fromJson: _day, toJson: _dayToJson) required this.nextRunOn, required this.serviceTitle, required this.startTime, required this.addressId});
+  factory _Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
+
+@override final  String id;
+@override final  Frequency frequency;
+/// The day of the next booking to be created, as a calendar date.
+@override@JsonKey(fromJson: _day, toJson: _dayToJson) final  DateTime nextRunOn;
+@override final  String serviceTitle;
+/// Wall-clock start in the business zone, `10:00`.
+@override final  String startTime;
+@override final  String addressId;
+
+/// Create a copy of Plan
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PlanCopyWith<_Plan> get copyWith => __$PlanCopyWithImpl<_Plan>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$PlanToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Plan&&(identical(other.id, id) || other.id == id)&&(identical(other.frequency, frequency) || other.frequency == frequency)&&(identical(other.nextRunOn, nextRunOn) || other.nextRunOn == nextRunOn)&&(identical(other.serviceTitle, serviceTitle) || other.serviceTitle == serviceTitle)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.addressId, addressId) || other.addressId == addressId));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,frequency,nextRunOn,serviceTitle,startTime,addressId);
+}
+
+@override
+String toString() {
+    return 'Plan(id: $id, frequency: $frequency, nextRunOn: $nextRunOn, serviceTitle: $serviceTitle, startTime: $startTime, addressId: $addressId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PlanCopyWith<$Res> implements $PlanCopyWith<$Res> {
+  factory _$PlanCopyWith(_Plan value, $Res Function(_Plan) _then) = __$PlanCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, Frequency frequency,@JsonKey(fromJson: _day, toJson: _dayToJson) DateTime nextRunOn, String serviceTitle, String startTime, String addressId
+});
+
+
+
+
+}
+/// @nodoc
+class __$PlanCopyWithImpl<$Res>
+    implements _$PlanCopyWith<$Res> {
+  __$PlanCopyWithImpl(this._self, this._then);
+
+  final _Plan _self;
+  final $Res Function(_Plan) _then;
+
+/// Create a copy of Plan
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? frequency = null,Object? nextRunOn = null,Object? serviceTitle = null,Object? startTime = null,Object? addressId = null,}) {
+  return _then(_Plan(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,frequency: null == frequency ? _self.frequency : frequency // ignore: cast_nullable_to_non_nullable
+as Frequency,nextRunOn: null == nextRunOn ? _self.nextRunOn : nextRunOn // ignore: cast_nullable_to_non_nullable
+as DateTime,serviceTitle: null == serviceTitle ? _self.serviceTitle : serviceTitle // ignore: cast_nullable_to_non_nullable
+as String,startTime: null == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
+as String,addressId: null == addressId ? _self.addressId : addressId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
 }
 
 

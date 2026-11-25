@@ -7,17 +7,21 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// connection with [serverClose], inspect what the client sent in [sent].
 class FakeChannel extends StreamChannelMixin<dynamic>
     implements WebSocketChannel {
-  FakeChannel({this.failHandshake = false});
+  FakeChannel({this.failHandshake = false, this.readyWhen});
 
   final bool failHandshake;
-  final sent = <String>[];
+
+  /// When set, the handshake only completes once this future does.
+  final Future<void>? readyWhen;
+  bool closed = false;
+  final List<String> sent = <String>[];
   final _incoming = StreamController<dynamic>();
   final _sink = _FakeSink();
 
   @override
   Future<void> get ready => failHandshake
       ? Future<void>.error(WebSocketChannelException('handshake failed'))
-      : Future<void>.value();
+      : (readyWhen ?? Future<void>.value());
 
   @override
   Stream<dynamic> get stream => _incoming.stream;
@@ -52,7 +56,9 @@ class _FakeSink implements WebSocketSink {
   Future<void> addStream(Stream<dynamic> stream) => stream.forEach(add);
 
   @override
-  Future<void> close([int? closeCode, String? closeReason]) async {}
+  Future<void> close([int? closeCode, String? closeReason]) async {
+    owner.closed = true;
+  }
 
   @override
   Future<void> get done => Completer<void>().future;

@@ -17,6 +17,7 @@ import 'package:tidy_client/features/bookings/presentation/bookings_screen.dart'
 import 'package:tidy_client/features/chat/presentation/chat_list_screen.dart';
 import 'package:tidy_client/features/chat/presentation/chat_screen.dart';
 import 'package:tidy_client/features/home/presentation/home_screen.dart';
+import 'package:tidy_client/features/plans/presentation/plans_screen.dart';
 import 'package:tidy_client/features/profile/presentation/profile_screen.dart';
 import 'package:tidy_client/features/review/presentation/review_screen.dart';
 import 'package:tidy_client/features/tracking/presentation/tracking_screen.dart';
@@ -25,7 +26,9 @@ part 'app_router.g.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
-const Set<String> _publicRoutes = {Routes.splash, Routes.welcome, Routes.otp};
+const Set<String> _publicRoutes = {Routes.splash, Routes.welcome};
+
+bool _isOtp(String location) => location.startsWith('${Routes.otp}/');
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
@@ -46,11 +49,13 @@ GoRouter appRouter(Ref ref) {
     }
     final signedIn = auth.value != null;
     if (!signedIn) {
-      return location == Routes.welcome || location == Routes.otp
+      return location == Routes.welcome || _isOtp(location)
           ? null
           : Routes.welcome;
     }
-    return _publicRoutes.contains(location) ? Routes.home : null;
+    return _publicRoutes.contains(location) || _isOtp(location)
+        ? Routes.home
+        : null;
   }
 
   return GoRouter(
@@ -68,8 +73,9 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
-        path: Routes.otp,
-        builder: (context, state) => OtpScreen(phone: state.extra! as String),
+        path: '${Routes.otp}/:phone',
+        builder: (context, state) =>
+            OtpScreen(phone: state.pathParameters['phone']!),
       ),
       GoRoute(
         path: Routes.addresses,
@@ -82,6 +88,10 @@ GoRouter appRouter(Ref ref) {
             builder: (context, state) => const AddAddressScreen(),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.plans,
+        builder: (context, state) => const PlansScreen(),
       ),
       GoRoute(
         path: Routes.configure,

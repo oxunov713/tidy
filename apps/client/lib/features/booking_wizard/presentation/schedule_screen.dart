@@ -3,11 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
-import 'package:tidy_client/core/providers/clock.dart';
 import 'package:tidy_client/core/router/routes.dart';
-import 'package:tidy_client/core/widgets/error_state.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
+import 'package:tidy_client/core/widgets/api_error_view.dart';
 import 'package:tidy_client/core/widgets/wizard_header.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_controller.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_state.dart';
@@ -16,6 +13,7 @@ import 'package:tidy_client/features/booking_wizard/presentation/widgets/day_str
 import 'package:tidy_client/features/booking_wizard/presentation/widgets/slot_grid.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/widgets/wizard_bottom_bar.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// Step 2: day, start time and (optionally) a cleaner. Times come from
@@ -47,7 +45,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final state = ref.watch(bookingWizardProvider);
     final wizard = ref.read(bookingWizardProvider.notifier);
     final now = ref.watch(clockProvider)();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = BusinessTime.today(now);
     final date = state.date ?? today;
 
     return Scaffold(
@@ -67,7 +65,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        formatMonthYear(date, locale),
+                        TidyDates.monthYearOf(date, locale),
                         style: text.titleSmall?.copyWith(fontSize: 15),
                       ),
                     ),
@@ -142,10 +140,14 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final slot = state.slot;
     if (slot == null) return l10n.pickATime;
     final minutes = state.quote?.minutes;
-    final day = formatDayLong(slot, locale);
+    final day = TidyDates.dayLong(slot, locale);
     return minutes == null
-        ? l10n.scheduleSummaryShort(day, formatClock(slot))
-        : l10n.scheduleSummary(day, formatClock(slot), hoursValue(minutes));
+        ? l10n.scheduleSummaryShort(day, TidyDates.clock(slot))
+        : l10n.scheduleSummary(
+            day,
+            TidyDates.clock(slot),
+            TidyFormat.hoursValue(minutes),
+          );
   }
 }
 
@@ -163,7 +165,7 @@ class _Slots extends ConsumerWidget {
     if (state.slotsError != null && !state.slotsLoading) {
       return SizedBox(
         height: 220,
-        child: ErrorState(error: state.slotsError!, onRetry: onRetry),
+        child: ApiErrorView(error: state.slotsError!, onRetry: onRetry),
       );
     }
     if (state.slotsLoading && state.slots.isEmpty) {

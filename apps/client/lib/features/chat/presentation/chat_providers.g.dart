@@ -94,7 +94,7 @@ final class ChatProvider extends $AsyncNotifierProvider<Chat, List<Message>> {
   }
 }
 
-String _$chatHash() => r'1c0d961da6be3b12aa8334bdcaacac86a2ca3a30';
+String _$chatHash() => r'16943eace6276624329936ffc6fe0c4148a01aa0';
 
 /// Messages of one booking: history plus `message.new` events as they come.
 

@@ -1,22 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_admin/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_admin/features/cleaners/presentation/cleaners_providers.dart';
 import 'package:tidy_admin/features/services/presentation/services_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
+import 'package:tidy_core/testing.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 import 'fakes.dart';
 
-/// Call once per test file: the theme asks Google Fonts for Inter, which
-/// must not hit the network in tests.
+/// Call once per test file: the theme uses the bundled fonts, which
+/// need no network.
 void setUpFonts() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  GoogleFonts.config.allowRuntimeFetching = false;
 }
 
 /// Overrides for every repository the panel reads; pass only the fakes a test
@@ -25,13 +24,13 @@ List<Override> fakeRepositories({
   FakeBookingsRepository? bookings,
   FakeCleanersRepository? cleaners,
   FakeServicesRepository? services,
-  FakeAuthRepository? auth,
+  FakeSessionRepository? auth,
   Duration? statsInterval,
 }) => [
   if (bookings != null) bookingsRepositoryProvider.overrideWithValue(bookings),
   if (cleaners != null) cleanersRepositoryProvider.overrideWithValue(cleaners),
   if (services != null) servicesRepositoryProvider.overrideWithValue(services),
-  if (auth != null) authRepositoryProvider.overrideWithValue(auth),
+  if (auth != null) sessionRepositoryProvider.overrideWithValue(auth),
   if (statsInterval != null)
     statsRefreshIntervalProvider.overrideWithValue(statsInterval),
 ];

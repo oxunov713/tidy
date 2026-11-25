@@ -56,7 +56,7 @@ final class ChatControllerProvider
   }
 }
 
-String _$chatControllerHash() => r'0efc1a0d099540ed61d569e9de046d9d2a903cfc';
+String _$chatControllerHash() => r'6e5e1622c0df1a3c69a5413ddd9c3ac7622a0846';
 
 /// Messages of one booking: history from the API, new ones from
 /// `message.new` over the WebSocket.

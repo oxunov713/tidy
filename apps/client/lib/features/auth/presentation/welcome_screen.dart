@@ -49,7 +49,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     });
     try {
       await ref.read(authControllerProvider.notifier).requestOtp(phone);
-      if (mounted) unawaited(context.push(Routes.otp, extra: phone));
+      if (mounted) unawaited(context.push(Routes.otpFor(phone)));
     } on Object catch (e) {
       if (mounted) setState(() => _error = errorMessage(context, e));
     } finally {

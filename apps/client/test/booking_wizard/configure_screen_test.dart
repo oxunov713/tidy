@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_controller.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/configure_screen.dart';
 import 'package:tidy_core/tidy_core.dart';

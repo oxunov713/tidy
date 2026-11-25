@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/error/error_text.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/catalog/presentation/catalog_providers.dart';
 import 'package:tidy_client/features/catalog/presentation/widgets/service_card.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';

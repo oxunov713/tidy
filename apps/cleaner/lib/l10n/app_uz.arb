@@ -7,6 +7,9 @@
   "errorTitle": "Nimadir xato ketdi",
   "errorOffline": "Aloqa yo'q. Internetni tekshirib, qayta urinib ko'ring.",
   "errorTooManyRequests": "Urinishlar juda ko'p. Bir daqiqa kutib turing.",
+  "errorSlotTaken": "Bu vaqtda sizda boshqa buyurtma bor.",
+  "errorNotFound": "Topilmadi.",
+  "errorInvalidTransition": "Bu buyurtma uchun endi bu mumkin emas.",
   "errorSessionExpired": "Seans tugadi. Qaytadan kiring.",
   "errorForbidden": "Bunga ruxsatingiz yo'q.",
   "errorServer": "Serverda muammo bor. Birozdan so'ng qayta urinib ko'ring.",
@@ -162,5 +165,6 @@
   "save": "Saqlash",
   "signOutConfirmTitle": "Chiqasizmi?",
   "signOutConfirmBody": "Bu telefonda buyurtmalar kelishi to'xtaydi.",
-  "profileSaved": "Profil yangilandi"
+  "profileSaved": "Profil yangilandi",
+  "chatClosed": "Bu suhbat yopilgan."
 }

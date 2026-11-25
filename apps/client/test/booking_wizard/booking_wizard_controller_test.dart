@@ -323,4 +323,17 @@ void main() {
     final w = ProviderContainerLike(container)..notifier.start(fx.standard);
     expect(w.state.date, DateTime(2026, 12));
   });
+
+  test('today is the business day, whatever the phone zone says', () async {
+    BusinessTime.useZone('Asia/Tashkent');
+    addTearDown(BusinessTime.reset);
+    fakes = Fakes();
+    // 23:30 UTC on the 1st is already 04:30 on the 2nd in Tashkent.
+    final container = await makeContainer(
+      fakes,
+      now: () => DateTime.utc(2026, 12, 1, 23, 30),
+    );
+    final w = ProviderContainerLike(container)..notifier.start(fx.standard);
+    expect(w.state.date, DateTime(2026, 12, 2));
+  });
 }

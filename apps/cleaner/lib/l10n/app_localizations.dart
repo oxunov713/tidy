@@ -142,6 +142,24 @@ abstract class AppLocalizations {
   /// **'Too many attempts. Wait a minute and try again.'**
   String get errorTooManyRequests;
 
+  /// No description provided for @errorSlotTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a job at that time.'**
+  String get errorSlotTaken;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find that.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorInvalidTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not possible for this job any more.'**
+  String get errorInvalidTransition;
+
   /// No description provided for @errorSessionExpired.
   ///
   /// In en, this message translates to:
@@ -1077,6 +1095,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile updated'**
   String get profileSaved;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation is closed.'**
+  String get chatClosed;
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,9 @@
   "errorTitle": "Something went wrong",
   "errorOffline": "No connection. Check your internet and try again.",
   "errorTooManyRequests": "Too many attempts. Wait a minute and try again.",
+  "errorSlotTaken": "You already have a job at that time.",
+  "errorNotFound": "We could not find that.",
+  "errorInvalidTransition": "That is not possible for this job any more.",
   "errorSessionExpired": "Your session expired. Please sign in again.",
   "errorForbidden": "You are not allowed to do that.",
   "errorServer": "Our servers had a problem. Try again in a moment.",
@@ -328,5 +331,6 @@
   "save": "Save",
   "signOutConfirmTitle": "Sign out?",
   "signOutConfirmBody": "You will stop receiving job offers on this phone.",
-  "profileSaved": "Profile updated"
+  "profileSaved": "Profile updated",
+  "chatClosed": "This conversation is closed."
 }

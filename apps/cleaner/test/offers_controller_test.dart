@@ -47,7 +47,7 @@ void main() {
       async.flushMicrotasks();
       expect(read(c).loading, isFalse);
       expect(read(c).offers.single.id, 'o1');
-      expect(h.gateway.subscribed, contains(Rooms.cleanerOffers));
+      expect(h.gateway.subscribeCalls, contains(Rooms.cleanerOffers));
       c.dispose();
     });
   });

@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/core/error/error_text.dart';
-import 'package:tidy_client/core/providers/locale_controller.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -75,6 +75,12 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.location_on_outlined,
             label: l10n.myAddresses,
             onTap: () => context.push(Routes.addresses),
+          ),
+          const SizedBox(height: 12),
+          _Tile(
+            icon: Icons.repeat,
+            label: l10n.managePlans,
+            onTap: () => context.push(Routes.plans),
           ),
           const SizedBox(height: 12),
           _Tile(

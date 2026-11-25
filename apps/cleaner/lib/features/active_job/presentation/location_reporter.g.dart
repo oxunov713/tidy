@@ -53,7 +53,7 @@ final class LocationReporterProvider
   }
 }
 
-String _$locationReporterHash() => r'ea1278c7d42051c31add2e869ea9f0324c4237bb';
+String _$locationReporterHash() => r'5e9ba7b8fbb672528861669433046bcc134b3f11';
 
 /// Whether the app is on screen. Position sharing is foreground only, so it
 /// pauses when the cleaner leaves the app.

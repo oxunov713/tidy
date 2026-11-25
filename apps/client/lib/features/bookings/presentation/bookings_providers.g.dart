@@ -101,7 +101,7 @@ final class BookingsListProvider
   }
 }
 
-String _$bookingsListHash() => r'31d2e89b01c64c7c16be1db33392c19516453ea3';
+String _$bookingsListHash() => r'c502a4ca1aa6a35f8c8ee746f29cb9566f597468';
 
 /// Upcoming or past bookings, fetched page by page with the server's cursor.
 

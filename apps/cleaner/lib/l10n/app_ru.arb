@@ -7,6 +7,9 @@
   "errorTitle": "Что-то пошло не так",
   "errorOffline": "Нет соединения. Проверьте интернет и повторите.",
   "errorTooManyRequests": "Слишком много попыток. Подождите минуту.",
+  "errorSlotTaken": "У вас уже есть заказ на это время.",
+  "errorNotFound": "Не удалось найти.",
+  "errorInvalidTransition": "Это уже невозможно для этого заказа.",
   "errorSessionExpired": "Сессия истекла. Войдите снова.",
   "errorForbidden": "У вас нет на это прав.",
   "errorServer": "Проблема на сервере. Повторите чуть позже.",
@@ -162,5 +165,6 @@
   "save": "Сохранить",
   "signOutConfirmTitle": "Выйти?",
   "signOutConfirmBody": "На этом телефоне вы перестанете получать заказы.",
-  "profileSaved": "Профиль обновлён"
+  "profileSaved": "Профиль обновлён",
+  "chatClosed": "Этот чат закрыт."
 }

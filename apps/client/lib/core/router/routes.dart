@@ -4,11 +4,16 @@ abstract final class Routes {
   static const welcome = '/welcome';
   static const otp = '/otp';
 
+  /// The code screen for [phone]; the number travels in the path, so the
+  /// screen can be opened from a link or restored after a restart.
+  static String otpFor(String phone) => '$otp/${Uri.encodeComponent(phone)}';
+
   static const home = '/home';
   static const bookings = '/bookings';
   static const chat = '/chat';
   static const profile = '/profile';
 
+  static const plans = '/plans';
   static const addresses = '/addresses';
   static const addAddress = '/addresses/new';
 

@@ -2,12 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tidy_client/core/providers/clock.dart';
 import 'package:tidy_client/core/providers/map_factory.dart';
-import 'package:tidy_client/core/providers/preferences.dart';
 import 'package:tidy_client/features/addresses/presentation/address_providers.dart';
 import 'package:tidy_client/features/auth/presentation/auth_providers.dart';
 import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_controller.dart';
@@ -15,6 +12,8 @@ import 'package:tidy_client/features/booking_wizard/presentation/booking_wizard_
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/catalog/presentation/catalog_providers.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
+import 'package:tidy_core/testing.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 import 'fakes.dart';
@@ -25,19 +24,29 @@ class Fakes {
     FakeCatalogRepository? catalog,
     FakeAddressRepository? addresses,
     FakeBookingRepository? bookings,
-  }) : catalog = catalog ?? FakeCatalogRepository(),
+    FakeRealtimeClient? realtime,
+    this.signedOut = false,
+  }) : realtime = realtime ?? FakeRealtimeClient(),
+       catalog = catalog ?? FakeCatalogRepository(),
        addresses = addresses ?? FakeAddressRepository(),
        bookings = bookings ?? FakeBookingRepository();
 
   final FakeCatalogRepository catalog;
   final FakeAddressRepository addresses;
   final FakeBookingRepository bookings;
+  final FakeRealtimeClient realtime;
+
+  /// Start without a session, as on a fresh install.
+  final bool signedOut;
 
   List<Override> get overrides => [
+    realtimeClientProvider.overrideWithValue(realtime),
     catalogRepositoryProvider.overrideWithValue(catalog),
     addressRepositoryProvider.overrideWithValue(addresses),
     bookingRepositoryProvider.overrideWithValue(bookings),
-    authControllerProvider.overrideWith(FakeAuthController.new),
+    authControllerProvider.overrideWith(
+      signedOut ? FakeSignedOutAuthController.new : FakeAuthController.new,
+    ),
     mapFactoryProvider.overrideWithValue(
       ({zoom = 15}) => const FakeMapProvider(),
     ),
@@ -73,8 +82,8 @@ Future<GoRouter> pumpScreen(
   Widget child,
   Fakes fakes, {
   List<String> extraRoutes = const [],
+  List<Override> extraOverrides = const [],
 }) async {
-  GoogleFonts.config.allowRuntimeFetching = false;
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
   final router = GoRouter(
@@ -96,6 +105,7 @@ Future<GoRouter> pumpScreen(
       ...fakes.overrides,
       sharedPreferencesProvider.overrideWithValue(prefs),
       quoteDebounceProvider.overrideWithValue(Duration.zero),
+      ...extraOverrides,
     ],
   );
   addTearDown(container.dispose);

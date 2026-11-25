@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:tidy_admin/features/auth/domain/auth_repository.dart';
 import 'package:tidy_admin/features/bookings/domain/bookings_repository.dart';
 import 'package:tidy_admin/features/cleaners/domain/cleaners_repository.dart';
 import 'package:tidy_admin/features/services/domain/services_repository.dart';
+import 'package:tidy_core/testing.dart';
 import 'package:tidy_core/tidy_core.dart';
 
 final _epoch = DateTime.utc(2026, 12, 3, 10);
@@ -127,6 +127,7 @@ class FakeBookingsRepository implements BookingsRepository {
   /// Set to make the next `list` call fail.
   Exception? failNextList;
   Exception? reassignError;
+  Exception? cancelError;
   BookingDetails? detailsValue;
   final reassigned = <(String, String)>[];
   final cancelled = <String>[];
@@ -204,6 +205,8 @@ class FakeBookingsRepository implements BookingsRepository {
 
   @override
   Future<Booking> cancel(String id) async {
+    final error = cancelError;
+    if (error != null) throw error;
     cancelled.add(id);
     return booking(id: id, status: BookingStatus.cancelled);
   }
@@ -266,37 +269,10 @@ class FakeServicesRepository implements ServicesRepository {
   }
 }
 
-class FakeAuthRepository implements AuthRepository {
-  FakeAuthRepository({this.restored, this.signInAs});
-
-  final User? restored;
-
-  /// What `verify` returns; a non-admin makes it throw like the real one.
-  User? signInAs;
-  final otpRequests = <String>[];
-  bool loggedOut = false;
-  Exception? otpError;
-
-  @override
-  Stream<void> get sessionExpired => const Stream.empty();
-
-  @override
-  Future<User?> restore() async => restored;
-
-  @override
-  Future<void> requestOtp(String phone) async {
-    otpRequests.add(phone);
-    final error = otpError;
-    if (error != null) throw error;
-  }
-
-  @override
-  Future<User> verify({required String phone, required String code}) async {
-    final user = signInAs ?? adminUser();
-    if (user.role != UserRole.admin) throw const NoAdminAccessException();
-    return user;
-  }
-
-  @override
-  Future<void> logout() async => loggedOut = true;
-}
+/// The admin app's session repository, as a fake.
+FakeSessionRepository fakeAdminSession({User? restored, User? signInAs}) =>
+    FakeSessionRepository(
+      expectedRole: UserRole.admin,
+      restoreResult: restored,
+      verifyResult: signInAs ?? adminUser(),
+    );

@@ -25,7 +25,21 @@ abstract interface class BookingRepository {
 
   Future<BookingDetails> details(String id);
 
-  Future<Cancellation> cancel(String id);
+  /// [CancelScope.series] also ends the recurring plan of the booking.
+  Future<Cancellation> cancel(
+    String id, {
+    CancelScope scope = CancelScope.visit,
+  });
+
+  /// A new payment to confirm for a booking that is still pending, for
+  /// example after the saved card was declined. Always `kind: payment`.
+  Future<PaymentIntentInfo> pay(String id);
+
+  /// The client's active recurring cleans.
+  Future<List<Plan>> plans();
+
+  /// Ends a series; visits that have no cleaner yet are cancelled.
+  Future<void> endPlan(String id);
 
   Future<Review> review(String id, ReviewRequest request);
 }

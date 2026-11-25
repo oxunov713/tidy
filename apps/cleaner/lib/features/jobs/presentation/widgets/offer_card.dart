@@ -1,15 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
-import 'package:tidy_cleaner/core/theme/pro_colors.dart';
-import 'package:tidy_cleaner/core/widgets/countdown.dart';
 import 'package:tidy_cleaner/features/jobs/domain/incoming_offer.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/widgets/booking_text.dart';
 import 'package:tidy_cleaner/l10n/app_localizations.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// An offer with its countdown and the accept / decline buttons. Used inline
 /// on the Jobs screen and inside the full-screen alert.
-class OfferCard extends StatelessWidget {
+class OfferCard extends ConsumerWidget {
   const OfferCard({
     required this.offer,
     required this.busy,
@@ -24,7 +23,7 @@ class OfferCard extends StatelessWidget {
   final VoidCallback onDecline;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final text = Theme.of(context).textTheme;
@@ -56,7 +55,7 @@ class OfferCard extends StatelessWidget {
                   child: Text(
                     l10n.newRequest,
                     style: const TextStyle(
-                      color: ProColors.onAccentSoft,
+                      color: TidyColors.onAccentSoft,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -67,8 +66,9 @@ class OfferCard extends StatelessWidget {
               Flexible(
                 child: Countdown(
                   until: offer.expiresAt,
+                  now: ref.read(clockProvider),
                   builder: (context, left) => Text(
-                    l10n.expiresIn(Fmt.countdown(left)),
+                    l10n.expiresIn(TidyFormat.countdown(left)),
                     key: const Key('offerCountdown'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -102,7 +102,7 @@ class OfferCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    Fmt.payout(booking.cleanerPayout),
+                    TidyFormat.payout(booking.cleanerPayout),
                     style: text.titleLarge?.copyWith(
                       fontSize: 24,
                       color: TidyColors.primary,
@@ -129,8 +129,8 @@ class OfferCard extends StatelessWidget {
                 _InfoRow(
                   icon: Icons.calendar_today_outlined,
                   text:
-                      '${Fmt.shortDate(booking.start, locale)} · '
-                      '${Fmt.timeRange(booking.start, booking.end, locale)}',
+                      '${TidyDates.dayShort(booking.start, locale)} · '
+                      '${TidyDates.timeRange(booking.start, booking.end, locale)}',
                 ),
                 const SizedBox(height: TidySpacing.sm),
                 _InfoRow(

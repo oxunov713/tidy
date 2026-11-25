@@ -43,7 +43,19 @@ class BookingRepositoryImpl implements BookingRepository {
   Future<BookingDetails> details(String id) => _api.get(id);
 
   @override
-  Future<Cancellation> cancel(String id) => _api.cancel(id);
+  Future<Cancellation> cancel(
+    String id, {
+    CancelScope scope = CancelScope.visit,
+  }) => _api.cancel(id, scope: scope);
+
+  @override
+  Future<PaymentIntentInfo> pay(String id) => _api.pay(id);
+
+  @override
+  Future<List<Plan>> plans() => _api.plans();
+
+  @override
+  Future<void> endPlan(String id) => _api.endPlan(id);
 
   @override
   Future<Review> review(String id, ReviewRequest request) =>

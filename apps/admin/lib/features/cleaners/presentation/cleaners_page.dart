@@ -3,9 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:tidy_admin/core/api_errors.dart';
 import 'package:tidy_admin/core/formatting.dart';
 import 'package:tidy_admin/core/responsive.dart';
-import 'package:tidy_admin/core/widgets/error_view.dart';
+import 'package:tidy_admin/core/widgets/api_error_view.dart';
 import 'package:tidy_admin/core/widgets/online_dot.dart';
-import 'package:tidy_admin/core/widgets/skeleton.dart';
 import 'package:tidy_admin/features/cleaners/presentation/cleaners_providers.dart';
 import 'package:tidy_admin/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -44,7 +43,7 @@ class _CleanersPageState extends ConsumerState<CleanersPage> {
         ..showSnackBar(
           SnackBar(
             content: Text(
-              '${l10n.cleanerUpdateFailed} ${describeError(e, l10n)}',
+              '${l10n.cleanerUpdateFailed} ${errorText(l10n, e)}',
             ),
           ),
         );
@@ -77,7 +76,7 @@ class _CleanersPageState extends ConsumerState<CleanersPage> {
         ),
         const SizedBox(height: TidySpacing.lg),
         if (async.hasError && !async.isLoading)
-          ErrorView(
+          ApiErrorView(
             error: async.error!,
             onRetry: () => ref.invalidate(cleanersControllerProvider),
           )
@@ -316,13 +315,13 @@ class _LoadingGrid extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Skeleton(width: 160, height: 20),
+                    Shimmer(child: SkeletonBox(width: 160, height: 20)),
                     SizedBox(height: 12),
-                    Skeleton(width: 100),
+                    Shimmer(child: SkeletonBox(width: 100)),
                     SizedBox(height: 12),
-                    Skeleton(),
+                    Shimmer(child: SkeletonBox()),
                     SizedBox(height: 20),
-                    Skeleton(height: 44, radius: 14),
+                    Shimmer(child: SkeletonBox(height: 44, radius: 14)),
                   ],
                 ),
               ),

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_client/core/realtime/live_channel.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/chat/data/chat_repository_impl.dart';
 import 'package:tidy_client/features/chat/domain/chat_repository.dart';
@@ -18,13 +17,36 @@ ChatRepository chatRepository(Ref ref) =>
 class Chat extends _$Chat {
   @override
   Future<List<Message>> build(String bookingId) async {
-    final sub = ref.read(liveChannelProvider).bookingEvents(bookingId).listen((
-      event,
-    ) {
-      if (event is MessageReceived) _add(event.message);
-    });
+    final sub = ref
+        .read(realtimeClientProvider)
+        .bookingEvents(bookingId)
+        .listen((
+          event,
+        ) {
+          switch (event) {
+            case MessageReceived(:final message):
+              _add(message);
+            case Reconnected():
+              // Messages that arrived while the socket was down.
+              unawaited(_refetch());
+            case _:
+              break;
+          }
+        });
     ref.onDispose(() => unawaited(sub.cancel()));
     return ref.watch(chatRepositoryProvider).messages(bookingId);
+  }
+
+  Future<void> _refetch() async {
+    try {
+      final messages = await ref
+          .read(chatRepositoryProvider)
+          .messages(bookingId);
+      if (!ref.mounted) return;
+      messages.forEach(_add);
+    } on Object {
+      // The next reconnect or send tries again.
+    }
   }
 
   Future<void> send(String body) async {

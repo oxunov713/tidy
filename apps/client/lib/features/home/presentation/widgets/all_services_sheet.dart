@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/features/catalog/presentation/catalog_providers.dart';
 import 'package:tidy_client/features/catalog/presentation/service_style.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
@@ -43,7 +42,9 @@ Future<void> showAllServicesSheet(
                     ),
                   ),
                   title: Text(service.title),
-                  subtitle: Text(l10n.hoursUnit(hoursRange(service.minutes))),
+                  subtitle: Text(
+                    l10n.hoursUnit(TidyFormat.hoursRange(service.minutes)),
+                  ),
                   trailing: Text(
                     PriceText.format(service.fromPrice),
                     style: Theme.of(context).textTheme.titleSmall,

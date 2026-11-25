@@ -1,6 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tidy_cleaner/core/clock.dart';
-import 'package:tidy_cleaner/core/format/formatters.dart';
 import 'package:tidy_cleaner/features/earnings/presentation/earnings_controller.dart';
 import 'package:tidy_cleaner/features/jobs/presentation/jobs_controller.dart';
 import 'package:tidy_core/tidy_core.dart';
@@ -21,13 +19,13 @@ class DayStats {
 /// schedule.
 @riverpod
 DayStats dayStats(Ref ref) {
-  final today = ref.watch(clockProvider)();
+  final today = BusinessTime.today(ref.watch(clockProvider)());
   final earnings = ref.watch(earningsProvider(EarningsPeriod.week)).value;
   final jobs = ref.watch(jobsControllerProvider).value;
 
   int? earned;
   if (earnings != null) {
-    final iso = Fmt.isoDay(today);
+    final iso = TidyDates.isoDay(today);
     earned = earnings.days
         .where((d) => d.date == iso)
         .fold<int>(0, (sum, d) => sum + d.amount);
@@ -39,7 +37,7 @@ DayStats dayStats(Ref ref) {
     final todays = jobs.where(
       (j) =>
           j.booking.status != BookingStatus.cancelled &&
-          Fmt.sameDay(j.booking.start.toLocal(), today),
+          BusinessTime.isOnDay(j.booking.start, today),
     );
     total = todays.length;
     done = todays

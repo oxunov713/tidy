@@ -6,12 +6,16 @@ on:
       - "apps/**"
       - "packages/**"
       - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
       - ".github/workflows/flutter.yml"
   pull_request:
     paths:
       - "apps/**"
       - "packages/**"
       - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
       - ".github/workflows/flutter.yml"
 
 permissions:

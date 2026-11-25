@@ -1,6 +1,7 @@
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:tidy_client/features/payment/domain/payment_sheet.dart';
+import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
 
 /// Stripe's own payment sheet, driven by the intent's client secret.
@@ -21,7 +22,12 @@ class StripePaymentSheet implements PaymentSheet {
     try {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: request.clientSecret,
+          paymentIntentClientSecret: request.kind == PaymentKind.payment
+              ? request.clientSecret
+              : null,
+          setupIntentClientSecret: request.kind == PaymentKind.setup
+              ? request.clientSecret
+              : null,
           merchantDisplayName: 'Tidy',
           style: ThemeMode.light,
           appearance: const PaymentSheetAppearance(

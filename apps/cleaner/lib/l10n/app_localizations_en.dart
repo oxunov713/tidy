@@ -33,6 +33,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Too many attempts. Wait a minute and try again.';
 
   @override
+  String get errorSlotTaken => 'You already have a job at that time.';
+
+  @override
+  String get errorNotFound => 'We could not find that.';
+
+  @override
+  String get errorInvalidTransition =>
+      'That is not possible for this job any more.';
+
+  @override
   String get errorSessionExpired =>
       'Your session expired. Please sign in again.';
 
@@ -566,4 +576,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSaved => 'Profile updated';
+
+  @override
+  String get chatClosed => 'This conversation is closed.';
 }

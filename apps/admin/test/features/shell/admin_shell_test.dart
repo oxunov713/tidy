@@ -13,7 +13,7 @@ void main() {
       tester,
       const AdminShell(location: '/bookings', child: SizedBox()),
       overrides: fakeRepositories(
-        auth: FakeAuthRepository(restored: adminUser()),
+        auth: fakeAdminSession(restored: adminUser()),
       ),
       size: size,
     );

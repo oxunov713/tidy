@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tidy_core/tidy_core.dart';
 
@@ -173,6 +174,95 @@ void main() {
       expect(adapter.count('/me/addresses'), 1);
     },
   );
+
+  group('a refresh that fails for another reason than 401', () {
+    for (final status in [429, 500, 502, 503]) {
+      test('$status keeps the tokens and the session', () async {
+        final adapter = FakeAdapter((o) {
+          if (o.path == '/auth/refresh') {
+            return FakeResponse(status, {
+              'error': {'code': 'internal', 'message': 'try later'},
+            });
+          }
+          return const FakeResponse(401, {
+            'error': {'code': 'unauthorized', 'message': 'expired'},
+          });
+        });
+        final client = clientFor(adapter);
+        var expired = 0;
+        client.sessionExpired.listen((_) => expired++);
+
+        await expectLater(
+          client.me.addresses(),
+          throwsA(
+            isA<ApiException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              status,
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(await storage.read(), _old);
+        expect(expired, 0);
+      });
+    }
+
+    test('a network error keeps the tokens and the session', () async {
+      final adapter = FakeAdapter((o) {
+        if (o.path == '/auth/refresh') {
+          throw DioException.connectionError(
+            requestOptions: o,
+            reason: 'offline',
+          );
+        }
+        return const FakeResponse(401, {
+          'error': {'code': 'unauthorized', 'message': 'expired'},
+        });
+      });
+      final client = clientFor(adapter);
+      var expired = 0;
+      client.sessionExpired.listen((_) => expired++);
+
+      await expectLater(
+        client.me.addresses(),
+        throwsA(isA<NetworkException>()),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(await storage.read(), _old);
+      expect(expired, 0);
+    });
+
+    test('the next request refreshes again once the server recovers', () async {
+      var healthy = false;
+      final adapter = FakeAdapter((o) {
+        if (o.path == '/auth/refresh') {
+          return healthy
+              ? const FakeResponse(200, {
+                  'access_token': 'new-access',
+                  'refresh_token': 'new-refresh',
+                })
+              : const FakeResponse(503, {
+                  'error': {'code': 'internal', 'message': 'down'},
+                });
+        }
+        return o.headers['Authorization'] == 'Bearer new-access'
+            ? FakeResponse(200, [addressJson()])
+            : const FakeResponse(401, {
+                'error': {'code': 'unauthorized', 'message': 'expired'},
+              });
+      });
+      final client = clientFor(adapter);
+
+      await expectLater(client.me.addresses(), throwsA(isA<ApiException>()));
+      healthy = true;
+
+      expect(await client.me.addresses(), hasLength(1));
+      expect((await storage.read())?.accessToken, 'new-access');
+    });
+  });
 
   test(
     'does not retry a request that fails with 401 again after refresh',

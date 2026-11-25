@@ -1091,7 +1091,7 @@ return $default(_that.title,_that.basePrice,_that.perBedroom,_that.perBathroom,_
 @JsonSerializable()
 
 class _ServiceUpdate implements ServiceUpdate {
-  const _ServiceUpdate({required this.title, required this.basePrice, required this.perBedroom, required this.perBathroom, required this.baseMinutes, required this.minutesPerRoom, this.isActive = true});
+  const _ServiceUpdate({required this.title, required this.basePrice, required this.perBedroom, required this.perBathroom, required this.baseMinutes, required this.minutesPerRoom, required this.isActive});
   factory _ServiceUpdate.fromJson(Map<String, dynamic> json) => _$ServiceUpdateFromJson(json);
 
 @override final  String title;
@@ -1100,7 +1100,7 @@ class _ServiceUpdate implements ServiceUpdate {
 @override final  int perBathroom;
 @override final  int baseMinutes;
 @override final  int minutesPerRoom;
-@override@JsonKey() final  bool isActive;
+@override final  bool isActive;
 
 /// Create a copy of ServiceUpdate
 /// with the given fields replaced by the non-null parameter values.

@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:tidy_client/core/format/formatters.dart';
 import 'package:tidy_client/core/router/routes.dart';
 import 'package:tidy_client/core/widgets/async_value_view.dart';
 import 'package:tidy_client/core/widgets/cleaner_avatar.dart';
 import 'package:tidy_client/core/widgets/round_icon_button.dart';
-import 'package:tidy_client/core/widgets/shimmer.dart';
 import 'package:tidy_client/features/bookings/presentation/book_again.dart';
 import 'package:tidy_client/features/bookings/presentation/bookings_providers.dart';
 import 'package:tidy_client/features/bookings/presentation/cancel_booking.dart';
 import 'package:tidy_client/features/bookings/presentation/status_labels.dart';
+import 'package:tidy_client/features/bookings/presentation/stuck_cancellation.dart';
+import 'package:tidy_client/features/payment/presentation/pay_booking.dart';
 import 'package:tidy_client/l10n/app_localizations.dart';
 import 'package:tidy_core/tidy_core.dart';
 import 'package:tidy_ui/tidy_ui.dart';
@@ -123,7 +123,7 @@ class _Content extends ConsumerWidget {
                 _InfoRow(
                   icon: Icons.event_outlined,
                   text:
-                      '${formatDayLong(booking.start, locale)} · ${formatClock(booking.start)}–${formatClock(booking.end)}',
+                      '${TidyDates.dayLong(booking.start, locale)} · ${TidyDates.clock(booking.start)}–${TidyDates.clock(booking.end)}',
                 ),
                 _InfoRow(
                   icon: Icons.bed_outlined,
@@ -242,6 +242,7 @@ class _Content extends ConsumerWidget {
           const SizedBox(height: 14),
           _Timeline(events: details.events),
           const SizedBox(height: 20),
+          _StuckNotice(details: details),
           _Actions(details: details),
         ],
       ),
@@ -259,9 +260,37 @@ class _Actions extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final booking = details.booking;
     final status = booking.status;
+    final now = ref.watch(clockProvider)();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (status == BookingStatus.pending) ...[
+          TidyButton(
+            key: const Key('payNow'),
+            label: l10n.payNow,
+            icon: Icons.lock_outline,
+            onPressed: () async {
+              final paid = await payForBooking(context, ref, booking);
+              if (paid && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.statusConfirmed)),
+                );
+              }
+            },
+          ),
+          if (unpaidBookingExpires(booking, now)) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.payNowHint,
+              key: const Key('payNowHint'),
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: TidyColors.muted),
+            ),
+          ],
+          const SizedBox(height: 10),
+        ],
         if (status.isTrackable)
           TidyButton(
             label: l10n.trackCleaner,
@@ -284,7 +313,7 @@ class _Actions extends ConsumerWidget {
             onPressed: () => bookAgain(context, ref, booking),
           ),
         ],
-        if (status.isCancellable) ...[
+        if (status.canCancel) ...[
           const SizedBox(height: 10),
           TidyButton(
             label: l10n.cancelBooking,
@@ -296,6 +325,48 @@ class _Actions extends ConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Says why the system cancelled a booking nobody paid for or took.
+class _StuckNotice extends StatelessWidget {
+  const _StuckNotice({required this.details});
+
+  final BookingDetails details;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final reason = stuckCancellationOf(details);
+    if (reason == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: TidyColors.accentSoft,
+          borderRadius: TidyRadii.controlBorder,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(TidySpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.info_outline, size: 20),
+              const SizedBox(width: TidySpacing.sm),
+              Expanded(
+                child: Text(
+                  switch (reason) {
+                    StuckCancellation.unpaid => l10n.cancelledUnpaid,
+                    StuckCancellation.noCleaner => l10n.cancelledNoCleaner,
+                  },
+                  key: const Key('stuckNotice'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -418,7 +489,7 @@ class _Timeline extends StatelessWidget {
             _TimelineRow(
               label: event.status.label(l10n),
               time:
-                  '${formatDayShort(event.at, locale)} · ${formatClock(event.at)}',
+                  '${TidyDates.dayShort(event.at, locale)} · ${TidyDates.clock(event.at)}',
               isFirst: index == 0,
               isLast: index == events.length - 1,
             ),
