@@ -76,6 +76,7 @@ Future<GoRouter> pumpScreen(
   Widget child,
   Fakes fakes, {
   List<String> extraRoutes = const [],
+  List<Override> extraOverrides = const [],
 }) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
@@ -98,6 +99,7 @@ Future<GoRouter> pumpScreen(
       ...fakes.overrides,
       sharedPreferencesProvider.overrideWithValue(prefs),
       quoteDebounceProvider.overrideWithValue(Duration.zero),
+      ...extraOverrides,
     ],
   );
   addTearDown(container.dispose);

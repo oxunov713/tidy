@@ -165,5 +165,6 @@
   "save": "Saqlash",
   "signOutConfirmTitle": "Chiqasizmi?",
   "signOutConfirmBody": "Bu telefonda buyurtmalar kelishi to'xtaydi.",
-  "profileSaved": "Profil yangilandi"
+  "profileSaved": "Profil yangilandi",
+  "chatClosed": "Bu suhbat yopilgan."
 }

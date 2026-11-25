@@ -440,5 +440,7 @@
   "language": "Language",
   "systemDefault": "System default",
   "logout": "Log out",
-  "logoutTitle": "Log out of Tidy?"
+  "logoutTitle": "Log out of Tidy?",
+  "chatClosed": "This conversation is closed.",
+  "loading": "Loading"
 }

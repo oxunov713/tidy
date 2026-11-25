@@ -222,5 +222,7 @@
   "language": "Til",
   "systemDefault": "Tizim tili",
   "logout": "Chiqish",
-  "logoutTitle": "Tidy dan chiqasizmi?"
+  "logoutTitle": "Tidy dan chiqasizmi?",
+  "chatClosed": "Bu suhbat yopilgan.",
+  "loading": "Yuklanmoqda"
 }

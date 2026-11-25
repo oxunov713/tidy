@@ -165,5 +165,6 @@
   "save": "Сохранить",
   "signOutConfirmTitle": "Выйти?",
   "signOutConfirmBody": "На этом телефоне вы перестанете получать заказы.",
-  "profileSaved": "Профиль обновлён"
+  "profileSaved": "Профиль обновлён",
+  "chatClosed": "Этот чат закрыт."
 }

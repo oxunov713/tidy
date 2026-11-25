@@ -331,5 +331,6 @@
   "save": "Save",
   "signOutConfirmTitle": "Sign out?",
   "signOutConfirmBody": "You will stop receiving job offers on this phone.",
-  "profileSaved": "Profile updated"
+  "profileSaved": "Profile updated",
+  "chatClosed": "This conversation is closed."
 }

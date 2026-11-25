@@ -749,4 +749,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get logoutTitle => 'Выйти из Tidy?';
+
+  @override
+  String get chatClosed => 'Этот чат закрыт.';
+
+  @override
+  String get loading => 'Загрузка';
 }

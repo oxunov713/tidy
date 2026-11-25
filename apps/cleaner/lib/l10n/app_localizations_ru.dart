@@ -575,4 +575,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileSaved => 'Профиль обновлён';
+
+  @override
+  String get chatClosed => 'Этот чат закрыт.';
 }

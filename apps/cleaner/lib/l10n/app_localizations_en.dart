@@ -576,4 +576,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSaved => 'Profile updated';
+
+  @override
+  String get chatClosed => 'This conversation is closed.';
 }

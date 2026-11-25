@@ -222,5 +222,7 @@
   "language": "Язык",
   "systemDefault": "Как в системе",
   "logout": "Выйти",
-  "logoutTitle": "Выйти из Tidy?"
+  "logoutTitle": "Выйти из Tidy?",
+  "chatClosed": "Этот чат закрыт.",
+  "loading": "Загрузка"
 }

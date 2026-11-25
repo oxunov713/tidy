@@ -1095,6 +1095,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile updated'**
   String get profileSaved;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation is closed.'**
+  String get chatClosed;
 }
 
 class _AppLocalizationsDelegate

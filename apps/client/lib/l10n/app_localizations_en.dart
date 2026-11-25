@@ -751,4 +751,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutTitle => 'Log out of Tidy?';
+
+  @override
+  String get chatClosed => 'This conversation is closed.';
+
+  @override
+  String get loading => 'Loading';
 }

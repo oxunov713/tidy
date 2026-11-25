@@ -571,4 +571,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get profileSaved => 'Profil yangilandi';
+
+  @override
+  String get chatClosed => 'Bu suhbat yopilgan.';
 }

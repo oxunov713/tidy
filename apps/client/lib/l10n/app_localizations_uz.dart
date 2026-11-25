@@ -755,4 +755,10 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get logoutTitle => 'Tidy dan chiqasizmi?';
+
+  @override
+  String get chatClosed => 'Bu suhbat yopilgan.';
+
+  @override
+  String get loading => 'Yuklanmoqda';
 }
