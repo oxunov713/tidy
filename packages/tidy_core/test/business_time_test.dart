@@ -79,6 +79,9 @@ void main() {
     test('calendar days are printed as they are', () {
       final day = DateTime(2026, 12, 3);
       expect(TidyDates.dayShortOf(day, 'en'), 'Thu 3 Dec');
+      expect(TidyDates.dayLongMonthOf(day, 'en'), 'Thursday, 3 December');
+      expect(TidyDates.monthYearOf(day, 'en'), 'December 2026');
+      expect(TidyDates.weekdayUpperOf(day, 'en'), 'THU');
       expect(TidyDates.isoDay(day), '2026-12-03');
       expect(
         TidyDates.dayRangeOf(day, DateTime(2026, 12, 9), 'en'),

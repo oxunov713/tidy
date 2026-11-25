@@ -124,7 +124,7 @@ event ids are stored in `processed_webhooks`, so a repeated webhook does nothing
 
 ## Flutter apps
 
-- **Riverpod 2** (`riverpod_generator`), **go_router**, **freezed** + `json_serializable`,
+- **Riverpod 3** (`riverpod_generator`), **go_router**, **freezed** + `json_serializable`,
   **dio** for HTTP.
 - Each feature is split into `data/` (DTOs, repositories), `domain/` (entities,
   repository interfaces) and `presentation/` (screens, widgets, providers).
@@ -144,8 +144,10 @@ abstract interface class MapProvider {
 
 - Tokens are stored with `flutter_secure_storage`; a dio interceptor refreshes
   the access token once on 401 and retries the request.
-- Push notifications with `firebase_messaging`; the token is sent to
-  `POST /me/devices`.
+- Push is an interface, `PushService` in `tidy_core`, whose default does
+  nothing, so the apps run and are tested without Firebase. A real
+  implementation (for example `firebase_messaging`) is passed in when the app
+  starts; its token is sent to `POST /me/devices`.
 - English is the main language, with Russian and Uzbek translations (ARB files).
 
 ## Design
