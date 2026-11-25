@@ -26,6 +26,9 @@ const (
 	otpMaxRequests   = 3
 	otpRequestWindow = 10 * time.Minute
 	tokenIssuer      = "tidy"
+	// refreshGrace lets an app retry a refresh whose answer it never got,
+	// or two refreshes race, without being signed out.
+	refreshGrace = 10 * time.Second
 )
 
 type AuthConfig struct {
@@ -83,18 +86,17 @@ func (a *Auth) RequestCode(ctx context.Context, rawPhone string) error {
 	return a.sender.SendCode(ctx, phone, code)
 }
 
-// Verify checks the code and signs the user in, creating the account on
-// first login. Role only matters for new accounts.
+// Verify checks the code and signs the user in. An unknown number signs up
+// as a client or cleaner; admins are never created here. A role that
+// doesn't match the existing account is refused, so a cleaner can't end up
+// in the client app by mistake. No role means "whatever the account is".
 func (a *Auth) Verify(ctx context.Context, rawPhone, code string, role domain.Role) (Session, error) {
 	phone, ok := domain.NormalizePhone(rawPhone)
 	if !ok {
 		return Session{}, errBadPhone
 	}
-	if role == "" {
-		role = domain.RoleClient
-	}
-	if role != domain.RoleClient && role != domain.RoleCleaner {
-		return Session{}, domain.Invalid("role", "must be client or cleaner")
+	if role != "" && !role.Valid() {
+		return Session{}, domain.Invalid("role", "must be client, cleaner or admin")
 	}
 
 	otp, err := a.store.TouchOTP(ctx, phone)
@@ -123,7 +125,7 @@ func (a *Auth) Verify(ctx context.Context, rawPhone, code string, role domain.Ro
 		return Session{}, errWrongCode
 	}
 
-	user, err := a.store.FindOrCreateUser(ctx, phone, role)
+	user, err := a.account(ctx, phone, role)
 	if err != nil {
 		return Session{}, err
 	}
@@ -135,16 +137,50 @@ func (a *Auth) Verify(ctx context.Context, rawPhone, code string, role domain.Ro
 	return s, nil
 }
 
-// Refresh swaps a refresh token for a new pair. Each refresh token works once.
+func (a *Auth) account(ctx context.Context, phone string, role domain.Role) (domain.User, error) {
+	user, err := a.store.GetUserByPhone(ctx, phone)
+	if errors.Is(err, domain.ErrNotFound) {
+		switch role {
+		case domain.RoleAdmin:
+			return domain.User{}, domain.Forbidden("This number isn't an admin.")
+		case "":
+			role = domain.RoleClient
+		}
+		user, err = a.store.CreateUser(ctx, phone, role)
+	}
+	if err != nil {
+		return domain.User{}, err
+	}
+	if role != "" && user.Role != role {
+		return domain.User{}, domain.Forbidden("This number is registered as " + withArticle(user.Role) + ".")
+	}
+	return user, nil
+}
+
+func withArticle(r domain.Role) string {
+	if r == domain.RoleAdmin {
+		return "an admin"
+	}
+	return "a " + string(r)
+}
+
+// Refresh swaps a refresh token for a new pair. Each refresh token works
+// once; presenting it again within refreshGrace returns the same pair.
 func (a *Auth) Refresh(ctx context.Context, refreshToken string) (Session, error) {
 	if refreshToken == "" {
 		return Session{}, errBadRefresh
 	}
-	next, err := randomToken()
-	if err != nil {
-		return Session{}, err
-	}
-	userID, err := a.store.RotateRefreshToken(ctx, hashToken(refreshToken), hashToken(next), a.clock.now().Add(a.cfg.RefreshTTL))
+	// The successor is derived from the old token, so a retry can be given
+	// the same token without storing it in plain text.
+	next := a.successor(refreshToken)
+	now := a.clock.now()
+	userID, rotatedAt, err := a.store.RotateRefreshToken(ctx, RefreshRotation{
+		OldHash:   hashToken(refreshToken),
+		NewHash:   hashToken(next),
+		ExpiresAt: now.Add(a.cfg.RefreshTTL),
+		Now:       now,
+		Grace:     refreshGrace,
+	})
 	if err != nil {
 		return Session{}, err
 	}
@@ -152,11 +188,18 @@ func (a *Auth) Refresh(ctx context.Context, refreshToken string) (Session, error
 	if err != nil {
 		return Session{}, err
 	}
-	access, err := a.accessToken(user)
+	// Issued at the rotation time, so a retry gets the same access token too.
+	access, err := a.accessTokenAt(user, rotatedAt)
 	if err != nil {
 		return Session{}, err
 	}
 	return Session{AccessToken: access, RefreshToken: next}, nil
+}
+
+func (a *Auth) successor(refreshToken string) string {
+	mac := hmac.New(sha256.New, a.cfg.Secret)
+	mac.Write([]byte("refresh:" + refreshToken))
+	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 }
 
 // Logout revokes the refresh token. Unknown tokens are ignored, so logging
@@ -209,7 +252,10 @@ func (a *Auth) newSession(ctx context.Context, user domain.User) (Session, error
 }
 
 func (a *Auth) accessToken(user domain.User) (string, error) {
-	now := a.clock.now()
+	return a.accessTokenAt(user, a.clock.now())
+}
+
+func (a *Auth) accessTokenAt(user domain.User, now time.Time) (string, error) {
 	claims := accessClaims{
 		Role: user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{

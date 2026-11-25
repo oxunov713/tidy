@@ -66,6 +66,10 @@ func (s CleanerStatus) Valid() bool {
 	return false
 }
 
+// CleanerSeenWithin: an online cleaner not heard from for longer (location,
+// online toggle or WebSocket heartbeat) gets no offers.
+const CleanerSeenWithin = 10 * time.Minute
+
 type Cleaner struct {
 	UserID      uuid.UUID     `json:"user_id"`
 	Status      CleanerStatus `json:"status"`
@@ -180,14 +184,26 @@ type Address struct {
 	Deleted bool `json:"-"`
 }
 
+const (
+	MaxAddressLine = 200
+	MaxCity        = 80
+	MaxPostcode    = 12
+	MaxAccessNotes = 500
+	MaxName        = 80
+	MaxBio         = 500
+	MaxEmail       = 254
+)
+
+// Validate expects fields already trimmed.
 func (a Address) Validate() error {
 	fe := FieldErrors{}
-	fe.Check(strings.TrimSpace(a.Line1) != "", "line1", "is required")
-	fe.Check(strings.TrimSpace(a.City) != "", "city", "is required")
-	fe.Check(strings.TrimSpace(a.Postcode) != "", "postcode", "is required")
+	fe.CheckLength(a.Line1, true, MaxAddressLine, "line1")
+	fe.CheckLength(a.Line2, false, MaxAddressLine, "line2")
+	fe.CheckLength(a.City, true, MaxCity, "city")
+	fe.CheckLength(a.Postcode, true, MaxPostcode, "postcode")
+	fe.CheckLength(a.AccessNotes, false, MaxAccessNotes, "access_notes")
 	fe.Check(a.Lat >= -90 && a.Lat <= 90, "lat", "must be between -90 and 90")
 	fe.Check(a.Lng >= -180 && a.Lng <= 180, "lng", "must be between -180 and 180")
-	fe.Check(len(a.AccessNotes) <= 1000, "access_notes", "is too long")
 	return fe.Err()
 }
 

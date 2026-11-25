@@ -30,6 +30,9 @@ const (
 	maxMessageBytes = 4 << 10
 	sendBuffer      = 32
 	writeTimeout    = 10 * time.Second
+	checkTimeout    = 5 * time.Second
+
+	reasonAccessRevoked = "access_revoked"
 )
 
 func bookingRoom(id uuid.UUID) string { return bookingRoomPrefix + id.String() }
@@ -41,6 +44,8 @@ type Authenticator func(token string) (service.Principal, error)
 type Backend interface {
 	CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (bool, error)
 	RecordLocation(ctx context.Context, cleanerID, bookingID uuid.UUID, lat, lng float64) (int, error)
+	// CleanerSeen is called for every heartbeat a cleaner's app answers.
+	CleanerSeen(ctx context.Context, cleanerID uuid.UUID) error
 }
 
 type Options struct {
@@ -89,9 +94,10 @@ func (h *Hub) Close() {
 
 type client struct {
 	service.Principal
-	send   chan []byte
-	rooms  map[string]bool // guarded by Hub.mu
-	cancel context.CancelFunc
+	send    chan []byte
+	rooms   map[string]bool // guarded by Hub.mu
+	cancel  context.CancelFunc
+	backend Backend
 }
 
 // Handler serves GET /ws?token=<access token>.
@@ -121,7 +127,7 @@ func (h *Hub) serve(parent context.Context, conn *websocket.Conn, p service.Prin
 	defer conn.CloseNow()
 	conn.SetReadLimit(maxMessageBytes)
 
-	c := &client{Principal: p, send: make(chan []byte, sendBuffer), rooms: map[string]bool{}, cancel: cancel}
+	c := &client{Principal: p, send: make(chan []byte, sendBuffer), rooms: map[string]bool{}, cancel: cancel, backend: backend}
 	h.register(c)
 	defer h.unregister(c)
 
@@ -177,6 +183,11 @@ func (h *Hub) pingLoop(ctx context.Context, conn *websocket.Conn, c *client) {
 				h.log.Debug("dropping silent websocket", "user_id", c.UserID)
 				c.cancel()
 				return
+			}
+			if c.Role == domain.RoleCleaner && c.backend != nil {
+				if err := c.backend.CleanerSeen(ctx, c.UserID); err != nil && ctx.Err() == nil {
+					h.log.Error("record cleaner heartbeat", "user_id", c.UserID, "err", err)
+				}
 			}
 		}
 	}
@@ -279,24 +290,73 @@ func (h *Hub) removeLocked(c *client, room string) {
 }
 
 // toRoom sends msg to every member of room that passes only (nil means all).
-// A client that can't keep up is disconnected instead of slowing others.
 func (h *Hub) toRoom(room string, msg any, only func(*client) bool) {
+	b, ok := h.encode(msg)
+	if !ok {
+		return
+	}
+	for _, c := range h.members(room) {
+		if only == nil || only(c) {
+			c.deliver(b)
+		}
+	}
+}
+
+// toBookingRoom checks every member's access again before sending, so
+// someone who lost access through a path that didn't evict them (a direct
+// database change, a missed event) still gets nothing.
+func (h *Hub) toBookingRoom(bookingID uuid.UUID, msg any) {
+	b, ok := h.encode(msg)
+	if !ok {
+		return
+	}
+	room := bookingRoom(bookingID)
+	for _, c := range h.members(room) {
+		if c.backend != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), checkTimeout)
+			allowed, err := c.backend.CanWatch(ctx, c.UserID, bookingID)
+			cancel()
+			if err != nil {
+				h.log.Error("websocket room recheck", "room", room, "err", err)
+				continue
+			}
+			if !allowed {
+				h.evict(c, room)
+				continue
+			}
+		}
+		c.deliver(b)
+	}
+}
+
+func (h *Hub) encode(msg any) ([]byte, bool) {
 	b, err := json.Marshal(msg)
 	if err != nil {
 		h.log.Error("encode websocket message", "err", err)
-		return
+		return nil, false
 	}
+	return b, true
+}
+
+// members is a snapshot, so slow access checks run without the lock.
+func (h *Hub) members(room string) []*client {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
+	out := make([]*client, 0, len(h.rooms[room]))
 	for c := range h.rooms[room] {
-		if only != nil && !only(c) {
-			continue
-		}
-		select {
-		case c.send <- b:
-		default:
-			c.cancel()
-		}
+		out = append(out, c)
+	}
+	return out
+}
+
+// evict removes c from room and tells the app why.
+func (h *Hub) evict(c *client, room string) {
+	h.mu.Lock()
+	member := c.rooms[room]
+	h.removeLocked(c, room)
+	h.mu.Unlock()
+	if member {
+		c.reply(roomAck{Type: "unsubscribed", Room: room, Reason: reasonAccessRevoked})
 	}
 }
 
@@ -305,6 +365,12 @@ func (c *client) reply(msg any) {
 	if err != nil {
 		return
 	}
+	c.deliver(b)
+}
+
+// deliver queues b. A client that can't keep up is disconnected instead of
+// slowing others.
+func (c *client) deliver(b []byte) {
 	select {
 	case c.send <- b:
 	default:
@@ -319,7 +385,7 @@ func cleanerOnly(id uuid.UUID) func(*client) bool {
 // The methods below implement service.Events.
 
 func (h *Hub) BookingStatus(b domain.Booking, at time.Time) {
-	h.toRoom(bookingRoom(b.ID), bookingStatus{Type: "booking.status", BookingID: b.ID, Status: b.Status, At: at}, nil)
+	h.toBookingRoom(b.ID, bookingStatus{Type: "booking.status", BookingID: b.ID, Status: b.Status, At: at})
 }
 
 func (h *Hub) OfferNew(cleanerID uuid.UUID, b domain.Booking, expiresAt time.Time) {
@@ -331,7 +397,39 @@ func (h *Hub) OfferGone(cleanerID, bookingID uuid.UUID) {
 }
 
 func (h *Hub) MessageNew(bookingID uuid.UUID, m domain.Message) {
-	h.toRoom(bookingRoom(bookingID), messageNew{Type: "message.new", BookingID: bookingID, Message: m}, nil)
+	h.toBookingRoom(bookingID, messageNew{Type: "message.new", BookingID: bookingID, Message: m})
+}
+
+func (h *Hub) BookingAccessRevoked(bookingID, userID uuid.UUID) {
+	room := bookingRoom(bookingID)
+	for _, c := range h.members(room) {
+		if c.UserID == userID {
+			h.evict(c, room)
+		}
+	}
+}
+
+func (h *Hub) UserAccessRevoked(userID uuid.UUID) {
+	type membership struct {
+		c    *client
+		room string
+	}
+	var found []membership
+	h.mu.RLock()
+	for c := range h.clients {
+		if c.UserID != userID {
+			continue
+		}
+		for room := range c.rooms {
+			if strings.HasPrefix(room, bookingRoomPrefix) {
+				found = append(found, membership{c, room})
+			}
+		}
+	}
+	h.mu.RUnlock()
+	for _, m := range found {
+		h.evict(m.c, m.room)
+	}
 }
 
 var _ service.Events = (*Hub)(nil)

@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"time"
@@ -83,13 +84,20 @@ func (s *Server) createBooking(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	type payment struct {
-		ClientSecret string `json:"client_secret"`
+	writeJSON(w, http.StatusCreated, created)
+	return nil
+}
+
+func (s *Server) payBooking(w http.ResponseWriter, r *http.Request) error {
+	id, err := pathID(r, "id")
+	if err != nil {
+		return err
 	}
-	writeJSON(w, http.StatusCreated, struct {
-		Booking domain.Booking `json:"booking"`
-		Payment payment        `json:"payment"`
-	}{created.Booking, payment{created.ClientSecret}})
+	pay, err := s.bookings.Pay(r.Context(), principal(r), id)
+	if err != nil {
+		return err
+	}
+	writeJSON(w, http.StatusOK, pay)
 	return nil
 }
 
@@ -130,12 +138,38 @@ func (s *Server) cancelBooking(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	c, err := s.bookings.Cancel(r.Context(), principal(r), id)
+	var in struct {
+		Scope service.CancelScope `json:"scope"`
+	}
+	if err := decodeOptional(w, r, &in); err != nil {
+		return err
+	}
+	c, err := s.bookings.Cancel(r.Context(), principal(r), id, in.Scope)
 	if err != nil {
 		return err
 	}
 	writeJSON(w, http.StatusOK, c)
 	return nil
+}
+
+func (s *Server) listPlans(w http.ResponseWriter, r *http.Request) error {
+	plans, err := s.bookings.Plans(r.Context(), principal(r))
+	if err != nil {
+		return err
+	}
+	writeJSON(w, http.StatusOK, plans)
+	return nil
+}
+
+func (s *Server) endPlan(w http.ResponseWriter, r *http.Request) error {
+	id, err := pathID(r, "id")
+	if err != nil {
+		return err
+	}
+	if err := s.bookings.EndPlan(r.Context(), principal(r), id); err != nil {
+		return err
+	}
+	return noContent(w)
 }
 
 func (s *Server) reviewBooking(w http.ResponseWriter, r *http.Request) error {
@@ -194,10 +228,12 @@ func (s *Server) postMessage(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-const maxWebhookBytes = 64 << 10
-
 func (s *Server) stripeWebhook(w http.ResponseWriter, r *http.Request) error {
-	payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxWebhookBytes))
+	payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBodyBytes))
+	var maxErr *http.MaxBytesError
+	if errors.As(err, &maxErr) {
+		return domain.ErrPayloadTooLarge
+	}
 	if err != nil {
 		return domain.NewError(domain.CodeInvalidRequest, "Could not read the webhook body.")
 	}

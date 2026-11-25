@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -73,10 +74,10 @@ func run() error {
 	hub := realtime.NewHub(auth.ParseAccessToken, realtime.Options{OriginPatterns: cfg.WSOriginPatterns}, log)
 	pusher := service.NewPusher(store, notifier, log)
 	dispatch := service.NewDispatcher(store, store, hub, pusher, loc, radius, nil, log)
-	payments := service.NewPayments(store, provider, dispatch, hub, nil, log)
+	payments := service.NewPayments(store, provider, dispatch, hub, pusher, nil, log)
 	bookings := service.NewBookings(store, store, payments, hub, pusher, loc, radius, nil, log)
 	cleaners := service.NewCleaners(store, payments, hub, pusher, loc, nil, log)
-	admin := service.NewAdmin(store, bookings, hub, pusher, loc, nil)
+	admin := service.NewAdmin(store, bookings, dispatch, hub, pusher, loc, nil, log)
 
 	api := httpapi.New(httpapi.Deps{
 		Auth:        auth,
@@ -99,17 +100,24 @@ func run() error {
 		IdleTimeout:       2 * time.Minute,
 	}
 
+	// Bind first: if the port is taken, fail before the scheduler touches
+	// any booking.
+	ln, err := net.Listen("tcp", cfg.HTTPAddr)
+	if err != nil {
+		return fmt.Errorf("listen: %w", err)
+	}
+
 	var jobs sync.WaitGroup
 	jobs.Add(1)
 	go func() {
 		defer jobs.Done()
-		scheduler.New(bookings, dispatch, log).Run(ctx)
+		scheduler.New(scheduler.Jobs{Plans: bookings, Offers: dispatch, Payments: payments, Stuck: bookings}, log).Run(ctx)
 	}()
 
 	serveErr := make(chan error, 1)
 	go func() {
-		log.Info("api listening", "addr", cfg.HTTPAddr, "env", cfg.Env, "payments", provider.Name(), "push", cfg.PushProvider)
-		serveErr <- srv.ListenAndServe()
+		log.Info("api listening", "addr", ln.Addr().String(), "env", cfg.Env, "payments", provider.Name(), "push", cfg.PushProvider)
+		serveErr <- srv.Serve(ln)
 	}()
 
 	select {

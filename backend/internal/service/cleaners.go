@@ -48,7 +48,7 @@ func (s *Cleaners) SetOnline(ctx context.Context, p Principal, online bool, lat,
 			return domain.Invalid("lat", "lat and lng are required to go online")
 		}
 	}
-	return s.store.SetCleanerOnline(ctx, p.UserID, online, lat, lng)
+	return s.store.SetCleanerOnline(ctx, p.UserID, online, lat, lng, s.clock.now())
 }
 
 // Job is a booking as the cleaner sees it: with the address and client name.
@@ -115,6 +115,9 @@ func (s *Cleaners) UpdateJobStatus(ctx context.Context, p Principal, bookingID u
 	}
 	if b.CleanerID == nil || *b.CleanerID != p.UserID {
 		return domain.Booking{}, domain.Forbidden("This isn't your job.")
+	}
+	if err := requireApproved(ctx, s.store, p.UserID); err != nil {
+		return domain.Booking{}, err
 	}
 	if !b.Status.CanTransitionTo(status) {
 		return domain.Booking{}, domain.InvalidTransition("A job that is " + string(b.Status) + " can't become " + string(status) + ".")

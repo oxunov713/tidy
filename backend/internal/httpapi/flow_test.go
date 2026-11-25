@@ -46,18 +46,20 @@ func TestOTPLogin(t *testing.T) {
 	e.expect(e.do("GET", "/me", "not-a-token", nil), http.StatusUnauthorized)
 	e.expect(e.do("GET", "/bookings", s.AccessToken, nil), http.StatusForbidden)
 
-	// Refresh rotates; the old refresh token then stops working, and using
-	// it again signs the user out everywhere.
+	// Refresh rotates; after the grace window the old refresh token stops
+	// working, and using it again signs the user out everywhere.
 	var next session
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": s.RefreshToken}), http.StatusOK).decode(t, &next)
 	if next.RefreshToken == s.RefreshToken {
 		t.Fatal("refresh token was not rotated")
 	}
+	e.travelTo(time.Now().Add(11 * time.Second))
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": s.RefreshToken}), http.StatusUnauthorized)
 	e.expect(e.do("POST", "/auth/refresh", "", map[string]string{"refresh_token": next.RefreshToken}), http.StatusUnauthorized)
 
-	// Logout revokes the refresh token.
-	again := e.login(phone, domain.RoleClient)
+	// Logout revokes the refresh token. Leaving the role out signs in as
+	// whatever the account is.
+	again := e.login(phone, "")
 	if again.User.Role != domain.RoleCleaner {
 		t.Errorf("existing user kept role %s, want cleaner", again.User.Role)
 	}
@@ -384,5 +386,69 @@ func TestWebhookIsIdempotent(t *testing.T) {
 	}
 	if offered := e.openOfferFor(b.ID); offered == nil || *offered != cl.ID {
 		t.Errorf("confirmed booking offered to %v, want %s", offered, cl.ID)
+	}
+}
+
+func TestDispatchSkipsCleanersNotSeenLately(t *testing.T) {
+	e := newEnv(t)
+	ghost := e.cleaner("+447700902101", 51.5200, -0.1550, true)
+	far := e.cleaner("+447700902102", 51.5000, -0.1000, true)
+	c := e.client("+447700902201")
+	if _, err := e.store.Pool().Exec(t.Context(),
+		`UPDATE cleaners SET last_seen_at = $2 WHERE user_id = $1`, ghost.ID, e.now().Add(-11*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+
+	b := e.book(c, tomorrowAt(10))
+	if offered := e.openOfferFor(b.ID); offered == nil || *offered != far.ID {
+		t.Fatalf("offer went to %v, want %s: the nearer cleaner hasn't been seen for 11 minutes", offered, far.ID)
+	}
+
+	// Going online again counts as being seen, on the service clock.
+	e.travelTo(time.Now().Add(time.Hour))
+	e.expect(e.do("POST", "/cleaner/online", ghost.AccessToken, map[string]any{"online": true, "lat": 51.52, "lng": -0.155}), http.StatusNoContent)
+	var seen time.Time
+	if err := e.store.Pool().QueryRow(t.Context(), `SELECT last_seen_at FROM cleaners WHERE user_id = $1`, ghost.ID).Scan(&seen); err != nil {
+		t.Fatal(err)
+	}
+	if d := e.now().Sub(seen); d < 0 || d > time.Minute {
+		t.Errorf("last_seen_at = %v, want about %v", seen, e.now())
+	}
+	second := e.book(c, tomorrowAt(14))
+	if offered := e.openOfferFor(second.ID); offered == nil || *offered != ghost.ID {
+		t.Errorf("offer went to %v, want the nearer cleaner %s now that they are back", offered, ghost.ID)
+	}
+}
+
+func TestChatClosesAfterTheBooking(t *testing.T) {
+	e := newEnv(t)
+	cl := e.cleaner("+447700902701", 51.5200, -0.1550, true)
+	c := e.client("+447700902801")
+	start := tomorrowAt(10)
+	done := e.book(c, start)
+	e.expect(e.do("POST", "/cleaner/offers/"+done.ID.String()+"/accept", cl.AccessToken, nil), http.StatusOK)
+	cancelled := e.book(c, tomorrowAt(14))
+	e.expect(e.do("POST", "/bookings/"+cancelled.ID.String()+"/cancel", c.AccessToken, nil), http.StatusOK)
+
+	post := func(id uuid.UUID) response {
+		return e.do("POST", "/bookings/"+id.String()+"/messages", c.AccessToken, map[string]string{"body": "Thanks!"})
+	}
+	if r := post(cancelled.ID); r.status != http.StatusConflict || r.errorCode(t) != "invalid_transition" {
+		t.Errorf("chat on a cancelled booking: got %d %s", r.status, r.body)
+	}
+
+	e.travelTo(start.Add(-time.Hour))
+	for _, s := range []string{"on_the_way", "in_progress", "completed"} {
+		e.expect(e.do("POST", "/cleaner/jobs/"+done.ID.String()+"/status", cl.AccessToken, map[string]string{"status": s}), http.StatusOK)
+	}
+	// The database stamps updated_at with its own clock; line it up with the
+	// travelled service clock.
+	if _, err := e.store.Pool().Exec(t.Context(), `UPDATE bookings SET updated_at = $2 WHERE id = $1`, done.ID, e.now()); err != nil {
+		t.Fatal(err)
+	}
+	e.expect(post(done.ID), http.StatusCreated)
+	e.travelTo(e.now().Add(25 * time.Hour))
+	if r := post(done.ID); r.status != http.StatusConflict || r.errorCode(t) != "invalid_transition" {
+		t.Errorf("chat 25 hours after completion: got %d %s", r.status, r.body)
 	}
 }

@@ -16,7 +16,9 @@ import (
 	"github.com/oxunov713/tidy/backend/internal/domain"
 )
 
-const maxBodyBytes = 1 << 20
+// maxBodyBytes is far more than any request needs; the rest is rejected
+// with 413 before it is read into memory.
+const maxBodyBytes = 64 << 10
 
 // handlerFunc returns an error instead of writing it, so every handler
 // reports errors the same way.
@@ -49,6 +51,7 @@ var statusByCode = map[domain.ErrorCode]int{
 	domain.CodeInvalidTransition: http.StatusConflict,
 	domain.CodeOfferGone:         http.StatusConflict,
 	domain.CodeTooManyRequests:   http.StatusTooManyRequests,
+	domain.CodePayloadTooLarge:   http.StatusRequestEntityTooLarge,
 }
 
 func (s *Server) writeError(w http.ResponseWriter, r *http.Request, err error) {
@@ -80,9 +83,18 @@ func noContent(w http.ResponseWriter) error {
 }
 
 func decode(w http.ResponseWriter, r *http.Request, v any) error {
+	return decodeBody(w, r, v, false)
+}
+
+// decodeOptional is decode for endpoints where the whole body may be left out.
+func decodeOptional(w http.ResponseWriter, r *http.Request, v any) error {
+	return decodeBody(w, r, v, true)
+}
+
+func decodeBody(w http.ResponseWriter, r *http.Request, v any, optional bool) error {
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodyBytes))
 	err := dec.Decode(v)
-	if err == nil {
+	if err == nil || (optional && errors.Is(err, io.EOF)) {
 		return nil
 	}
 	var typeErr *json.UnmarshalTypeError
@@ -91,7 +103,7 @@ func decode(w http.ResponseWriter, r *http.Request, v any) error {
 	case errors.As(err, &typeErr) && typeErr.Field != "":
 		return domain.Invalid(typeErr.Field, "has the wrong type")
 	case errors.As(err, &maxErr):
-		return domain.NewError(domain.CodeInvalidRequest, "The request body is too large.")
+		return domain.ErrPayloadTooLarge
 	case errors.Is(err, io.EOF):
 		return domain.NewError(domain.CodeInvalidRequest, "The request body is empty.")
 	}

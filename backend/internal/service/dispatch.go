@@ -85,7 +85,10 @@ func (d *Dispatcher) nextCandidate(ctx context.Context, b domain.Booking, addr d
 		q.only = nil
 	}
 
-	q.onlineOnly = true
+	// An app that crashed or lost signal leaves is_online set; only
+	// cleaners seen recently get offers.
+	seen := d.clock.now().Add(-domain.CleanerSeenWithin)
+	q.onlineSince = &seen
 	cands, err := d.matcher.candidates(ctx, q)
 	if err != nil {
 		return nil, err
@@ -124,7 +127,7 @@ func (d *Dispatcher) Offer(ctx context.Context, b domain.Booking, cleanerID uuid
 // the update is conditional on the booking still being confirmed, and the
 // database rejects it if the cleaner is already busy at that time.
 func (d *Dispatcher) Accept(ctx context.Context, p Principal, bookingID uuid.UUID) (domain.Booking, error) {
-	if err := d.requireApproved(ctx, p.UserID); err != nil {
+	if err := requireApproved(ctx, d.store, p.UserID); err != nil {
 		return domain.Booking{}, err
 	}
 	b, withdrawn, err := d.store.AcceptOffer(ctx, bookingID, p.UserID, d.clock.now())
@@ -229,8 +232,13 @@ func (d *Dispatcher) dispatchLogged(ctx context.Context, bookingID uuid.UUID) {
 	}
 }
 
-func (d *Dispatcher) requireApproved(ctx context.Context, cleanerID uuid.UUID) error {
-	c, err := d.store.GetCleaner(ctx, cleanerID)
+type cleanerGetter interface {
+	GetCleaner(ctx context.Context, id uuid.UUID) (domain.Cleaner, error)
+}
+
+// requireApproved stops pending and suspended cleaners from acting on jobs.
+func requireApproved(ctx context.Context, store cleanerGetter, cleanerID uuid.UUID) error {
+	c, err := store.GetCleaner(ctx, cleanerID)
 	if errors.Is(err, domain.ErrNotFound) {
 		return domain.Forbidden("Only cleaners can do that.")
 	}
@@ -238,7 +246,7 @@ func (d *Dispatcher) requireApproved(ctx context.Context, cleanerID uuid.UUID) e
 		return err
 	}
 	if c.Status != domain.CleanerApproved {
-		return domain.Forbidden("Your profile isn't approved yet.")
+		return domain.Forbidden("Your profile isn't approved.")
 	}
 	return nil
 }

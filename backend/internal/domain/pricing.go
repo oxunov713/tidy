@@ -21,14 +21,24 @@ type Service struct {
 	SortOrder      int       `json:"sort_order"`
 }
 
+// Limits for catalogue prices (pence) and durations (minutes). They also
+// keep every booking total far inside the database's int range.
+const (
+	MaxServiceTitle = 80
+	MaxPrice        = 1_000_000
+	MaxMinutes      = 24 * 60
+)
+
 func (s Service) Validate() error {
 	fe := FieldErrors{}
-	fe.Check(s.Title != "", "title", "is required")
-	fe.Check(s.BasePrice > 0, "base_price", "must be positive")
-	fe.Check(s.PerBedroom >= 0, "per_bedroom", "can't be negative")
-	fe.Check(s.PerBathroom >= 0, "per_bathroom", "can't be negative")
-	fe.Check(s.BaseMinutes > 0, "base_minutes", "must be positive")
-	fe.Check(s.MinutesPerRoom >= 0, "minutes_per_room", "can't be negative")
+	fe.CheckLength(s.Title, true, MaxServiceTitle, "title")
+	price := fmt.Sprintf("must be between 1 and %d pence", MaxPrice)
+	fe.Check(s.BasePrice >= 1 && s.BasePrice <= MaxPrice, "base_price", price)
+	fe.Check(s.PerBedroom >= 1 && s.PerBedroom <= MaxPrice, "per_bedroom", price)
+	fe.Check(s.PerBathroom >= 1 && s.PerBathroom <= MaxPrice, "per_bathroom", price)
+	minutes := fmt.Sprintf("must be between 1 and %d minutes", MaxMinutes)
+	fe.Check(s.BaseMinutes >= 1 && s.BaseMinutes <= MaxMinutes, "base_minutes", minutes)
+	fe.Check(s.MinutesPerRoom >= 1 && s.MinutesPerRoom <= MaxMinutes, "minutes_per_room", minutes)
 	return fe.Err()
 }
 
@@ -131,6 +141,9 @@ func Price(in QuoteInput) (Quote, error) {
 	ValidateRooms(fe, in.Bedrooms, in.Bathrooms)
 	fe.Check(in.Frequency.Valid(), "frequency", "must be once, weekly or fortnightly")
 	fe.Check(in.Service.IsActive, "service_id", "is not available")
+	// Rows written before the limits existed could still overflow below.
+	fe.Check(in.Service.BasePrice <= MaxPrice && in.Service.PerBedroom <= MaxPrice &&
+		in.Service.PerBathroom <= MaxPrice, "service_id", "has an invalid price")
 	if err := fe.Err(); err != nil {
 		return Quote{}, err
 	}

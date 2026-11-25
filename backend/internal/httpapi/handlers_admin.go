@@ -77,7 +77,7 @@ func (s *Server) setCleanerStatus(status domain.CleanerStatus) handlerFunc {
 		if err != nil {
 			return err
 		}
-		if err := s.admin.SetCleanerStatus(r.Context(), id, status); err != nil {
+		if err := s.admin.SetCleanerStatus(r.Context(), principal(r), id, status); err != nil {
 			return err
 		}
 		return noContent(w)
@@ -99,26 +99,33 @@ func (s *Server) updateService(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	var in struct {
-		Title          string `json:"title"`
-		BasePrice      int    `json:"base_price"`
-		PerBedroom     int    `json:"per_bedroom"`
-		PerBathroom    int    `json:"per_bathroom"`
-		BaseMinutes    int    `json:"base_minutes"`
-		MinutesPerRoom int    `json:"minutes_per_room"`
-		IsActive       *bool  `json:"is_active"`
+		Title          *string `json:"title"`
+		BasePrice      *int    `json:"base_price"`
+		PerBedroom     *int    `json:"per_bedroom"`
+		PerBathroom    *int    `json:"per_bathroom"`
+		BaseMinutes    *int    `json:"base_minutes"`
+		MinutesPerRoom *int    `json:"minutes_per_room"`
+		IsActive       *bool   `json:"is_active"`
 	}
 	if err := decode(w, r, &in); err != nil {
 		return err
 	}
-	// PUT replaces the whole service, so a missing flag must not quietly
-	// switch a disabled service back on.
-	if in.IsActive == nil {
-		return domain.Invalid("is_active", "is required")
+	// PUT replaces the whole service, so a missing field must not quietly
+	// become 0 or switch a disabled service back on.
+	fe := domain.FieldErrors{}
+	for field, missing := range map[string]bool{
+		"title": in.Title == nil, "base_price": in.BasePrice == nil, "per_bedroom": in.PerBedroom == nil,
+		"per_bathroom": in.PerBathroom == nil, "base_minutes": in.BaseMinutes == nil,
+		"minutes_per_room": in.MinutesPerRoom == nil, "is_active": in.IsActive == nil,
+	} {
+		fe.Check(!missing, field, "is required")
 	}
-	active := *in.IsActive
+	if err := fe.Err(); err != nil {
+		return err
+	}
 	svc, err := s.catalogue.UpdateService(r.Context(), id, service.ServiceUpdate{
-		Title: in.Title, BasePrice: in.BasePrice, PerBedroom: in.PerBedroom, PerBathroom: in.PerBathroom,
-		BaseMinutes: in.BaseMinutes, MinutesPerRoom: in.MinutesPerRoom, IsActive: active,
+		Title: *in.Title, BasePrice: *in.BasePrice, PerBedroom: *in.PerBedroom, PerBathroom: *in.PerBathroom,
+		BaseMinutes: *in.BaseMinutes, MinutesPerRoom: *in.MinutesPerRoom, IsActive: *in.IsActive,
 	})
 	if err != nil {
 		return err

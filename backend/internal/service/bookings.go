@@ -31,6 +31,7 @@ type BookingsStore interface {
 
 type Bookings struct {
 	store    BookingsStore
+	cleaners CleanerStore
 	matcher  *matcher
 	payments *Payments
 	events   Events
@@ -42,6 +43,7 @@ type Bookings struct {
 func NewBookings(store BookingsStore, cleaners CleanerStore, payments *Payments, events Events, push *Pusher, loc *time.Location, radiusKm float64, clock Clock, log *slog.Logger) *Bookings {
 	return &Bookings{
 		store:    store,
+		cleaners: cleaners,
 		matcher:  &matcher{store: cleaners, loc: loc, radiusKm: radiusKm},
 		payments: payments,
 		events:   events,
@@ -147,12 +149,13 @@ type CreateBookingRequest struct {
 }
 
 type CreatedBooking struct {
-	Booking      domain.Booking
-	ClientSecret string
+	Booking domain.Booking `json:"booking"`
+	Payment PaymentStart   `json:"payment"`
 }
 
 // Create stores the booking in pending and starts the payment. The booking
-// is confirmed when the payment is authorised.
+// is confirmed when the money is held: now, or AuthorizeAhead before a
+// visit further away than DirectPaymentWindow.
 func (s *Bookings) Create(ctx context.Context, p Principal, in CreateBookingRequest) (CreatedBooking, error) {
 	if in.Frequency == "" {
 		in.Frequency = domain.FrequencyOnce
@@ -216,7 +219,7 @@ func (s *Bookings) Create(ctx context.Context, p Principal, in CreateBookingRequ
 	if err != nil {
 		return CreatedBooking{}, err
 	}
-	secret, err := s.payments.Start(ctx, b)
+	pay, err := s.payments.Start(ctx, b)
 	if err != nil {
 		return CreatedBooking{}, err
 	}
@@ -225,7 +228,23 @@ func (s *Bookings) Create(ctx context.Context, p Principal, in CreateBookingRequ
 	if err != nil {
 		return CreatedBooking{}, err
 	}
-	return CreatedBooking{Booking: b, ClientSecret: secret}, nil
+	return CreatedBooking{Booking: b, Payment: pay}, nil
+}
+
+// Pay lets the client pay a pending booking again, e.g. after their saved
+// card was declined.
+func (s *Bookings) Pay(ctx context.Context, p Principal, id uuid.UUID) (PaymentStart, error) {
+	b, err := s.store.GetBooking(ctx, id)
+	if err != nil {
+		return PaymentStart{}, err
+	}
+	if b.ClientID != p.UserID {
+		return PaymentStart{}, domain.Forbidden("This isn't your booking.")
+	}
+	if b.Status != domain.StatusPending {
+		return PaymentStart{}, domain.InvalidTransition("Only a booking waiting for payment can be paid.")
+	}
+	return s.payments.Pay(ctx, b)
 }
 
 func (s *Bookings) List(ctx context.Context, p Principal, upcoming bool, cursor string, limit int) (Page[domain.Booking], error) {
@@ -290,13 +309,28 @@ func (s *Bookings) Get(ctx context.Context, p Principal, id uuid.UUID) (BookingD
 }
 
 type Cancellation struct {
-	Booking  domain.Booking `json:"booking"`
-	Refunded bool           `json:"refunded"`
+	Booking   domain.Booking `json:"booking"`
+	Refunded  bool           `json:"refunded"`
+	PlanEnded bool           `json:"plan_ended"`
 }
 
+// CancelScope says whether a cancellation also ends the recurring plan.
+type CancelScope string
+
+const (
+	CancelVisit  CancelScope = "visit"
+	CancelSeries CancelScope = "series"
+)
+
 // Cancel is free until FreeCancellationWindow before the start; later the
-// held payment is charged.
-func (s *Bookings) Cancel(ctx context.Context, p Principal, id uuid.UUID) (Cancellation, error) {
+// held payment is charged. With CancelSeries the plan ends too.
+func (s *Bookings) Cancel(ctx context.Context, p Principal, id uuid.UUID, scope CancelScope) (Cancellation, error) {
+	if scope == "" {
+		scope = CancelVisit
+	}
+	if scope != CancelVisit && scope != CancelSeries {
+		return Cancellation{}, domain.Invalid("scope", "must be visit or series")
+	}
 	b, err := s.store.GetBooking(ctx, id)
 	if err != nil {
 		return Cancellation{}, err
@@ -304,7 +338,16 @@ func (s *Bookings) Cancel(ctx context.Context, p Principal, id uuid.UUID) (Cance
 	if b.ClientID != p.UserID {
 		return Cancellation{}, domain.Forbidden("This isn't your booking.")
 	}
-	return s.cancel(ctx, b, p.UserID, b.CancellationIsFree(s.clock.now()))
+	c, err := s.cancel(ctx, b, p.UserID, b.CancellationIsFree(s.clock.now()))
+	if err != nil {
+		return Cancellation{}, err
+	}
+	if scope == CancelSeries && b.PlanID != nil {
+		if c.PlanEnded, err = s.endPlan(ctx, *b.PlanID, &p.UserID); err != nil {
+			return Cancellation{}, err
+		}
+	}
+	return c, nil
 }
 
 // CancelByAdmin always refunds in full.
@@ -318,30 +361,38 @@ func (s *Bookings) CancelByAdmin(ctx context.Context, p Principal, id uuid.UUID)
 
 func (s *Bookings) cancel(ctx context.Context, b domain.Booking, actor uuid.UUID, refund bool) (Cancellation, error) {
 	if !b.Status.CanTransitionTo(domain.StatusCancelled) {
-		return Cancellation{}, domain.InvalidTransition("This booking can't be cancelled any more.")
+		return Cancellation{}, domain.InvalidTransition(b.Status.Phrase() + " can't be cancelled.")
 	}
 	b, withdrawn, err := s.store.CancelBooking(ctx, b.ID, b.Status, &actor)
 	if err != nil {
 		return Cancellation{}, err
 	}
+	refunded := s.afterCancel(ctx, CancelledBooking{Booking: b, Withdrawn: withdrawn}, refund)
+	return Cancellation{Booking: b, Refunded: refunded}, nil
+}
+
+// afterCancel settles the payment and tells everyone involved. It reports
+// whether the client got their money back.
+func (s *Bookings) afterCancel(ctx context.Context, c CancelledBooking, refund bool) bool {
+	b := c.Booking
 	refunded, err := s.payments.Settle(ctx, b.ID, refund)
 	if err != nil {
 		// The booking is cancelled either way; a failed refund is fixed by hand.
 		s.log.Error("settle payment after cancel", "booking_id", b.ID, "err", err)
 	}
-
-	for _, cleanerID := range withdrawn {
+	for _, cleanerID := range c.Withdrawn {
 		s.events.OfferGone(cleanerID, b.ID)
 	}
 	s.events.BookingStatus(b, s.clock.now())
 	if b.CleanerID != nil {
+		s.events.BookingAccessRevoked(b.ID, *b.CleanerID)
 		s.push.Notify(*b.CleanerID, domain.Notification{
 			Title: "Job cancelled",
 			Body:  "Booking " + b.Code + " was cancelled.",
 			Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String()},
 		})
 	}
-	return Cancellation{Booking: b, Refunded: refunded}, nil
+	return refunded
 }
 
 type ReviewRequest struct {
@@ -376,10 +427,23 @@ func (s *Bookings) Review(ctx context.Context, p Principal, id uuid.UUID, in Rev
 }
 
 func (s *Bookings) Messages(ctx context.Context, p Principal, id uuid.UUID) ([]domain.Message, error) {
-	if _, err := s.accessible(ctx, p, id); err != nil {
+	b, err := s.accessible(ctx, p, id)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.requireApprovedCleaner(ctx, b, p.UserID); err != nil {
 		return nil, err
 	}
 	return s.store.ListMessages(ctx, id)
+}
+
+// requireApprovedCleaner checks the cleaner's profile when the caller is
+// the booking's cleaner.
+func (s *Bookings) requireApprovedCleaner(ctx context.Context, b domain.Booking, userID uuid.UUID) error {
+	if b.CleanerID == nil || *b.CleanerID != userID {
+		return nil
+	}
+	return requireApproved(ctx, s.store, userID)
 }
 
 func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, body string) (domain.Message, error) {
@@ -389,6 +453,12 @@ func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, b
 	}
 	if !b.IsParticipant(p.UserID) {
 		return domain.Message{}, domain.Forbidden("Only the client and the cleaner can write here.")
+	}
+	if err := s.requireApprovedCleaner(ctx, b, p.UserID); err != nil {
+		return domain.Message{}, err
+	}
+	if err := b.ChatClosed(s.clock.now()); err != nil {
+		return domain.Message{}, err
 	}
 	body, err = domain.ValidateMessageBody(body)
 	if err != nil {
@@ -414,7 +484,8 @@ func (s *Bookings) PostMessage(ctx context.Context, p Principal, id uuid.UUID, b
 	return m, nil
 }
 
-// CanWatch tells the WebSocket hub who may join booking:<id>.
+// CanWatch tells the WebSocket hub who may be in booking:<id>: the client,
+// and the assigned cleaner while approved and until the booking is cancelled.
 func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (bool, error) {
 	b, err := s.store.GetBooking(ctx, bookingID)
 	if errors.Is(err, domain.ErrNotFound) {
@@ -423,7 +494,23 @@ func (s *Bookings) CanWatch(ctx context.Context, userID, bookingID uuid.UUID) (b
 	if err != nil {
 		return false, err
 	}
-	return b.IsParticipant(userID), nil
+	if b.ClientID == userID {
+		return true, nil
+	}
+	if !b.IsParticipant(userID) || b.Status == domain.StatusCancelled {
+		return false, nil
+	}
+	err = requireApproved(ctx, s.store, userID)
+	if errors.Is(err, domain.ErrForbidden) {
+		return false, nil
+	}
+	return err == nil, err
+}
+
+// CleanerSeen records a sign of life from the cleaner app, e.g. a WebSocket
+// heartbeat, so dispatch knows the cleaner is really there.
+func (s *Bookings) CleanerSeen(ctx context.Context, cleanerID uuid.UUID) error {
+	return s.cleaners.TouchCleaner(ctx, cleanerID, s.clock.now())
 }
 
 // RecordLocation stores the cleaner's latest position on the way to a job
@@ -439,10 +526,13 @@ func (s *Bookings) RecordLocation(ctx context.Context, cleanerID, bookingID uuid
 	if b.CleanerID == nil || *b.CleanerID != cleanerID {
 		return 0, domain.Forbidden("This isn't your job.")
 	}
+	if err := requireApproved(ctx, s.store, cleanerID); err != nil {
+		return 0, err
+	}
 	if b.Status != domain.StatusAssigned && b.Status != domain.StatusOnTheWay {
 		return 0, domain.InvalidTransition("Location is only shared on the way to a job.")
 	}
-	if err := s.store.SaveLocation(ctx, bookingID, cleanerID, lat, lng); err != nil {
+	if err := s.store.SaveLocation(ctx, bookingID, cleanerID, lat, lng, s.clock.now()); err != nil {
 		return 0, err
 	}
 	addr, err := s.store.GetAddress(ctx, b.AddressID)
@@ -450,75 +540,6 @@ func (s *Bookings) RecordLocation(ctx context.Context, cleanerID, bookingID uuid
 		return 0, err
 	}
 	return domain.ETAMinutes(domain.DistanceKm(lat, lng, addr.Lat, addr.Lng)), nil
-}
-
-// RunPlans creates the bookings of recurring plans that are due within the
-// next week. Returns how many bookings were created.
-func (s *Bookings) RunPlans(ctx context.Context) (int, error) {
-	now := s.clock.now()
-	plans, err := s.store.DuePlans(ctx, dateOf(now.In(s.loc()).Add(planLookahead)))
-	if err != nil {
-		return 0, err
-	}
-	created := 0
-	for _, plan := range plans {
-		if err := ctx.Err(); err != nil {
-			return created, err
-		}
-		ok, err := s.runPlan(ctx, plan, now)
-		if err != nil {
-			s.log.Error("run booking plan", "plan_id", plan.ID, "err", err)
-			continue
-		}
-		if ok {
-			created++
-		}
-	}
-	return created, nil
-}
-
-func (s *Bookings) runPlan(ctx context.Context, plan domain.Plan, now time.Time) (bool, error) {
-	t := plan.Template
-	next := plan.NextRunOn.AddDate(0, 0, plan.Frequency.IntervalDays())
-	start := t.StartTime.On(plan.NextRunOn, s.loc()).UTC()
-	if start.Before(now.Add(minLeadTime)) {
-		// Missed while the service was down; skip rather than book at short notice.
-		return false, s.store.AdvancePlan(ctx, plan.ID, next)
-	}
-
-	q, extras, err := s.quote(ctx, QuoteRequest{
-		ServiceID: t.ServiceID, Bedrooms: t.Bedrooms, Bathrooms: t.Bathrooms,
-		ExtraIDs: t.ExtraIDs, Frequency: plan.Frequency,
-	})
-	if err != nil {
-		return false, err
-	}
-	b, err := s.store.CreateBooking(ctx, domain.NewBooking{
-		ClientID:           plan.ClientID,
-		ServiceID:          t.ServiceID,
-		AddressID:          t.AddressID,
-		RequestedCleanerID: t.CleanerID,
-		Bedrooms:           t.Bedrooms,
-		Bathrooms:          t.Bathrooms,
-		Frequency:          plan.Frequency,
-		Start:              start,
-		End:                start.Add(time.Duration(q.Minutes) * time.Minute),
-		Quote:              q,
-		Extras:             extras,
-		FromPlan:           &domain.PlanRun{PlanID: plan.ID, NextRunOn: next},
-	})
-	if err != nil {
-		return false, err
-	}
-	if _, err := s.payments.Start(ctx, b); err != nil {
-		return false, err
-	}
-	s.push.Notify(plan.ClientID, domain.Notification{
-		Title: "Next clean booked",
-		Body:  b.ServiceTitle + " on " + b.Start.In(s.loc()).Format("Mon 2 Jan 15:04"),
-		Data:  map[string]string{"type": "booking.status", "booking_id": b.ID.String()},
-	})
-	return true, nil
 }
 
 // accessible loads a booking the caller may see: its client, its cleaner or an admin.

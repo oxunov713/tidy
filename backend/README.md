@@ -29,8 +29,10 @@ curl -X POST localhost:8080/api/v1/auth/otp -d '{"phone":"+447700900201"}'
 curl -X POST localhost:8080/api/v1/auth/verify -d '{"phone":"+447700900201","code":"123456"}'
 ```
 
-`PAYMENT_PROVIDER=mock` authorises every payment instantly, so a booking is
-confirmed and offered to a cleaner as soon as it is created. For Stripe test
+`PAYMENT_PROVIDER=mock` succeeds at every payment instantly, so a booking
+within 5 days is confirmed and offered to a cleaner as soon as it is created.
+Later bookings save the card and are confirmed by the scheduler 48 h before
+the visit. For Stripe test
 mode set `PAYMENT_PROVIDER=stripe` and the two `STRIPE_*` keys, and forward
 webhooks with `stripe listen --forward-to localhost:8080/api/v1/webhooks/stripe`.
 
@@ -57,5 +59,5 @@ its tables, so point it at a database used only for tests.
 | `internal/httpapi` | router, middleware, handlers |
 | `internal/realtime` | WebSocket hub |
 | `internal/payment`, `internal/push` | Stripe/mock and FCM/log adapters |
-| `internal/scheduler` | recurring bookings, offer expiry |
+| `internal/scheduler` | recurring bookings, offer expiry, saved-card charges, stuck bookings |
 | `migrations` | SQL migrations, embedded in the binary |

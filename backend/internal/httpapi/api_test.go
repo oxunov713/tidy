@@ -68,30 +68,82 @@ func (c *codeBook) last(phone string) string {
 }
 
 // recordingProvider is the mock provider that remembers what it was asked
-// to do. With hold set it behaves like Stripe: payments stay pending until a
-// webhook arrives. Its "signed" webhook body is {"id", "ref"}.
+// to do. With hold set it behaves like Stripe: payments and card setups stay
+// pending until a webhook arrives. With declineSaved the saved card is
+// declined off-session. Its "signed" webhook body is {"id", "ref", "kind"};
+// kind defaults to authorized.
 type recordingProvider struct {
 	payment.Mock
-	hold     bool
-	mu       sync.Mutex
-	captured []string
-	refunded []string
+	hold         bool
+	declineSaved bool
+	mu           sync.Mutex
+	requests     []chargeCall
+	captured     []string
+	refunded     []string
 }
 
-func (p *recordingProvider) CreateIntent(ctx context.Context, b domain.Booking) (domain.PaymentIntent, error) {
-	intent, err := p.Mock.CreateIntent(ctx, b)
+type chargeCall struct {
+	method string
+	req    domain.ChargeRequest
+}
+
+func (p *recordingProvider) remember(method string, req domain.ChargeRequest) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.requests = append(p.requests, chargeCall{method, req})
+}
+
+func (p *recordingProvider) calls(method string) []domain.ChargeRequest {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	var out []domain.ChargeRequest
+	for _, c := range p.requests {
+		if c.method == method {
+			out = append(out, c.req)
+		}
+	}
+	return out
+}
+
+func (p *recordingProvider) CreateIntent(ctx context.Context, req domain.ChargeRequest) (domain.PaymentIntent, error) {
+	p.remember("intent", req)
+	intent, err := p.Mock.CreateIntent(ctx, req)
 	if p.hold {
 		intent.Status = domain.PaymentRequiresAction
 	}
 	return intent, err
 }
 
+func (p *recordingProvider) CreateSetup(ctx context.Context, req domain.ChargeRequest) (domain.PaymentIntent, error) {
+	p.remember("setup", req)
+	intent, err := p.Mock.CreateSetup(ctx, req)
+	if p.hold {
+		intent.Status = domain.PaymentRequiresAction
+	}
+	return intent, err
+}
+
+func (p *recordingProvider) AuthorizeSaved(ctx context.Context, req domain.ChargeRequest) (domain.PaymentIntent, error) {
+	p.remember("saved", req)
+	intent, err := p.Mock.AuthorizeSaved(ctx, req)
+	if p.declineSaved {
+		intent.Status = domain.PaymentFailed
+	}
+	return intent, err
+}
+
 func (p *recordingProvider) ParseWebhook(payload []byte, signature string) (domain.PaymentEvent, error) {
-	var ev struct{ ID, Ref string }
+	var ev struct {
+		ID, Ref string
+		Kind    domain.PaymentEventKind
+	}
 	if signature != "valid" || json.Unmarshal(payload, &ev) != nil {
 		return domain.PaymentEvent{}, fmt.Errorf("bad signature")
 	}
-	return domain.PaymentEvent{ID: ev.ID, Kind: domain.PaymentEventAuthorized, Ref: ev.Ref}, nil
+	if ev.Kind == "" {
+		ev.Kind = domain.PaymentEventAuthorized
+	}
+	return domain.PaymentEvent{ID: ev.ID, Kind: ev.Kind, Ref: ev.Ref}, nil
 }
 
 func (p *recordingProvider) Capture(_ context.Context, ref string) error {
@@ -115,6 +167,8 @@ type testEnv struct {
 	codes    *codeBook
 	payments *recordingProvider
 	dispatch *service.Dispatcher
+	bookings *service.Bookings
+	payment  *service.Payments
 
 	mu     sync.Mutex
 	offset time.Duration
@@ -161,13 +215,15 @@ func newEnv(t *testing.T) *testEnv {
 
 	auth := service.NewAuth(store, e.codes, service.AuthConfig{
 		// Long enough to survive the clock jumps some tests make.
-		Secret: []byte("test-secret-test-secret-test-secret"), AccessTTL: 72 * time.Hour, RefreshTTL: time.Hour,
+		Secret: []byte("test-secret-test-secret-test-secret"), AccessTTL: 60 * 24 * time.Hour, RefreshTTL: time.Hour,
 	}, clock)
 	hub := realtime.NewHub(auth.ParseAccessToken, realtime.Options{}, log)
 	pusher := service.NewPusher(store, push.Log{Log: log}, log)
 	e.dispatch = service.NewDispatcher(store, store, hub, pusher, london, 15, clock, log)
-	payments := service.NewPayments(store, e.payments, e.dispatch, hub, clock, log)
+	payments := service.NewPayments(store, e.payments, e.dispatch, hub, pusher, clock, log)
+	e.payment = payments
 	bookings := service.NewBookings(store, store, payments, hub, pusher, london, 15, clock, log)
+	e.bookings = bookings
 
 	api := httpapi.New(httpapi.Deps{
 		Auth:      auth,
@@ -176,7 +232,7 @@ func newEnv(t *testing.T) *testEnv {
 		Bookings:  bookings,
 		Dispatch:  e.dispatch,
 		Cleaners:  service.NewCleaners(store, payments, hub, pusher, london, clock, log),
-		Admin:     service.NewAdmin(store, bookings, hub, pusher, london, clock),
+		Admin:     service.NewAdmin(store, bookings, e.dispatch, hub, pusher, london, clock, log),
 		Payments:  payments,
 		WebSocket: hub.Handler(bookings),
 		Health:    store.Ping,
@@ -288,8 +344,8 @@ func (e *testEnv) cleaner(phone string, lat, lng float64, online bool) cleaner {
 	s := e.login(phone, domain.RoleCleaner)
 	ctx := context.Background()
 	_, err := e.store.Pool().Exec(ctx, `
-		UPDATE cleaners SET status = 'approved', is_online = $2, last_lat = $3, last_lng = $4
-		WHERE user_id = $1`, s.User.ID, online, lat, lng)
+		UPDATE cleaners SET status = 'approved', is_online = $2, last_lat = $3, last_lng = $4, last_seen_at = $5
+		WHERE user_id = $1`, s.User.ID, online, lat, lng, e.now())
 	if err != nil {
 		e.t.Fatal(err)
 	}
@@ -329,14 +385,17 @@ func (e *testEnv) serviceID(slug string) uuid.UUID {
 }
 
 // tomorrowAt is a start time that is always far enough ahead to book.
-func tomorrowAt(hour int) time.Time {
-	d := time.Now().In(london).AddDate(0, 0, 1)
+func tomorrowAt(hour int) time.Time { return daysAheadAt(1, hour) }
+
+func daysAheadAt(days, hour int) time.Time {
+	d := time.Now().In(london).AddDate(0, 0, days)
 	return time.Date(d.Year(), d.Month(), d.Day(), hour, 0, 0, 0, london)
 }
 
 type createdBooking struct {
 	Booking domain.Booking `json:"booking"`
 	Payment struct {
+		Kind         string `json:"kind"`
 		ClientSecret string `json:"client_secret"`
 	} `json:"payment"`
 }
@@ -344,16 +403,26 @@ type createdBooking struct {
 // book creates a standard 2 bed, 1 bath clean (150 minutes).
 func (e *testEnv) book(c client, start time.Time) domain.Booking {
 	e.t.Helper()
+	return e.bookEvery(c, start, domain.FrequencyOnce)
+}
+
+func (e *testEnv) bookEvery(c client, start time.Time, f domain.Frequency) domain.Booking {
+	e.t.Helper()
+	return e.create(c, start, f).Booking
+}
+
+func (e *testEnv) create(c client, start time.Time, f domain.Frequency) createdBooking {
+	e.t.Helper()
 	r := e.expect(e.do("POST", "/bookings", c.AccessToken, map[string]any{
 		"service_id": e.serviceID("standard"), "bedrooms": 2, "bathrooms": 1,
-		"frequency": "once", "address_id": c.AddressID, "start": start,
+		"frequency": f, "address_id": c.AddressID, "start": start,
 	}), http.StatusCreated)
 	var cb createdBooking
 	r.decode(e.t, &cb)
 	if cb.Payment.ClientSecret == "" {
 		e.t.Fatal("no client secret in booking response")
 	}
-	return cb.Booking
+	return cb
 }
 
 func (e *testEnv) bookingStatus(id uuid.UUID) (domain.BookingStatus, *uuid.UUID) {
@@ -368,12 +437,13 @@ func (e *testEnv) bookingStatus(id uuid.UUID) (domain.BookingStatus, *uuid.UUID)
 	return status, cleanerID
 }
 
+// paymentStatus is the booking's latest payment.
 func (e *testEnv) paymentStatus(bookingID uuid.UUID) (domain.PaymentStatus, string) {
 	e.t.Helper()
 	var status domain.PaymentStatus
 	var ref string
 	err := e.store.Pool().QueryRow(context.Background(),
-		`SELECT status, provider_ref FROM payments WHERE booking_id = $1`, bookingID).Scan(&status, &ref)
+		`SELECT status, provider_ref FROM payments WHERE booking_id = $1 ORDER BY created_at DESC LIMIT 1`, bookingID).Scan(&status, &ref)
 	if err != nil {
 		e.t.Fatal(err)
 	}

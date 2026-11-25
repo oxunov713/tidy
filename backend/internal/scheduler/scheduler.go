@@ -1,4 +1,5 @@
-// Package scheduler runs the periodic jobs: recurring bookings and offer expiry.
+// Package scheduler runs the periodic jobs: recurring bookings, offer
+// expiry, charging saved cards and cancelling stuck bookings.
 package scheduler
 
 import (
@@ -16,22 +17,40 @@ type OfferSweeper interface {
 	Sweep(ctx context.Context) error
 }
 
-type Scheduler struct {
-	plans  PlanRunner
-	offers OfferSweeper
-	log    *slog.Logger
-
-	PlanInterval  time.Duration
-	SweepInterval time.Duration
+type PaymentAuthorizer interface {
+	AuthorizeDue(ctx context.Context) error
 }
 
-func New(plans PlanRunner, offers OfferSweeper, log *slog.Logger) *Scheduler {
+type StuckSweeper interface {
+	SweepStuck(ctx context.Context) error
+}
+
+// Jobs is what the scheduler runs.
+type Jobs struct {
+	Plans    PlanRunner
+	Offers   OfferSweeper
+	Payments PaymentAuthorizer
+	Stuck    StuckSweeper
+}
+
+type Scheduler struct {
+	jobs Jobs
+	log  *slog.Logger
+
+	PlanInterval    time.Duration
+	SweepInterval   time.Duration
+	PaymentInterval time.Duration
+	StuckInterval   time.Duration
+}
+
+func New(jobs Jobs, log *slog.Logger) *Scheduler {
 	return &Scheduler{
-		plans:         plans,
-		offers:        offers,
-		log:           log,
-		PlanInterval:  time.Hour,
-		SweepInterval: 5 * time.Second,
+		jobs:            jobs,
+		log:             log,
+		PlanInterval:    time.Hour,
+		SweepInterval:   5 * time.Second,
+		PaymentInterval: time.Minute,
+		StuckInterval:   time.Minute,
 	}
 }
 
@@ -39,28 +58,38 @@ func New(plans PlanRunner, offers OfferSweeper, log *slog.Logger) *Scheduler {
 // then on its interval; a slow run delays the next one instead of overlapping.
 func (s *Scheduler) Run(ctx context.Context) {
 	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		every(ctx, s.PlanInterval, func(ctx context.Context) {
-			n, err := s.plans.RunPlans(ctx)
-			if err != nil {
-				s.log.Error("recurring bookings", "err", err)
-				return
-			}
-			if n > 0 {
-				s.log.Info("recurring bookings created", "count", n)
-			}
-		})
-	}()
-	go func() {
-		defer wg.Done()
-		every(ctx, s.SweepInterval, func(ctx context.Context) {
-			if err := s.offers.Sweep(ctx); err != nil && ctx.Err() == nil {
-				s.log.Error("offer sweep", "err", err)
-			}
-		})
-	}()
+	start := func(interval time.Duration, job func(context.Context)) {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			every(ctx, interval, job)
+		}()
+	}
+	start(s.PlanInterval, func(ctx context.Context) {
+		n, err := s.jobs.Plans.RunPlans(ctx)
+		if err != nil {
+			s.log.Error("recurring bookings", "err", err)
+			return
+		}
+		if n > 0 {
+			s.log.Info("recurring bookings created", "count", n)
+		}
+	})
+	start(s.SweepInterval, func(ctx context.Context) {
+		if err := s.jobs.Offers.Sweep(ctx); err != nil && ctx.Err() == nil {
+			s.log.Error("offer sweep", "err", err)
+		}
+	})
+	start(s.PaymentInterval, func(ctx context.Context) {
+		if err := s.jobs.Payments.AuthorizeDue(ctx); err != nil && ctx.Err() == nil {
+			s.log.Error("authorise saved cards", "err", err)
+		}
+	})
+	start(s.StuckInterval, func(ctx context.Context) {
+		if err := s.jobs.Stuck.SweepStuck(ctx); err != nil && ctx.Err() == nil {
+			s.log.Error("cancel stuck bookings", "err", err)
+		}
+	})
 	wg.Wait()
 }
 

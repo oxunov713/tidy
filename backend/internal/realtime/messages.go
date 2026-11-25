@@ -21,6 +21,8 @@ type inbound struct {
 type roomAck struct {
 	Type string `json:"type"`
 	Room string `json:"room"`
+	// Reason is set when the server removed the app from the room.
+	Reason string `json:"reason,omitempty"`
 }
 
 type bookingStatus struct {

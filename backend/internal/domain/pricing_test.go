@@ -109,3 +109,11 @@ func TestCleanerPayout(t *testing.T) {
 		}
 	}
 }
+
+func TestPriceRejectsOutOfRangeService(t *testing.T) {
+	huge := standard
+	huge.PerBedroom = 1 << 40
+	if _, err := Price(QuoteInput{Service: huge, Bedrooms: 10, Bathrooms: 1, Frequency: FrequencyOnce}); err == nil {
+		t.Error("want an error for a price outside the limits")
+	}
+}

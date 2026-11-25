@@ -29,10 +29,11 @@ func (s *Store) GetCleaner(ctx context.Context, id uuid.UUID) (domain.Cleaner, e
 	return scanCleaner(s.pool.QueryRow(ctx, `SELECT `+cleanerColumns+` FROM cleaners c WHERE c.user_id = $1`, id))
 }
 
-func (s *Store) ListApprovedCleaners(ctx context.Context, onlineOnly bool) ([]domain.Cleaner, error) {
+func (s *Store) ListApprovedCleaners(ctx context.Context, onlineSince *time.Time) ([]domain.Cleaner, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT `+cleanerColumns+` FROM cleaners c
-		WHERE c.status = 'approved' AND (c.is_online OR NOT $1)`, onlineOnly)
+		WHERE c.status = 'approved'
+		  AND ($1::timestamptz IS NULL OR (c.is_online AND c.last_seen_at >= $1))`, onlineSince)
 	if err != nil {
 		return nil, err
 	}
@@ -91,14 +92,19 @@ func (s *Store) BusyPeriods(ctx context.Context, cleanerIDs []uuid.UUID, from, t
 	return out, rows.Err()
 }
 
-func (s *Store) SetCleanerOnline(ctx context.Context, id uuid.UUID, online bool, lat, lng *float64) error {
+func (s *Store) SetCleanerOnline(ctx context.Context, id uuid.UUID, online bool, lat, lng *float64, now time.Time) error {
 	tag, err := s.pool.Exec(ctx, `
 		UPDATE cleaners SET is_online = $2,
-			last_lat = coalesce($3, last_lat), last_lng = coalesce($4, last_lng), last_seen_at = now()
-		WHERE user_id = $1`, id, online, lat, lng)
+			last_lat = coalesce($3, last_lat), last_lng = coalesce($4, last_lng), last_seen_at = $5
+		WHERE user_id = $1`, id, online, lat, lng, now)
 	if err == nil && tag.RowsAffected() == 0 {
 		return domain.NotFound("Cleaner")
 	}
+	return err
+}
+
+func (s *Store) TouchCleaner(ctx context.Context, id uuid.UUID, now time.Time) error {
+	_, err := s.pool.Exec(ctx, `UPDATE cleaners SET last_seen_at = $2 WHERE user_id = $1`, id, now)
 	return err
 }
 
@@ -197,4 +203,55 @@ func (s *Store) SetCleanerStatus(ctx context.Context, id uuid.UUID, status domai
 		return domain.NotFound("Cleaner")
 	}
 	return err
+}
+
+func (s *Store) SuspendCleaner(ctx context.Context, id uuid.UUID, actor *uuid.UUID) (service.ReleasedJobs, error) {
+	var out service.ReleasedJobs
+	err := s.inTx(ctx, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(ctx, `UPDATE cleaners SET status = 'suspended', is_online = false WHERE user_id = $1`, id)
+		if err != nil {
+			return err
+		}
+		if tag.RowsAffected() == 0 {
+			return domain.NotFound("Cleaner")
+		}
+
+		// Jobs the cleaner hasn't started go back to the pool. A clean that
+		// is already in progress is left for support to sort out.
+		rows, err := tx.Query(ctx, `
+			UPDATE bookings SET cleaner_id = NULL, status = 'confirmed', updated_at = now()
+			WHERE cleaner_id = $1 AND status IN ('assigned', 'on_the_way')
+			RETURNING id`, id)
+		if err != nil {
+			return err
+		}
+		ids, err := pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+		if err != nil {
+			return err
+		}
+		for _, bookingID := range ids {
+			if err := addEvent(ctx, tx, bookingID, domain.StatusConfirmed, actor); err != nil {
+				return err
+			}
+			b, err := getBooking(ctx, tx, bookingID)
+			if err != nil {
+				return err
+			}
+			out.Released = append(out.Released, b)
+		}
+		// The client's map must not keep showing the old cleaner.
+		if _, err := tx.Exec(ctx, `DELETE FROM booking_locations WHERE booking_id = ANY($1::uuid[])`, uuidStrings(ids)); err != nil {
+			return err
+		}
+
+		rows, err = tx.Query(ctx, `
+			UPDATE booking_offers SET status = 'withdrawn'
+			WHERE cleaner_id = $1 AND status = 'open' RETURNING booking_id`, id)
+		if err != nil {
+			return err
+		}
+		out.WithdrawnOffers, err = pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+		return err
+	})
+	return out, err
 }

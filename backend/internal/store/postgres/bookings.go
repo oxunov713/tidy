@@ -113,10 +113,14 @@ func (s *Store) CreateBooking(ctx context.Context, nb domain.NewBooking) (domain
 		}
 		if nb.FromPlan != nil {
 			planID = &nb.FromPlan.PlanID
-			_, err := tx.Exec(ctx, `UPDATE booking_plans SET next_run_on = $2::date WHERE id = $1`,
+			// The plan may have ended since the scheduler read it.
+			tag, err := tx.Exec(ctx, `UPDATE booking_plans SET next_run_on = $2::date WHERE id = $1 AND is_active`,
 				nb.FromPlan.PlanID, nb.FromPlan.NextRunOn.Format(time.DateOnly))
 			if err != nil {
 				return fmt.Errorf("advance plan: %w", err)
+			}
+			if tag.RowsAffected() == 0 {
+				return domain.ErrPlanEnded
 			}
 		}
 
@@ -292,6 +296,55 @@ func (s *Store) CancelBooking(ctx context.Context, id uuid.UUID, from domain.Boo
 	return b, withdrawn, err
 }
 
+// stuckBatch bounds one sweep; the next sweep picks up the rest.
+const stuckBatch = 100
+
+func (s *Store) CancelStuck(ctx context.Context, now, unassignedBy time.Time) (service.StuckBookings, error) {
+	var out service.StuckBookings
+	err := s.inTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		out.Unpaid, err = cancelWhere(ctx, tx, `status = 'pending' AND payment_due_at <= $1`, now)
+		if err != nil {
+			return err
+		}
+		out.Unassigned, err = cancelWhere(ctx, tx, `status = 'confirmed' AND cleaner_id IS NULL AND lower(period) <= $1`, unassignedBy)
+		return err
+	})
+	return out, err
+}
+
+// cancelWhere cancels bookings matching cond (with $1 as its argument) as
+// the system, without an actor.
+func cancelWhere(ctx context.Context, tx pgx.Tx, cond string, arg any) ([]service.CancelledBooking, error) {
+	rows, err := tx.Query(ctx, `
+		UPDATE bookings SET status = 'cancelled', updated_at = now()
+		WHERE id IN (SELECT id FROM bookings WHERE `+cond+` ORDER BY lower(period) LIMIT $2 FOR UPDATE SKIP LOCKED)
+		RETURNING id`, arg, stuckBatch)
+	if err != nil {
+		return nil, err
+	}
+	ids, err := pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+	if err != nil {
+		return nil, err
+	}
+	var out []service.CancelledBooking
+	for _, id := range ids {
+		if err := addEvent(ctx, tx, id, domain.StatusCancelled, nil); err != nil {
+			return nil, err
+		}
+		withdrawn, err := withdrawOffers(ctx, tx, id)
+		if err != nil {
+			return nil, err
+		}
+		b, err := getBooking(ctx, tx, id)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, service.CancelledBooking{Booking: b, Withdrawn: withdrawn})
+	}
+	return out, nil
+}
+
 func (s *Store) AssignCleaner(ctx context.Context, bookingID, cleanerID uuid.UUID, actor *uuid.UUID) (domain.Booking, []uuid.UUID, error) {
 	var b domain.Booking
 	var withdrawn []uuid.UUID
@@ -353,16 +406,16 @@ func (s *Store) LastLocation(ctx context.Context, bookingID uuid.UUID) (*domain.
 	return &l, err
 }
 
-func (s *Store) SaveLocation(ctx context.Context, bookingID, cleanerID uuid.UUID, lat, lng float64) error {
+func (s *Store) SaveLocation(ctx context.Context, bookingID, cleanerID uuid.UUID, lat, lng float64, now time.Time) error {
 	return s.inTx(ctx, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
-			INSERT INTO booking_locations (booking_id, lat, lng, recorded_at) VALUES ($1, $2, $3, now())
-			ON CONFLICT (booking_id) DO UPDATE SET lat = $2, lng = $3, recorded_at = now()`, bookingID, lat, lng)
+			INSERT INTO booking_locations (booking_id, lat, lng, recorded_at) VALUES ($1, $2, $3, $4)
+			ON CONFLICT (booking_id) DO UPDATE SET lat = $2, lng = $3, recorded_at = $4`, bookingID, lat, lng, now)
 		if err != nil {
 			return err
 		}
-		_, err = tx.Exec(ctx, `UPDATE cleaners SET last_lat = $2, last_lng = $3, last_seen_at = now() WHERE user_id = $1`,
-			cleanerID, lat, lng)
+		_, err = tx.Exec(ctx, `UPDATE cleaners SET last_lat = $2, last_lng = $3, last_seen_at = $4 WHERE user_id = $1`,
+			cleanerID, lat, lng, now)
 		return err
 	})
 }
@@ -427,30 +480,6 @@ func (s *Store) CreateMessage(ctx context.Context, m domain.Message) (domain.Mes
 		INSERT INTO messages (booking_id, sender_id, body) VALUES ($1, $2, $3)
 		RETURNING id, created_at`, m.BookingID, m.SenderID, m.Body).Scan(&m.ID, &m.CreatedAt)
 	return m, err
-}
-
-func (s *Store) DuePlans(ctx context.Context, until time.Time) ([]domain.Plan, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, client_id, frequency, template, next_run_on FROM booking_plans
-		WHERE is_active AND next_run_on <= $1::date ORDER BY next_run_on`, until.Format(time.DateOnly))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []domain.Plan
-	for rows.Next() {
-		var p domain.Plan
-		if err := rows.Scan(&p.ID, &p.ClientID, &p.Frequency, &p.Template, &p.NextRunOn); err != nil {
-			return nil, err
-		}
-		out = append(out, p)
-	}
-	return out, rows.Err()
-}
-
-func (s *Store) AdvancePlan(ctx context.Context, id uuid.UUID, next time.Time) error {
-	_, err := s.pool.Exec(ctx, `UPDATE booking_plans SET next_run_on = $2::date WHERE id = $1`, id, next.Format(time.DateOnly))
-	return err
 }
 
 func (s *Store) StatsBetween(ctx context.Context, from, to time.Time) (service.Stats, error) {
